@@ -1,0 +1,45 @@
+{
+  "heading": "บริษัทประกันต่างประเทศ",
+  "companies": [
+    {
+      "id": "intl-1",
+      "displayName": "CIGNA EUROPE INSURANCE COMPANY S.A.-N.V. SINGAPORE BRANCH",
+      "code": "CIGNASG",
+      "iclaimId": "90",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "intl-2",
+      "displayName": "Indochina Insurance Co., Ltd.",
+      "code": "ICI",
+      "iclaimId": "147",
+      "isClickable": true,
+      "isNew": true,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "intl-3",
+      "displayName": "MSIG SOKXAY INSURANCE COMPANY LIMITED",
+      "code": "SOKXAY",
+      "iclaimId": "38",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "intl-4",
+      "displayName": "SOKXAY LIFE INSURANCE SOLE COMPANY LIMITED",
+      "code": "SLIS",
+      "iclaimId": "141",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    }
+  ]
+}

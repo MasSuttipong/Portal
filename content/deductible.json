@@ -1,0 +1,16 @@
+{
+  "heading": "ตรวจสอบ Deductible",
+  "companies": [
+    {
+      "id": "ded-1",
+      "displayName": "พรูเด็นเซียล : ตรวจสอบ Deductible ของผลิตภัณฑ์ Health As Charged",
+      "code": null,
+      "iclaimId": null,
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null,
+      "redirectUrl": "https://tpacare.thirdpartyadmin.co.th/app/DeductPlt.aspx"
+    }
+  ]
+}

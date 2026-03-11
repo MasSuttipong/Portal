@@ -1,0 +1,95 @@
+{
+  "items": [
+    {
+      "id": "n1",
+      "title": "จดหมายแจ้งระงับการใช้เครดิตของบมจ.เคดับบลิวไอประกันภัย",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_014052025_20250529.pdf",
+      "isNew": true,
+      "isPublished": true
+    },
+    {
+      "id": "n2",
+      "title": "จดหมายแจ้งระงับการใช้เครดิตของบมจ.เคดับบลิวไอประกันชีวิต",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_013052025_20250529.pdf",
+      "isNew": true,
+      "isPublished": true
+    },
+    {
+      "id": "n3",
+      "title": "แจ้งเปลี่ยนชื่อบริษัท เดิม บมจ.ไทยประกันภัย เป็น บมจ.อินทรประกันภัย",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_012042025_20250423.pdf",
+      "isNew": false,
+      "isPublished": true
+    },
+    {
+      "id": "n4",
+      "title": "แจ้งเปลี่ยนชื่อบริษัท เดิม บมจ.เมืองไทยประกันภัย เป็น บมจ.เมืองไทย Non-Life Insurance",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_011042025_20250423.pdf",
+      "isNew": false,
+      "isPublished": true
+    },
+    {
+      "id": "n5",
+      "title": "แจ้งเปลี่ยนชื่อบริษัท เดิม บมจ.วิริยะประกันภัย เป็น บมจ.วิริยะ Non-Life Insurance",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_010042025_20250423.pdf",
+      "isNew": false,
+      "isPublished": true
+    },
+    {
+      "id": "n6",
+      "title": "แจ้งเปลี่ยนชื่อบริษัท เดิม บมจ.ทิพยประกันภัย เป็น บมจ.ทิพย Non-Life Insurance",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_009042025_20250423.pdf",
+      "isNew": false,
+      "isPublished": true
+    },
+    {
+      "id": "n7",
+      "title": "แจ้งเปลี่ยนชื่อบริษัท เดิม บมจ.กรุงเทพประกันภัย เป็น บมจ.กรุงเทพ Non-Life Insurance",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_008042025_20250423.pdf",
+      "isNew": false,
+      "isPublished": true
+    },
+    {
+      "id": "n8",
+      "title": "ประกาศรายชื่อบริษัทประกันภัยและประกันชีวิตที่ร่วมให้บริการ",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_007032025.pdf",
+      "isNew": false,
+      "isPublished": true
+    },
+    {
+      "id": "n9",
+      "title": "แจ้งเปลี่ยนที่อยู่สำนักงานใหญ่ BVTPA",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_006022025.pdf",
+      "isNew": false,
+      "isPublished": true
+    },
+    {
+      "id": "n10",
+      "title": "แจ้งเปลี่ยนชื่อบริษัท เดิม บมจ.แอกซ่าประกันภัย เป็น บมจ.เคดับบลิวไอ ประกันภัย",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_005012025.pdf",
+      "isNew": false,
+      "isPublished": true
+    },
+    {
+      "id": "n11",
+      "title": "แจ้งเปลี่ยนชื่อบริษัท เดิม บมจ.กรุงไทยแอกซ่าประกันชีวิต เป็น บมจ.เคดับบลิวไอ ประกันชีวิต",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_004012025.pdf",
+      "isNew": false,
+      "isPublished": true
+    },
+    {
+      "id": "n12",
+      "title": "ประกาศรายชื่อบริษัทสวัสดิการพนักงาน (Self Insured) ที่ร่วมให้บริการ",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_003122024.pdf",
+      "isNew": false,
+      "isPublished": true
+    },
+    {
+      "id": "n13",
+      "title": "แจ้งการรวมกิจการ บมจ.ไทยศรีประกันภัย เข้ากับ บมจ.อินทรประกันภัย",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/BVTPA_002112024.pdf",
+      "isNew": false,
+      "isPublished": true
+    }
+  ]
+}

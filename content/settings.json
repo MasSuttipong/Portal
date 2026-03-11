@@ -1,0 +1,13 @@
+{
+  "logo": {
+    "url": "/images/bvtpa-logo.png",
+    "alt": "BVTPA TPA Care"
+  },
+  "iclaim": {
+    "baseUrl": "https://tpacare.thirdpartyadmin.co.th/app/EClaim.aspx",
+    "confirmText": "ระบบกำลังพาท่านไปสู่ระบบ iClaim",
+    "confirmOk": "ตกลง",
+    "confirmCancel": "ยกเลิก",
+    "claimTypePrompt": "เลือก Claim Type ที่ต้องการ"
+  }
+}

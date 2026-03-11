@@ -1,0 +1,17 @@
+{
+  "subHeading": "คู่มือ TPA",
+  "items": [
+    {
+      "id": "m1",
+      "title": "คู่มือการใช้งาน TPA Care mobile app (PDF)",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/TPA_Care_Manual_New_Version_TH_r.pdf",
+      "isPublished": true
+    },
+    {
+      "id": "m2",
+      "title": "บริษัทที่อยู่ภายใต้การดูแลของ THRES (TPA)",
+      "url": "https://tpacare.thirdpartyadmin.co.th/app/Download/CompanyTHRES_TakeCareof.pdf",
+      "isPublished": true
+    }
+  ]
+}

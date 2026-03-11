@@ -1,0 +1,31 @@
+import { SignJWT, jwtVerify } from "jose";
+
+export const COOKIE_NAME = "admin_token";
+
+const getSecret = () =>
+  new TextEncoder().encode(process.env.JWT_SECRET || "fallback-secret");
+
+export async function signToken(): Promise<string> {
+  return new SignJWT({ role: "admin" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("8h")
+    .sign(getSecret());
+}
+
+export async function verifyToken(token: string): Promise<boolean> {
+  try {
+    await jwtVerify(token, getSecret());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: 8 * 60 * 60, // 8 hours
+};

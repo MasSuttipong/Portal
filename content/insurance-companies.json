@@ -1,0 +1,355 @@
+{
+  "heading": "บริษัทประกันภัยและประกันชีวิต",
+  "companies": [
+    {
+      "id": "ins-1",
+      "displayName": "U.S.Mission / U.S. Embassy (บมจ.ทิพย Non-Life Insurance)",
+      "code": "USDHIP",
+      "iclaimId": "140",
+      "isClickable": true,
+      "isNew": true,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-2",
+      "displayName": "บริษัท กรุงเทพ Non-Life Insurance จำกัด (มหาชน)",
+      "code": "BKI",
+      "iclaimId": "23",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-3",
+      "displayName": "บริษัท กรุงเทพประกันสุขภาพ จำกัด (มหาชน)",
+      "code": null,
+      "iclaimId": null,
+      "isClickable": false,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-4",
+      "displayName": "บริษัท กรุงไทยพานิชประกันภัย จำกัด (มหาชน)",
+      "code": "KTP",
+      "iclaimId": "9",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-5",
+      "displayName": "บริษัท เคดับบลิวไอ ประกันภัย จำกัด (มหาชน)",
+      "code": null,
+      "iclaimId": null,
+      "isClickable": false,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": "ระงับการใช้เครดิต กรุณาสำรองจ่ายทุกกรณี ตั้งแต่ 29.05.2025 เป็นต้นไป"
+    },
+    {
+      "id": "ins-6",
+      "displayName": "บริษัท เคดับบลิวไอ ประกันชีวิต จำกัด (มหาชน)",
+      "code": null,
+      "iclaimId": null,
+      "isClickable": false,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": "ระงับการใช้เครดิต กรุณาสำรองจ่ายทุกกรณี ตั้งแต่ 29.05.2025 เป็นต้นไป"
+    },
+    {
+      "id": "ins-7",
+      "displayName": "บริษัท ชับบ์สามัคคีประกันภัย จำกัด (มหาชน)",
+      "code": "CSI",
+      "iclaimId": "5",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-8",
+      "displayName": "บริษัท ชับบ์ ไลฟ์ แอสชัวรันซ์ จำกัด (มหาชน)",
+      "code": "CHUBBLIFE",
+      "iclaimId": "83",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-9",
+      "displayName": "บริษัท ทิพย Non-Life Insurance จำกัด (มหาชน)",
+      "code": "TIP",
+      "iclaimId": "3",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-10",
+      "displayName": "บริษัท ทิพยประกันชีวิต จำกัด (มหาชน)",
+      "code": "TIPLIFE",
+      "iclaimId": "63",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-11",
+      "displayName": "บริษัท ไทยประกันชีวิต จำกัด (มหาชน)",
+      "code": "THAILIFE",
+      "iclaimId": "59",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-12",
+      "displayName": "บริษัท อินทรประกันภัย จำกัด (มหาชน)",
+      "code": "INDARA",
+      "iclaimId": "7",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-13",
+      "displayName": "บริษัท นวกิจประกันภัย จำกัด (มหาชน)",
+      "code": "NKI",
+      "iclaimId": "4",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-14",
+      "displayName": "บริษัท เมืองไทย Non-Life Insurance จำกัด (มหาชน)",
+      "code": "MTI",
+      "iclaimId": "2",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-15",
+      "displayName": "บริษัท เมืองไทยประกันชีวิต จำกัด (มหาชน)",
+      "code": "MTL",
+      "iclaimId": "60",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-16",
+      "displayName": "บริษัท แมนูไลฟ์ประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
+      "code": "MANULIFE",
+      "iclaimId": "62",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-17",
+      "displayName": "บริษัท รพ.กรุงเทพ ดุสิตเวชการ (โรงพยาบาลกรุงเทพ)",
+      "code": "BDMS",
+      "iclaimId": "82",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-18",
+      "displayName": "บริษัท วิริยะ Non-Life Insurance จำกัด (มหาชน)",
+      "code": "VIB",
+      "iclaimId": "1",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-19",
+      "displayName": "บริษัท สยามซิตี้ประกันภัย จำกัด (มหาชน)",
+      "code": "SCICP",
+      "iclaimId": "10",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-20",
+      "displayName": "บริษัท สินมั่นคงประกันภัย จำกัด (มหาชน)",
+      "code": "SMK",
+      "iclaimId": "6",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-21",
+      "displayName": "บริษัท อลิอันซ์ อยุธยา ประกันชีวิต จำกัด (มหาชน)",
+      "code": "AZAY",
+      "iclaimId": "61",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-22",
+      "displayName": "บริษัท อาคเนย์ประกันภัย จำกัด (มหาชน)",
+      "code": "SEIC",
+      "iclaimId": "8",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-23",
+      "displayName": "บริษัท อาคเนย์ประกันชีวิต จำกัด (มหาชน)",
+      "code": "SELIC",
+      "iclaimId": "64",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-24",
+      "displayName": "บริษัท เอเชียประกันภัย 1950 จำกัด (มหาชน)",
+      "code": "ASIA",
+      "iclaimId": "11",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-25",
+      "displayName": "บริษัท เอ็ม เอส ไอ จี ประกันภัย (ประเทศไทย) จำกัด (มหาชน)",
+      "code": "MSIG",
+      "iclaimId": "12",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-26",
+      "displayName": "บริษัท เอไอเอ จำกัด",
+      "code": "AIA",
+      "iclaimId": "58",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-27",
+      "displayName": "บริษัท แอกซ่า ประกันภัย จำกัด (มหาชน)",
+      "code": "AXA",
+      "iclaimId": "13",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-28",
+      "displayName": "บริษัท ไอโออิ กรุงเทพ ประกันภัย จำกัด (มหาชน)",
+      "code": "IOIBKK",
+      "iclaimId": "14",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-29",
+      "displayName": "บริษัท ฟอลคอนประกันภัย จำกัด (มหาชน)",
+      "code": "FALCON",
+      "iclaimId": "15",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-30",
+      "displayName": "บริษัท พรูเด็นเชียล ประกันชีวิต (ประเทศไทย) จำกัด (มหาชน)",
+      "code": "PRULI",
+      "iclaimId": "65",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-31",
+      "displayName": "บริษัท แปซิฟิค ครอส ประกันสุขภาพ จำกัด (มหาชน)",
+      "code": "PCROSS",
+      "iclaimId": "66",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-32",
+      "displayName": "บริษัท ไทยสมุทรประกันชีวิต จำกัด (มหาชน)",
+      "code": "OCEAN",
+      "iclaimId": "67",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-33",
+      "displayName": "บริษัท เจนเนอราลี่ ประกันชีวิต (ไทยแลนด์) จำกัด (มหาชน)",
+      "code": "GENERALI",
+      "iclaimId": "68",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-34",
+      "displayName": "บริษัท เอฟดับบลิวดี ประกันชีวิต จำกัด (มหาชน)",
+      "code": "FWD",
+      "iclaimId": "69",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "ins-35",
+      "displayName": "บริษัท ไทยพาณิชย์ประกันชีวิต จำกัด (มหาชน)",
+      "code": "SCBLIFE",
+      "iclaimId": "70",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    }
+  ]
+}

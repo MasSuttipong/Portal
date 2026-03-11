@@ -1,0 +1,361 @@
+{
+  "heading": "สวัสดิการพนักงาน (Self Insured)",
+  "companies": [
+    {
+      "id": "si-1",
+      "displayName": "Baker Hughes Operations (Thailand) Ltd.",
+      "code": "BHOT",
+      "iclaimId": "118",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-2",
+      "displayName": "Coffee Concepts (Starbucks) [OPD Only]",
+      "code": "STBT",
+      "iclaimId": "88",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_ONLY",
+      "remark": null
+    },
+    {
+      "id": "si-3",
+      "displayName": "Datapath (Thailand) Co., Ltd.",
+      "code": "DATAPATH",
+      "iclaimId": "119",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-4",
+      "displayName": "GE Capital (Thailand) Ltd.",
+      "code": "GECT",
+      "iclaimId": "120",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-5",
+      "displayName": "Mega Lifesciences Public Company Limited",
+      "code": "MEGA",
+      "iclaimId": "89",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-6",
+      "displayName": "Pruksa Real Estate Public Company Limited",
+      "code": "PRUKSA",
+      "iclaimId": "91",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-7",
+      "displayName": "SCG Chemicals Group",
+      "code": "SCGC",
+      "iclaimId": "92",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-8",
+      "displayName": "Thai Beverage Public Company Limited",
+      "code": "THAIBEV",
+      "iclaimId": "93",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-9",
+      "displayName": "Thai Union Group Public Company Limited",
+      "code": "TU",
+      "iclaimId": "94",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-10",
+      "displayName": "The Siam Cement Group (SCG)",
+      "code": "SCG",
+      "iclaimId": "95",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-11",
+      "displayName": "True Corporation Public Company Limited",
+      "code": "TRUE",
+      "iclaimId": "96",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-12",
+      "displayName": "บริษัท บุญรอดบริวเวอรี่ จำกัด",
+      "code": "BOONRAWD",
+      "iclaimId": "97",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-13",
+      "displayName": "บริษัท ปตท. จำกัด (มหาชน)",
+      "code": "PTT",
+      "iclaimId": "98",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-14",
+      "displayName": "บริษัท เซ็นทรัล รีเทล คอร์ปอเรชั่น จำกัด (มหาชน)",
+      "code": "CRC",
+      "iclaimId": "100",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    },
+    {
+      "id": "si-15",
+      "displayName": "บริษัท ไมเนอร์ อินเตอร์เนชั่นแนล จำกัด (มหาชน)",
+      "code": "MINOR",
+      "iclaimId": "101",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null
+    }
+  ],
+  "groups": [
+    {
+      "id": "grp-carabao",
+      "headerName": "คาราบาวกรุ๊ป และบริษัทในเครือ",
+      "headerIconUrl": "/icons/opd-warning.png",
+      "companies": [
+        {
+          "id": "si-grp-cb1",
+          "displayName": "บริษัท คาราบาวกรุ๊ป จำกัด (มหาชน)",
+          "code": "CBG",
+          "iclaimId": "71",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb2",
+          "displayName": "บริษัท คาราบาวตะวันแดง จำกัด (สำนักงานใหญ่)",
+          "code": "CBD",
+          "iclaimId": "76",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb3",
+          "displayName": "บริษัท คาราบาวตะวันแดง จำกัด (สาขาฉะเชิงเทรา)",
+          "code": "CBDC",
+          "iclaimId": "77",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb4",
+          "displayName": "บริษัท คาราบาวตะวันแดง จำกัด (สาขาบุรีรัมย์)",
+          "code": "CBDB",
+          "iclaimId": "78",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb5",
+          "displayName": "บริษัท เอเซีย แพ็คเกจจิ้ง แมนูแฟคเจอริ่ง จำกัด",
+          "code": "APM",
+          "iclaimId": "72",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb6",
+          "displayName": "บริษัท ตะวันแดง ดีซีเอ็ม จำกัด",
+          "code": "TDCM",
+          "iclaimId": "73",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb7",
+          "displayName": "บริษัท ตะวันแดง 1999 จำกัด",
+          "code": "TD99",
+          "iclaimId": "74",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb8",
+          "displayName": "บริษัท ซี บี เอนเนอร์ยี่ จำกัด",
+          "code": "CBE",
+          "iclaimId": "75",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb9",
+          "displayName": "บริษัท คาราบาว แพ็ค จำกัด",
+          "code": "CBP",
+          "iclaimId": "79",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb10",
+          "displayName": "บริษัท หนองแค เบเวอเรจ จำกัด",
+          "code": "NKB",
+          "iclaimId": "80",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb11",
+          "displayName": "บริษัท คาราบาวฟาร์ม จำกัด",
+          "code": "CBF",
+          "iclaimId": "102",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb12",
+          "displayName": "บริษัท เสถียรพลาส จำกัด",
+          "code": "STP",
+          "iclaimId": "103",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb13",
+          "displayName": "บริษัท คาราบาว ดีทีซี จำกัด",
+          "code": "CBDTC",
+          "iclaimId": "104",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-cb14",
+          "displayName": "บริษัท แคร์เบอร์รี่ จำกัด",
+          "code": "CAREBERRY",
+          "iclaimId": "105",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        }
+      ]
+    },
+    {
+      "id": "grp-blueventure",
+      "headerName": "บลูเวนเจอร์ กรุ๊ป",
+      "headerIconUrl": null,
+      "companies": [
+        {
+          "id": "si-grp-bv1",
+          "displayName": "บริษัท บลูเวนเจอร์ กรุ๊ป จำกัด (มหาชน)",
+          "code": "BVG",
+          "iclaimId": "99",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-bv2",
+          "displayName": "บริษัท อักษร เอ็ดดูเคชั่น จำกัด (มหาชน)",
+          "code": "AKSORN",
+          "iclaimId": "106",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-bv3",
+          "displayName": "บริษัท บลู โซลูชั่นส์ จำกัด",
+          "code": "BLUESOL",
+          "iclaimId": "107",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-bv4",
+          "displayName": "บริษัท อักษร เน็กซ์ จำกัด",
+          "code": "AKSORNEXT",
+          "iclaimId": "108",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        },
+        {
+          "id": "si-grp-bv5",
+          "displayName": "บริษัท วาวา แพ็ค จำกัด",
+          "code": "WAWAPACK",
+          "iclaimId": "109",
+          "isClickable": true,
+          "isNew": false,
+          "claimType": "OPD_IPD",
+          "remark": null
+        }
+      ]
+    }
+  ]
+}
