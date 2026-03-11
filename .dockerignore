@@ -1,0 +1,26 @@
+# Dependencies (reinstalled inside the build)
+node_modules
+
+# Next.js build output (produced inside the build)
+.next
+
+# Version control
+.git
+.gitignore
+
+# Documentation (not needed in image)
+*.md
+!README.md
+
+# Local environment overrides (secrets must come from docker-compose env or runtime)
+.env.local
+.env*.local
+
+# Editor and tool config
+.claude
+.vscode
+.idea
+
+# OS artifacts
+.DS_Store
+Thumbs.db

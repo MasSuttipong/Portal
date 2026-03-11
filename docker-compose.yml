@@ -1,0 +1,16 @@
+services:
+  bvtpa-portal:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    volumes:
+      # Mount host content directory so admin edits persist outside the container.
+      # On first run, pre-populate ./content on the host before starting,
+      # or copy seed data out of the container: docker cp bvtpa-portal:/app/content ./content
+      - ./content:/app/content
+    environment:
+      - ADMIN_PASSWORD=change-me-before-production
+      - JWT_SECRET=change-me-to-a-long-random-secret
+    restart: unless-stopped

@@ -1,0 +1,36 @@
+import { NextRequest, NextResponse } from "next/server";
+import { COOKIE_NAME, verifyToken } from "@/lib/auth";
+
+export async function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  const token = request.cookies.get(COOKIE_NAME)?.value;
+  const isValid = token ? await verifyToken(token) : false;
+
+  if (!isValid) {
+    // API routes return 401 JSON
+    if (pathname.startsWith("/api/admin/")) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    // Page routes redirect to login (skip if already on login page)
+    if (pathname.startsWith("/admin/") && pathname !== "/admin/login") {
+      const loginUrl = new URL("/admin/login", request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+
+    if (pathname === "/admin") {
+      const loginUrl = new URL("/admin/login", request.url);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
+  return NextResponse.next();
+}
+
+export const config = {
+  matcher: ["/admin/:path*", "/api/admin/:path*"],
+};

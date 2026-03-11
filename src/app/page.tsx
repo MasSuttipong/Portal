@@ -1,11 +1,40 @@
 export const dynamic = "force-dynamic";
 
-export default function PortalPage() {
+import { readContent } from "@/lib/content";
+import type {
+  PortalSettings,
+  ManualData,
+  NewsData,
+  TpaCareCheck,
+  CompanySection,
+} from "@/types/portal";
+import PortalPage from "@/components/portal/PortalPage";
+
+export default function Page() {
+  const settings = readContent<PortalSettings>("settings");
+  const manual = readContent<ManualData>("manual");
+  const news = readContent<NewsData>("news");
+  const tpaCareCheck = readContent<TpaCareCheck>("tpacare-check");
+  const insuranceCompanies = readContent<CompanySection>("insurance-companies");
+  const selfInsured = readContent<CompanySection>("self-insured");
+  const internationalInsurance = readContent<CompanySection>(
+    "international-insurance"
+  );
+  const deductible = readContent<CompanySection>("deductible");
+
   return (
-    <main className="min-h-screen bg-white">
-      <div className="mx-auto max-w-[900px] px-4 py-8">
-        <h1 className="text-2xl font-bold text-center">BVTPA Portal</h1>
-        <p className="text-center text-gray-500 mt-4">Portal page — coming soon</p>
+    <main className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-[900px] bg-white px-6 py-4 shadow-sm min-h-screen">
+        <PortalPage
+          settings={settings}
+          manual={manual}
+          news={news}
+          tpaCareCheck={tpaCareCheck}
+          insuranceCompanies={insuranceCompanies}
+          selfInsured={selfInsured}
+          internationalInsurance={internationalInsurance}
+          deductible={deductible}
+        />
       </div>
     </main>
   );
