@@ -62,16 +62,16 @@ export default function IClaimModal({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => { if (!isOpen) handleClose(); }}>
-      <DialogContent showCloseButton={true} className="sm:max-w-md">
+      <DialogContent showCloseButton={true} className="sm:max-w-md border-t-4 border-t-portal-gold">
         {step === "confirm" && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-base font-semibold text-gray-900">
+              <DialogTitle className="text-base font-semibold text-primary font-heading">
                 {company?.displayName}
               </DialogTitle>
             </DialogHeader>
 
-            <p className="text-gray-700 leading-relaxed py-2">
+            <p className="text-foreground/80 leading-relaxed py-2">
               {settings.confirmText}
             </p>
 
@@ -81,7 +81,7 @@ export default function IClaimModal({
               </Button>
               <Button
                 onClick={handleConfirm}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
+                className="bg-portal-cta hover:bg-portal-cta-hover text-white"
               >
                 {settings.confirmOk}
               </Button>
@@ -92,7 +92,7 @@ export default function IClaimModal({
         {step === "claimType" && (
           <>
             <DialogHeader>
-              <DialogTitle className="text-base font-semibold text-gray-900">
+              <DialogTitle className="text-base font-semibold text-primary font-heading">
                 {settings.claimTypePrompt}
               </DialogTitle>
             </DialogHeader>
@@ -102,7 +102,7 @@ export default function IClaimModal({
                 <button
                   type="button"
                   onClick={() => redirect("OPD")}
-                  className="w-full py-4 text-lg font-semibold rounded-lg bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer"
+                  className="w-full py-4 text-lg font-semibold font-heading rounded-lg bg-portal-cta hover:bg-portal-cta-hover hover:shadow-lg text-white transition-all duration-200 cursor-pointer"
                 >
                   OPD
                   <span className="block text-sm font-normal opacity-90 mt-0.5">
@@ -114,7 +114,7 @@ export default function IClaimModal({
                 <button
                   type="button"
                   onClick={() => redirect("IPD")}
-                  className="w-full py-4 text-lg font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white transition-colors cursor-pointer"
+                  className="w-full py-4 text-lg font-semibold font-heading rounded-lg bg-portal-success hover:bg-portal-success-hover hover:shadow-lg text-white transition-all duration-200 cursor-pointer"
                 >
                   IPD
                   <span className="block text-sm font-normal opacity-90 mt-0.5">

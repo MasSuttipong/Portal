@@ -10,7 +10,8 @@
       "isNew": false,
       "claimType": "OPD_IPD",
       "remark": null,
-      "redirectUrl": "https://tpacare.thirdpartyadmin.co.th/app/DeductPlt.aspx"
+      "redirectUrl": "https://tpacare.thirdpartyadmin.co.th/app/DeductPlt.aspx",
+      "logoUrl": "/logos/ded-1.png"
     }
   ]
 }

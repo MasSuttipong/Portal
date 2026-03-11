@@ -1,3 +1,7 @@
+export type AlertType = "warning" | "error" | "info" | "success" | "promo" | "urgent";
+export type AlertSize = "xs" | "sm" | "md" | "lg" | "xl";
+export type AlertBorder = "none" | "glow" | "pulse" | "shimmer" | "bounce" | "shake" | "rainbow" | "blink";
+
 export interface Company {
   id: string;
   displayName: string;
@@ -8,6 +12,12 @@ export interface Company {
   claimType: "OPD_IPD" | "OPD_ONLY" | "IPD_ONLY";
   remark: string | null;
   redirectUrl?: string;
+  logoUrl?: string | null;
+  alertText?: string | null;
+  alertType?: AlertType;
+  alertSize?: AlertSize;
+  alertGlow?: boolean;
+  alertBorder?: AlertBorder;
 }
 
 export interface CompanyGroup {
@@ -15,12 +25,22 @@ export interface CompanyGroup {
   headerName: string;
   headerIconUrl: string | null;
   companies: Company[];
+  alertText?: string | null;
+  alertType?: AlertType;
+  alertSize?: AlertSize;
+  alertGlow?: boolean;
+  alertBorder?: AlertBorder;
 }
 
 export interface CompanySection {
   heading: string;
   companies: Company[];
   groups?: CompanyGroup[];
+  alertText?: string | null;
+  alertType?: AlertType;
+  alertSize?: AlertSize;
+  alertGlow?: boolean;
+  alertBorder?: AlertBorder;
 }
 
 export interface NewsItem {
@@ -47,6 +67,17 @@ export interface ManualData {
   items: ManualItem[];
 }
 
+export interface AnnouncementConfig {
+  enabled: boolean;
+  text: string;
+  type: AlertType;
+  size: AlertSize;
+  glow?: boolean;
+  border: AlertBorder;
+  link: string | null;
+  dismissible: boolean;
+}
+
 export interface PortalSettings {
   logo: { url: string; alt: string };
   iclaim: {
@@ -56,6 +87,7 @@ export interface PortalSettings {
     confirmCancel: string;
     claimTypePrompt: string;
   };
+  announcement?: AnnouncementConfig;
 }
 
 export interface TpaCareCheck {

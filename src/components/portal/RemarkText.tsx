@@ -6,6 +6,6 @@ interface RemarkTextProps {
 
 export default function RemarkText({ remark }: RemarkTextProps) {
   return (
-    <span className="text-red-500 text-sm ml-2 leading-relaxed">{remark}</span>
+    <span className="text-destructive text-xs font-medium ml-2 leading-relaxed">{remark}</span>
   );
 }

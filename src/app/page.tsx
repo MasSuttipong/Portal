@@ -23,8 +23,8 @@ export default function Page() {
   const deductible = readContent<CompanySection>("deductible");
 
   return (
-    <main className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-[900px] bg-white px-6 py-4 shadow-sm min-h-screen">
+    <main className="min-h-screen bg-background">
+      <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-10 xl:px-16 py-4 min-h-screen">
         <PortalPage
           settings={settings}
           manual={manual}

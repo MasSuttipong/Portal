@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Plus, Save, ChevronDown, ChevronRight, Users } from "lucide-react";
+import { Pencil, Trash2, Plus, Save, ChevronDown, ChevronRight, Users, Upload, X } from "lucide-react";
 import DragDropList from "@/components/admin/DragDropList";
 
 interface CompanyFormData {
@@ -46,11 +46,20 @@ interface CompanyFormData {
   claimType: "OPD_IPD" | "OPD_ONLY" | "IPD_ONLY";
   remark: string;
   redirectUrl: string;
+  logoUrl: string;
+  alertText: string;
+  alertType: "warning" | "error" | "info" | "success" | "promo" | "urgent";
+  alertSize: "xs" | "sm" | "md" | "lg" | "xl";
+  alertBorder: "none" | "glow" | "pulse" | "shimmer";
 }
 
 interface GroupFormData {
   headerName: string;
   headerIconUrl: string;
+  alertText: string;
+  alertType: "warning" | "error" | "info" | "success" | "promo" | "urgent";
+  alertSize: "xs" | "sm" | "md" | "lg" | "xl";
+  alertBorder: "none" | "glow" | "pulse" | "shimmer";
 }
 
 const emptyCompanyForm: CompanyFormData = {
@@ -62,11 +71,20 @@ const emptyCompanyForm: CompanyFormData = {
   claimType: "OPD_IPD",
   remark: "",
   redirectUrl: "",
+  logoUrl: "",
+  alertText: "",
+  alertType: "warning",
+  alertSize: "sm",
+  alertBorder: "none",
 };
 
 const emptyGroupForm: GroupFormData = {
   headerName: "",
   headerIconUrl: "",
+  alertText: "",
+  alertType: "warning",
+  alertSize: "sm",
+  alertBorder: "none",
 };
 
 const CLAIM_TYPE_LABELS: Record<string, string> = {
@@ -80,6 +98,10 @@ export default function SelfInsuredPage() {
     "self-insured"
   );
   const [headingValue, setHeadingValue] = useState("");
+  const [sectionAlertText, setSectionAlertText] = useState("");
+  const [sectionAlertType, setSectionAlertType] = useState<"warning" | "error" | "info" | "success" | "promo" | "urgent">("warning");
+  const [sectionAlertSize, setSectionAlertSize] = useState<"xs" | "sm" | "md" | "lg" | "xl">("sm");
+  const [sectionAlertBorder, setSectionAlertBorder] = useState<"none" | "glow" | "pulse" | "shimmer">("none");
   const [headingInitialized, setHeadingInitialized] = useState(false);
 
   // Company dialog state
@@ -94,21 +116,36 @@ export default function SelfInsuredPage() {
   const [groupForm, setGroupForm] = useState<GroupFormData>(emptyGroupForm);
 
   // Delete state
-  const [deleteCompanyTarget, setDeleteCompanyTarget] = useState<{ groupId: string; companyId: string } | null>(null);
+  const [deleteCompanyTarget, setDeleteCompanyTarget] = useState<{ groupId: string | null; companyId: string } | null>(null);
   const [deleteGroupId, setDeleteGroupId] = useState<string | null>(null);
 
   // Expanded groups
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
 
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   if (data && !headingInitialized) {
     setHeadingValue(data.heading ?? "");
+    setSectionAlertText(data.alertText ?? "");
+    setSectionAlertType(data.alertType ?? "warning");
+    setSectionAlertSize(data.alertSize ?? "sm");
+    setSectionAlertBorder(data.alertBorder ?? (data.alertGlow ? "glow" : "none"));
     setHeadingInitialized(true);
   }
 
   const groups = data?.groups ?? [];
   const ungroupedCompanies = data?.companies ?? [];
+
+  function sectionFields() {
+    return {
+      heading: headingValue,
+      alertText: sectionAlertText.trim() || null,
+      alertType: sectionAlertText.trim() ? sectionAlertType : undefined,
+      alertSize: sectionAlertText.trim() ? sectionAlertSize : undefined,
+      alertBorder: sectionAlertText.trim() ? sectionAlertBorder : undefined,
+    };
+  }
 
   function toggleExpanded(groupId: string) {
     setExpandedGroups((prev) => {
@@ -135,6 +172,10 @@ export default function SelfInsuredPage() {
     setGroupForm({
       headerName: group.headerName,
       headerIconUrl: group.headerIconUrl ?? "",
+      alertText: group.alertText ?? "",
+      alertType: group.alertType ?? "warning",
+      alertSize: group.alertSize ?? "sm",
+      alertBorder: group.alertBorder ?? (group.alertGlow ? "glow" : "none"),
     });
     setGroupDialogOpen(true);
   }
@@ -152,6 +193,10 @@ export default function SelfInsuredPage() {
               ...g,
               headerName: groupForm.headerName,
               headerIconUrl: groupForm.headerIconUrl.trim() || null,
+              alertText: groupForm.alertText.trim() || null,
+              alertType: groupForm.alertText.trim() ? groupForm.alertType : undefined,
+              alertSize: groupForm.alertText.trim() ? groupForm.alertSize : undefined,
+              alertBorder: groupForm.alertText.trim() ? groupForm.alertBorder : undefined,
             }
           : g
       );
@@ -160,25 +205,29 @@ export default function SelfInsuredPage() {
         id: `grp-${Date.now()}`,
         headerName: groupForm.headerName,
         headerIconUrl: groupForm.headerIconUrl.trim() || null,
+        alertText: groupForm.alertText.trim() || null,
+        alertType: groupForm.alertText.trim() ? groupForm.alertType : undefined,
+        alertSize: groupForm.alertText.trim() ? groupForm.alertSize : undefined,
+        alertBorder: groupForm.alertText.trim() ? groupForm.alertBorder : undefined,
         companies: [],
       };
       newGroups = [...currentGroups, newGroup];
     }
 
-    void save({ ...data, heading: headingValue, groups: newGroups });
+    void save({ ...data, ...sectionFields(), groups: newGroups });
     setGroupDialogOpen(false);
   }
 
   function handleDeleteGroup(groupId: string) {
     if (!data) return;
     const newGroups = groups.filter((g) => g.id !== groupId);
-    void save({ ...data, heading: headingValue, groups: newGroups });
+    void save({ ...data, ...sectionFields(), groups: newGroups });
     setDeleteGroupId(null);
   }
 
   function handleReorderGroups(reordered: CompanyGroup[]) {
     if (!data) return;
-    void save({ ...data, heading: headingValue, groups: reordered });
+    void save({ ...data, ...sectionFields(), groups: reordered });
   }
 
   // --- Company operations ---
@@ -202,6 +251,11 @@ export default function SelfInsuredPage() {
       claimType: company.claimType,
       remark: company.remark ?? "",
       redirectUrl: company.redirectUrl ?? "",
+      logoUrl: company.logoUrl ?? "",
+      alertText: company.alertText ?? "",
+      alertType: company.alertType ?? "warning",
+      alertSize: company.alertSize ?? "sm",
+      alertBorder: company.alertBorder ?? (company.alertGlow ? "glow" : "none"),
     });
     setCompanyDialogOpen(true);
   }
@@ -217,35 +271,67 @@ export default function SelfInsuredPage() {
       claimType: companyForm.claimType,
       remark: companyForm.remark.trim() || null,
       redirectUrl: companyForm.redirectUrl.trim() || undefined,
+      logoUrl: companyForm.logoUrl.trim() || null,
+      alertText: companyForm.alertText.trim() || null,
+      alertType: companyForm.alertText.trim() ? companyForm.alertType : undefined,
+      alertSize: companyForm.alertText.trim() ? companyForm.alertSize : undefined,
+      alertBorder: companyForm.alertText.trim() ? companyForm.alertBorder : undefined,
     };
   }
 
+  function openAddUngroupedCompany() {
+    setEditingCompanyId(null);
+    setEditingGroupId(null);
+    setCompanyForm(emptyCompanyForm);
+    setCompanyDialogOpen(true);
+  }
+
   function handleCompanyDialogSave() {
-    if (!companyForm.displayName.trim() || !data || !editingGroupId) return;
+    if (!companyForm.displayName.trim() || !data) return;
 
-    const newGroups = groups.map((g) => {
-      if (g.id !== editingGroupId) return g;
-
+    if (editingGroupId === null) {
+      // Ungrouped company
       const newCompanies = editingCompanyId
-        ? g.companies.map((c) =>
+        ? ungroupedCompanies.map((c) =>
             c.id === editingCompanyId ? buildCompanyFromForm(editingCompanyId) : c
           )
-        : [...g.companies, buildCompanyFromForm(`co-${Date.now()}`)];
+        : [...ungroupedCompanies, buildCompanyFromForm(`co-${Date.now()}`)];
 
-      return { ...g, companies: newCompanies };
-    });
+      void save({ ...data, ...sectionFields(), groups, companies: newCompanies });
+    } else {
+      // Grouped company
+      const newGroups = groups.map((g) => {
+        if (g.id !== editingGroupId) return g;
 
-    void save({ ...data, heading: headingValue, groups: newGroups });
+        const newCompanies = editingCompanyId
+          ? g.companies.map((c) =>
+              c.id === editingCompanyId ? buildCompanyFromForm(editingCompanyId) : c
+            )
+          : [...g.companies, buildCompanyFromForm(`co-${Date.now()}`)];
+
+        return { ...g, companies: newCompanies };
+      });
+
+      void save({ ...data, ...sectionFields(), groups: newGroups });
+    }
+
     setCompanyDialogOpen(false);
   }
 
-  function handleDeleteCompany(groupId: string, companyId: string) {
+  function handleDeleteCompany(groupId: string | null, companyId: string) {
     if (!data) return;
-    const newGroups = groups.map((g) => {
-      if (g.id !== groupId) return g;
-      return { ...g, companies: g.companies.filter((c) => c.id !== companyId) };
-    });
-    void save({ ...data, heading: headingValue, groups: newGroups });
+
+    if (groupId === null) {
+      const newCompanies = ungroupedCompanies.filter((c) => c.id !== companyId);
+      void save({ ...data, ...sectionFields(), groups, companies: newCompanies });
+    } else {
+      const newGroups = groups.map((g) => {
+        if (g.id !== groupId) return g;
+        return { ...g, companies: g.companies.filter((c) => c.id !== companyId) };
+      });
+      void save({ ...data, ...sectionFields(), groups: newGroups });
+    }
+
     setDeleteCompanyTarget(null);
   }
 
@@ -254,14 +340,38 @@ export default function SelfInsuredPage() {
     const newGroups = groups.map((g) =>
       g.id === groupId ? { ...g, companies: reordered } : g
     );
-    void save({ ...data, heading: headingValue, groups: newGroups });
+    void save({ ...data, ...sectionFields(), groups: newGroups });
+  }
+
+  function handleReorderUngroupedCompanies(reordered: Company[]) {
+    if (!data) return;
+    void save({ ...data, ...sectionFields(), groups, companies: reordered });
   }
 
   async function handleSave() {
     if (!data) return;
     setSaving(true);
-    await save({ ...data, heading: headingValue, groups, companies: ungroupedCompanies });
+    await save({ ...data, ...sectionFields(), groups, companies: ungroupedCompanies });
     setSaving(false);
+  }
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Upload failed");
+      const { url } = await res.json();
+      setCompanyForm((prev) => ({ ...prev, logoUrl: url }));
+    } catch {
+      alert("อัปโหลดไม่สำเร็จ");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
   }
 
   if (loading) {
@@ -285,6 +395,10 @@ export default function SelfInsuredPage() {
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-bold text-gray-900">จัดการสวัสดิการพนักงาน</h1>
         <div className="flex gap-2">
+          <Button onClick={openAddUngroupedCompany} variant="outline" size="sm" className="gap-1.5">
+            <Plus className="size-4" />
+            เพิ่มบริษัท
+          </Button>
           <Button onClick={openAddGroupDialog} variant="outline" size="sm" className="gap-1.5">
             <Plus className="size-4" />
             เพิ่มกลุ่ม
@@ -309,6 +423,197 @@ export default function SelfInsuredPage() {
               onChange={(e) => setHeadingValue(e.target.value)}
             />
           </div>
+          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 mt-3 items-end">
+            <div className="space-y-2">
+              <Label htmlFor="si-alert">ข้อความแจ้งเตือนส่วน (ถ้ามี)</Label>
+              <Input
+                id="si-alert"
+                value={sectionAlertText}
+                onChange={(e) => setSectionAlertText(e.target.value)}
+                placeholder="เช่น OPD ให้สำรองจ่าย"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="si-alert-type">ประเภท</Label>
+              <select
+                id="si-alert-type"
+                value={sectionAlertType}
+                onChange={(e) => setSectionAlertType(e.target.value as "warning" | "error" | "info" | "success" | "promo" | "urgent")}
+                title="ประเภทแจ้งเตือน"
+                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="warning">⚠️ เตือน</option>
+                <option value="error">❌ สำคัญ</option>
+                <option value="info">ℹ️ แจ้งข้อมูล</option>
+                <option value="success">✅ สำเร็จ</option>
+                <option value="promo">🎉 โปรโมชั่น</option>
+                <option value="urgent">🚨 ด่วน</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="si-alert-size">ขนาด</Label>
+              <select
+                id="si-alert-size"
+                value={sectionAlertSize}
+                onChange={(e) => setSectionAlertSize(e.target.value as "xs" | "sm" | "md" | "lg" | "xl")}
+                title="ขนาดแจ้งเตือน"
+                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="xs">XS</option>
+                <option value="sm">S</option>
+                <option value="md">M</option>
+                <option value="lg">L</option>
+                <option value="xl">XL</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="si-alert-border">ขอบ</Label>
+              <select
+                id="si-alert-border"
+                value={sectionAlertBorder}
+                onChange={(e) => setSectionAlertBorder(e.target.value as "none" | "glow" | "pulse" | "shimmer")}
+                title="เอฟเฟกต์ขอบ"
+                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="none">ไม่มี</option>
+                <option value="glow">เรืองแสง</option>
+                <option value="pulse">กระพริบ</option>
+                <option value="shimmer">วิ่ง</option>
+                <option value="bounce">เด้ง</option>
+                <option value="shake">สั่น</option>
+                <option value="rainbow">สายรุ้ง</option>
+                <option value="blink">กระพริบจ้า</option>
+              </select>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Standalone Companies */}
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
+          <CardTitle className="text-base">บริษัทเดี่ยว ({ungroupedCompanies.length})</CardTitle>
+          <Button onClick={openAddUngroupedCompany} variant="ghost" size="sm" className="gap-1.5 text-xs h-7">
+            <Plus className="size-3.5" />
+            เพิ่มบริษัท
+          </Button>
+        </CardHeader>
+        <CardContent>
+          {ungroupedCompanies.length === 0 ? (
+            <div className="text-center py-6 text-gray-400 text-sm">
+              ยังไม่มีบริษัทเดี่ยว กดปุ่ม &quot;เพิ่มบริษัท&quot; เพื่อเพิ่ม
+            </div>
+          ) : (
+            <>
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-8"></TableHead>
+                    <TableHead>ชื่อบริษัท</TableHead>
+                    <TableHead className="w-28">ประเภท</TableHead>
+                    <TableHead className="w-24 text-center">คลิกได้</TableHead>
+                    <TableHead className="w-20 text-center">ใหม่</TableHead>
+                    <TableHead className="w-24 text-right">จัดการ</TableHead>
+                  </TableRow>
+                </TableHeader>
+              </Table>
+              <DragDropList
+                items={ungroupedCompanies}
+                onReorder={handleReorderUngroupedCompanies}
+                renderItem={(company) => (
+                  <Table>
+                    <TableBody>
+                      <TableRow>
+                        <TableCell className="flex-1">
+                          <span className="text-sm text-gray-800">
+                            {company.displayName}
+                          </span>
+                          {company.remark && (
+                            <span className="block text-xs text-red-500 mt-0.5">
+                              {company.remark}
+                            </span>
+                          )}
+                        </TableCell>
+                        <TableCell className="w-28">
+                          <Badge variant="outline" className="text-xs">
+                            {CLAIM_TYPE_LABELS[company.claimType] ?? company.claimType}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="w-24 text-center">
+                          <Switch
+                            checked={company.isClickable}
+                            onCheckedChange={(val) => {
+                              if (!data) return;
+                              const newCompanies = ungroupedCompanies.map((c) =>
+                                c.id === company.id ? { ...c, isClickable: val } : c
+                              );
+                              void save({ ...data, ...sectionFields(), groups, companies: newCompanies });
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell className="w-20 text-center">
+                          <Switch
+                            checked={company.isNew}
+                            onCheckedChange={(val) => {
+                              if (!data) return;
+                              const newCompanies = ungroupedCompanies.map((c) =>
+                                c.id === company.id ? { ...c, isNew: val } : c
+                              );
+                              void save({ ...data, ...sectionFields(), groups, companies: newCompanies });
+                            }}
+                          />
+                        </TableCell>
+                        <TableCell className="w-24 text-right">
+                          <div className="flex justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8"
+                              onClick={() => {
+                                setEditingCompanyId(company.id);
+                                setEditingGroupId(null);
+                                setCompanyForm({
+                                  displayName: company.displayName,
+                                  code: company.code ?? "",
+                                  iclaimId: company.iclaimId ?? "",
+                                  isClickable: company.isClickable,
+                                  isNew: company.isNew,
+                                  claimType: company.claimType,
+                                  remark: company.remark ?? "",
+                                  redirectUrl: company.redirectUrl ?? "",
+                                  logoUrl: company.logoUrl ?? "",
+                                  alertText: company.alertText ?? "",
+                                  alertType: company.alertType ?? "warning",
+                                  alertSize: company.alertSize ?? "sm",
+                                  alertBorder: company.alertBorder ?? (company.alertGlow ? "glow" : "none"),
+                                });
+                                setCompanyDialogOpen(true);
+                              }}
+                            >
+                              <Pencil className="size-3.5" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-8 text-red-500 hover:text-red-700 hover:bg-red-50"
+                              onClick={() =>
+                                setDeleteCompanyTarget({
+                                  groupId: null,
+                                  companyId: company.id,
+                                })
+                              }
+                            >
+                              <Trash2 className="size-3.5" />
+                            </Button>
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    </TableBody>
+                  </Table>
+                )}
+              />
+            </>
+          )}
         </CardContent>
       </Card>
 
@@ -389,6 +694,7 @@ export default function SelfInsuredPage() {
                               <TableHead>ชื่อบริษัท</TableHead>
                               <TableHead className="w-28">ประเภท</TableHead>
                               <TableHead className="w-24 text-center">คลิกได้</TableHead>
+                              <TableHead className="w-20 text-center">ใหม่</TableHead>
                               <TableHead className="w-24 text-right">จัดการ</TableHead>
                             </TableRow>
                           </TableHeader>
@@ -433,7 +739,27 @@ export default function SelfInsuredPage() {
                                             ),
                                           };
                                         });
-                                        void save({ ...data, heading: headingValue, groups: newGroups });
+                                        void save({ ...data, ...sectionFields(), groups: newGroups });
+                                      }}
+                                    />
+                                  </TableCell>
+                                  <TableCell className="w-20 text-center">
+                                    <Switch
+                                      checked={company.isNew}
+                                      onCheckedChange={(val) => {
+                                        if (!data) return;
+                                        const newGroups = groups.map((g) => {
+                                          if (g.id !== group.id) return g;
+                                          return {
+                                            ...g,
+                                            companies: g.companies.map((c) =>
+                                              c.id === company.id
+                                                ? { ...c, isNew: val }
+                                                : c
+                                            ),
+                                          };
+                                        });
+                                        void save({ ...data, ...sectionFields(), groups: newGroups });
                                       }}
                                     />
                                   </TableCell>
@@ -509,6 +835,77 @@ export default function SelfInsuredPage() {
                 }
                 placeholder="/images/logo-group.png"
               />
+            </div>
+            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-end">
+              <div className="space-y-2">
+                <Label htmlFor="grp-alert">ข้อความแจ้งเตือนกลุ่ม (ถ้ามี)</Label>
+                <Input
+                  id="grp-alert"
+                  value={groupForm.alertText}
+                  onChange={(e) =>
+                    setGroupForm((prev) => ({ ...prev, alertText: e.target.value }))
+                  }
+                  placeholder="เช่น OPD ให้สำรองจ่าย"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="grp-alert-type">ประเภท</Label>
+                <select
+                  id="grp-alert-type"
+                  value={groupForm.alertType}
+                  onChange={(e) =>
+                    setGroupForm((prev) => ({ ...prev, alertType: e.target.value as "warning" | "error" | "info" | "success" | "promo" | "urgent" }))
+                  }
+                  title="ประเภทแจ้งเตือน"
+                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="warning">⚠️ เตือน</option>
+                  <option value="error">❌ สำคัญ</option>
+                  <option value="info">ℹ️ แจ้งข้อมูล</option>
+                  <option value="success">✅ สำเร็จ</option>
+                  <option value="promo">🎉 โปรโมชั่น</option>
+                  <option value="urgent">🚨 ด่วน</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="grp-alert-size">ขนาด</Label>
+                <select
+                  id="grp-alert-size"
+                  value={groupForm.alertSize}
+                  onChange={(e) =>
+                    setGroupForm((prev) => ({ ...prev, alertSize: e.target.value as "xs" | "sm" | "md" | "lg" | "xl" }))
+                  }
+                  title="ขนาดแจ้งเตือน"
+                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="xs">XS</option>
+                  <option value="sm">S</option>
+                  <option value="md">M</option>
+                  <option value="lg">L</option>
+                  <option value="xl">XL</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="grp-alert-border">ขอบ</Label>
+                <select
+                  id="grp-alert-border"
+                  value={groupForm.alertBorder}
+                  onChange={(e) =>
+                    setGroupForm((prev) => ({ ...prev, alertBorder: e.target.value as "none" | "glow" | "pulse" | "shimmer" }))
+                  }
+                  title="เอฟเฟกต์ขอบ"
+                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="none">ไม่มี</option>
+                  <option value="glow">เรืองแสง</option>
+                  <option value="pulse">กระพริบ</option>
+                  <option value="shimmer">วิ่ง</option>
+                  <option value="bounce">เด้ง</option>
+                  <option value="shake">สั่น</option>
+                  <option value="rainbow">สายรุ้ง</option>
+                  <option value="blink">กระพริบจ้า</option>
+                </select>
+              </div>
             </div>
           </div>
           <DialogFooter>
@@ -608,6 +1005,38 @@ export default function SelfInsuredPage() {
               />
             </div>
             <div className="space-y-2">
+              <Label>โลโก้บริษัท</Label>
+              {companyForm.logoUrl ? (
+                <div className="flex items-center gap-3">
+                  <img src={companyForm.logoUrl} alt="logo" className="w-12 h-12 object-contain rounded border" />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-700 gap-1"
+                    onClick={() => setCompanyForm((prev) => ({ ...prev, logoUrl: "" }))}
+                  >
+                    <X className="size-3.5" />
+                    ลบโลโก้
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
+                    <Upload className="size-3.5" />
+                    {uploading ? "กำลังอัปโหลด..." : "อัปโหลดโลโก้"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleLogoUpload}
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="co-remark">หมายเหตุ</Label>
               <Input
                 id="co-remark"
@@ -617,6 +1046,77 @@ export default function SelfInsuredPage() {
                 }
                 placeholder="ข้อความหมายเหตุ"
               />
+            </div>
+            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-end">
+              <div className="space-y-2">
+                <Label htmlFor="co-alert">ข้อความแจ้งเตือน (ถ้ามี)</Label>
+                <Input
+                  id="co-alert"
+                  value={companyForm.alertText}
+                  onChange={(e) =>
+                    setCompanyForm((prev) => ({ ...prev, alertText: e.target.value }))
+                  }
+                  placeholder="เช่น OPD ให้สำรองจ่าย"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="co-alert-type">ประเภท</Label>
+                <select
+                  id="co-alert-type"
+                  value={companyForm.alertType}
+                  onChange={(e) =>
+                    setCompanyForm((prev) => ({ ...prev, alertType: e.target.value as "warning" | "error" | "info" | "success" | "promo" | "urgent" }))
+                  }
+                  title="ประเภทแจ้งเตือน"
+                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="warning">⚠️ เตือน</option>
+                  <option value="error">❌ สำคัญ</option>
+                  <option value="info">ℹ️ แจ้งข้อมูล</option>
+                  <option value="success">✅ สำเร็จ</option>
+                  <option value="promo">🎉 โปรโมชั่น</option>
+                  <option value="urgent">🚨 ด่วน</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="co-alert-size">ขนาด</Label>
+                <select
+                  id="co-alert-size"
+                  value={companyForm.alertSize}
+                  onChange={(e) =>
+                    setCompanyForm((prev) => ({ ...prev, alertSize: e.target.value as "xs" | "sm" | "md" | "lg" | "xl" }))
+                  }
+                  title="ขนาดแจ้งเตือน"
+                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="xs">XS</option>
+                  <option value="sm">S</option>
+                  <option value="md">M</option>
+                  <option value="lg">L</option>
+                  <option value="xl">XL</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="co-alert-border">ขอบ</Label>
+                <select
+                  id="co-alert-border"
+                  value={companyForm.alertBorder}
+                  onChange={(e) =>
+                    setCompanyForm((prev) => ({ ...prev, alertBorder: e.target.value as "none" | "glow" | "pulse" | "shimmer" }))
+                  }
+                  title="เอฟเฟกต์ขอบ"
+                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="none">ไม่มี</option>
+                  <option value="glow">เรืองแสง</option>
+                  <option value="pulse">กระพริบ</option>
+                  <option value="shimmer">วิ่ง</option>
+                  <option value="bounce">เด้ง</option>
+                  <option value="shake">สั่น</option>
+                  <option value="rainbow">สายรุ้ง</option>
+                  <option value="blink">กระพริบจ้า</option>
+                </select>
+              </div>
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="co-clickable">คลิกได้ (ไม่ระงับ)</Label>

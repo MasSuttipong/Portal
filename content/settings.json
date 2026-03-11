@@ -5,9 +5,18 @@
   },
   "iclaim": {
     "baseUrl": "https://tpacare.thirdpartyadmin.co.th/app/EClaim.aspx",
-    "confirmText": "ระบบกำลังพาท่านไปสู่ระบบ iClaim",
+    "confirmText": "ระบบกำลังพาท่านไปสู่ระบบ Claim",
     "confirmOk": "ตกลง",
     "confirmCancel": "ยกเลิก",
     "claimTypePrompt": "เลือก Claim Type ที่ต้องการ"
+  },
+  "announcement": {
+    "enabled": false,
+    "text": "",
+    "type": "warning",
+    "size": "lg",
+    "border": "glow",
+    "link": null,
+    "dismissible": false
   }
 }

@@ -9,7 +9,10 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/intl-1.png",
+      "alertText": "OPD สำรองจ่าย",
+      "alertType": "warning"
     },
     {
       "id": "intl-2",
@@ -19,7 +22,8 @@
       "isClickable": true,
       "isNew": true,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/images/1773204731690-ChatGPT_Image_Feb_19__2026__01_14_06_PM.png"
     },
     {
       "id": "intl-3",
@@ -29,7 +33,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "intl-4",
@@ -39,7 +44,9 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     }
-  ]
+  ],
+  "alertText": null
 }

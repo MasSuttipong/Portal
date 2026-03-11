@@ -41,7 +41,7 @@ import {
 } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Plus, Save } from "lucide-react";
+import { Pencil, Trash2, Plus, Save, Upload, X } from "lucide-react";
 import DragDropList from "@/components/admin/DragDropList";
 
 // shadcn Select might not be installed — use native select as fallback
@@ -55,6 +55,7 @@ interface CompanyFormData {
   claimType: "OPD_IPD" | "OPD_ONLY" | "IPD_ONLY";
   remark: string;
   redirectUrl: string;
+  logoUrl: string;
 }
 
 const emptyForm: CompanyFormData = {
@@ -66,6 +67,7 @@ const emptyForm: CompanyFormData = {
   claimType: "OPD_IPD",
   remark: "",
   redirectUrl: "",
+  logoUrl: "",
 };
 
 const CLAIM_TYPE_LABELS: Record<string, string> = {
@@ -85,6 +87,7 @@ export default function InsurancePage() {
   const [form, setForm] = useState<CompanyFormData>(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   if (data && !headingInitialized) {
     setHeadingValue(data.heading ?? "");
@@ -110,6 +113,7 @@ export default function InsurancePage() {
       claimType: company.claimType,
       remark: company.remark ?? "",
       redirectUrl: company.redirectUrl ?? "",
+      logoUrl: company.logoUrl ?? "",
     });
     setDialogOpen(true);
   }
@@ -132,6 +136,7 @@ export default function InsurancePage() {
       claimType: form.claimType,
       remark: form.remark.trim() || null,
       redirectUrl: form.redirectUrl.trim() || undefined,
+      logoUrl: form.logoUrl.trim() || null,
     };
   }
 
@@ -170,6 +175,25 @@ export default function InsurancePage() {
     setSaving(true);
     await save({ ...data, heading: headingValue, companies });
     setSaving(false);
+  }
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Upload failed");
+      const { url } = await res.json();
+      setForm((prev) => ({ ...prev, logoUrl: url }));
+    } catch {
+      alert("อัปโหลดไม่สำเร็จ");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
   }
 
   if (loading) {
@@ -376,6 +400,38 @@ export default function InsurancePage() {
                 onChange={(e) => handleFormChange("redirectUrl", e.target.value)}
                 placeholder="https://..."
               />
+            </div>
+            <div className="space-y-2">
+              <Label>โลโก้บริษัท</Label>
+              {form.logoUrl ? (
+                <div className="flex items-center gap-3">
+                  <img src={form.logoUrl} alt="logo" className="w-12 h-12 object-contain rounded border" />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-700 gap-1"
+                    onClick={() => handleFormChange("logoUrl", "")}
+                  >
+                    <X className="size-3.5" />
+                    ลบโลโก้
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
+                    <Upload className="size-3.5" />
+                    {uploading ? "กำลังอัปโหลด..." : "อัปโหลดโลโก้"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleLogoUpload}
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
+              )}
             </div>
             <div className="space-y-2">
               <Label htmlFor="co-remark">หมายเหตุ (แสดงเมื่อระงับ)</Label>

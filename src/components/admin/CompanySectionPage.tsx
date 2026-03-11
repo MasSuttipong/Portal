@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Plus, Save } from "lucide-react";
+import { Pencil, Trash2, Plus, Save, Upload, X } from "lucide-react";
 import DragDropList from "@/components/admin/DragDropList";
 
 interface CompanySectionPageProps {
@@ -51,6 +51,11 @@ interface CompanyFormData {
   claimType: "OPD_IPD" | "OPD_ONLY" | "IPD_ONLY";
   remark: string;
   redirectUrl: string;
+  logoUrl: string;
+  alertText: string;
+  alertType: "warning" | "error" | "info" | "success" | "promo" | "urgent";
+  alertSize: "xs" | "sm" | "md" | "lg" | "xl";
+  alertBorder: "none" | "glow" | "pulse" | "shimmer";
 }
 
 const emptyForm: CompanyFormData = {
@@ -62,6 +67,11 @@ const emptyForm: CompanyFormData = {
   claimType: "OPD_IPD",
   remark: "",
   redirectUrl: "",
+  logoUrl: "",
+  alertText: "",
+  alertType: "warning",
+  alertSize: "sm",
+  alertBorder: "none",
 };
 
 const CLAIM_TYPE_LABELS: Record<string, string> = {
@@ -76,19 +86,38 @@ export default function CompanySectionPage({
 }: CompanySectionPageProps) {
   const { data, loading, error, save } = useAdminContent<CompanySection>(filename);
   const [headingValue, setHeadingValue] = useState("");
+  const [sectionAlertText, setSectionAlertText] = useState("");
+  const [sectionAlertType, setSectionAlertType] = useState<CompanyFormData["alertType"]>("warning");
+  const [sectionAlertSize, setSectionAlertSize] = useState<"xs" | "sm" | "md" | "lg" | "xl">("sm");
+  const [sectionAlertBorder, setSectionAlertBorder] = useState<"none" | "glow" | "pulse" | "shimmer">("none");
   const [headingInitialized, setHeadingInitialized] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [form, setForm] = useState<CompanyFormData>(emptyForm);
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   if (data && !headingInitialized) {
     setHeadingValue(data.heading ?? "");
+    setSectionAlertText(data.alertText ?? "");
+    setSectionAlertType(data.alertType ?? "warning");
+    setSectionAlertSize(data.alertSize ?? "sm");
+    setSectionAlertBorder(data.alertBorder ?? (data.alertGlow ? "glow" : "none"));
     setHeadingInitialized(true);
   }
 
   const companies = data?.companies ?? [];
+
+  function sectionFields() {
+    return {
+      heading: headingValue,
+      alertText: sectionAlertText.trim() || null,
+      alertType: sectionAlertText.trim() ? sectionAlertType : undefined,
+      alertSize: sectionAlertText.trim() ? sectionAlertSize : undefined,
+      alertBorder: sectionAlertText.trim() ? sectionAlertBorder : undefined,
+    };
+  }
 
   function openAddDialog() {
     setEditingId(null);
@@ -107,6 +136,11 @@ export default function CompanySectionPage({
       claimType: company.claimType,
       remark: company.remark ?? "",
       redirectUrl: company.redirectUrl ?? "",
+      logoUrl: company.logoUrl ?? "",
+      alertText: company.alertText ?? "",
+      alertType: company.alertType ?? "warning",
+      alertSize: company.alertSize ?? "sm",
+      alertBorder: company.alertBorder ?? (company.alertGlow ? "glow" : "none"),
     });
     setDialogOpen(true);
   }
@@ -129,6 +163,11 @@ export default function CompanySectionPage({
       claimType: form.claimType,
       remark: form.remark.trim() || null,
       redirectUrl: form.redirectUrl.trim() || undefined,
+      logoUrl: form.logoUrl.trim() || null,
+      alertText: form.alertText.trim() || null,
+      alertType: form.alertText.trim() ? form.alertType : undefined,
+      alertSize: form.alertText.trim() ? form.alertSize : undefined,
+      alertBorder: form.alertText.trim() ? form.alertBorder : undefined,
     };
   }
 
@@ -143,7 +182,7 @@ export default function CompanySectionPage({
 
     const newData: CompanySection = {
       ...(data ?? { heading: headingValue, companies: [] }),
-      heading: headingValue,
+      ...sectionFields(),
       companies: newCompanies,
     };
     void save(newData);
@@ -153,20 +192,39 @@ export default function CompanySectionPage({
   function handleDelete(id: string) {
     if (!data) return;
     const newCompanies = companies.filter((c) => c.id !== id);
-    void save({ ...data, heading: headingValue, companies: newCompanies });
+    void save({ ...data, ...sectionFields(), companies: newCompanies });
     setDeleteId(null);
   }
 
   function handleReorder(reordered: Company[]) {
     if (!data) return;
-    void save({ ...data, heading: headingValue, companies: reordered });
+    void save({ ...data, ...sectionFields(), companies: reordered });
   }
 
   async function handleSave() {
     if (!data) return;
     setSaving(true);
-    await save({ ...data, heading: headingValue, companies });
+    await save({ ...data, ...sectionFields(), companies });
     setSaving(false);
+  }
+
+  async function handleLogoUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      if (!res.ok) throw new Error("Upload failed");
+      const { url } = await res.json();
+      handleFormChange("logoUrl", url);
+    } catch {
+      alert("อัปโหลดไม่สำเร็จ");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
   }
 
   if (loading) {
@@ -214,6 +272,69 @@ export default function CompanySectionPage({
               onChange={(e) => setHeadingValue(e.target.value)}
             />
           </div>
+          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 mt-3">
+            <div className="space-y-2">
+              <Label htmlFor={`${filename}-alert`}>ข้อความแจ้งเตือนส่วน (ถ้ามี)</Label>
+              <Input
+                id={`${filename}-alert`}
+                value={sectionAlertText}
+                onChange={(e) => setSectionAlertText(e.target.value)}
+                placeholder="เช่น OPD ให้สำรองจ่าย"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`${filename}-alert-type`}>ประเภท</Label>
+              <select
+                id={`${filename}-alert-type`}
+                value={sectionAlertType}
+                onChange={(e) => setSectionAlertType(e.target.value as CompanyFormData["alertType"])}
+                title="ประเภทแจ้งเตือน"
+                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="warning">⚠️ เตือน</option>
+                <option value="error">❌ สำคัญ</option>
+                <option value="info">ℹ️ แจ้งข้อมูล</option>
+                <option value="success">✅ สำเร็จ</option>
+                <option value="promo">🎉 โปรโมชั่น</option>
+                <option value="urgent">🚨 ด่วน</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`${filename}-alert-size`}>ขนาด</Label>
+              <select
+                id={`${filename}-alert-size`}
+                value={sectionAlertSize}
+                onChange={(e) => setSectionAlertSize(e.target.value as CompanyFormData["alertSize"])}
+                title="ขนาดแจ้งเตือน"
+                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="xs">XS</option>
+                <option value="sm">S</option>
+                <option value="md">M</option>
+                <option value="lg">L</option>
+                <option value="xl">XL</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor={`${filename}-alert-border`}>ขอบ</Label>
+              <select
+                id={`${filename}-alert-border`}
+                value={sectionAlertBorder}
+                onChange={(e) => setSectionAlertBorder(e.target.value as CompanyFormData["alertBorder"])}
+                title="เอฟเฟกต์ขอบ"
+                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="none">ไม่มี</option>
+                <option value="glow">เรืองแสง</option>
+                <option value="pulse">กระพริบ</option>
+                <option value="shimmer">วิ่ง</option>
+                <option value="bounce">เด้ง</option>
+                <option value="shake">สั่น</option>
+                <option value="rainbow">สายรุ้ง</option>
+                <option value="blink">กระพริบจ้า</option>
+              </select>
+            </div>
+          </div>
         </CardContent>
       </Card>
 
@@ -227,6 +348,7 @@ export default function CompanySectionPage({
             <TableHeader>
               <TableRow>
                 <TableHead className="w-8"></TableHead>
+                <TableHead className="w-12">โลโก้</TableHead>
                 <TableHead>ชื่อบริษัท</TableHead>
                 <TableHead className="w-28">ประเภท</TableHead>
                 <TableHead className="w-24 text-center">คลิกได้</TableHead>
@@ -242,6 +364,13 @@ export default function CompanySectionPage({
               <Table>
                 <TableBody>
                   <TableRow>
+                    <TableCell className="w-12">
+                      {company.logoUrl ? (
+                        <img src={company.logoUrl} alt="" className="w-8 h-8 object-contain rounded" />
+                      ) : (
+                        <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs">—</div>
+                      )}
+                    </TableCell>
                     <TableCell className="flex-1">
                       <span className="text-sm font-medium text-gray-800">
                         {company.displayName}
@@ -265,7 +394,7 @@ export default function CompanySectionPage({
                           const updated = companies.map((c) =>
                             c.id === company.id ? { ...c, isClickable: val } : c
                           );
-                          void save({ ...data, heading: headingValue, companies: updated });
+                          void save({ ...data, ...sectionFields(), companies: updated });
                         }}
                       />
                     </TableCell>
@@ -277,7 +406,7 @@ export default function CompanySectionPage({
                           const updated = companies.map((c) =>
                             c.id === company.id ? { ...c, isNew: val } : c
                           );
-                          void save({ ...data, heading: headingValue, companies: updated });
+                          void save({ ...data, ...sectionFields(), companies: updated });
                         }}
                       />
                     </TableCell>
@@ -375,6 +504,38 @@ export default function CompanySectionPage({
               />
             </div>
             <div className="space-y-2">
+              <Label>โลโก้บริษัท</Label>
+              {form.logoUrl ? (
+                <div className="flex items-center gap-3">
+                  <img src={form.logoUrl} alt="logo" className="w-12 h-12 object-contain rounded border" />
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    className="text-red-500 hover:text-red-700 gap-1"
+                    onClick={() => handleFormChange("logoUrl", "")}
+                  >
+                    <X className="size-3.5" />
+                    ลบโลโก้
+                  </Button>
+                </div>
+              ) : (
+                <div>
+                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
+                    <Upload className="size-3.5" />
+                    {uploading ? "กำลังอัปโหลด..." : "อัปโหลดโลโก้"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={handleLogoUpload}
+                      disabled={uploading}
+                    />
+                  </label>
+                </div>
+              )}
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="co-remark">หมายเหตุ (แสดงเมื่อระงับ)</Label>
               <Input
                 id="co-remark"
@@ -382,6 +543,69 @@ export default function CompanySectionPage({
                 onChange={(e) => handleFormChange("remark", e.target.value)}
                 placeholder="ข้อความหมายเหตุ"
               />
+            </div>
+            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3">
+              <div className="space-y-2">
+                <Label htmlFor="co-alert">ข้อความแจ้งเตือน (ถ้ามี)</Label>
+                <Input
+                  id="co-alert"
+                  value={form.alertText}
+                  onChange={(e) => handleFormChange("alertText", e.target.value)}
+                  placeholder="เช่น OPD ให้สำรองจ่าย"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="co-alert-type">ประเภท</Label>
+                <select
+                  id="co-alert-type"
+                  value={form.alertType}
+                  onChange={(e) => handleFormChange("alertType", e.target.value as CompanyFormData["alertType"])}
+                  title="ประเภทแจ้งเตือน"
+                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="warning">⚠️ เตือน</option>
+                  <option value="error">❌ สำคัญ</option>
+                  <option value="info">ℹ️ แจ้งข้อมูล</option>
+                  <option value="success">✅ สำเร็จ</option>
+                  <option value="promo">🎉 โปรโมชั่น</option>
+                  <option value="urgent">🚨 ด่วน</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="co-alert-size">ขนาด</Label>
+                <select
+                  id="co-alert-size"
+                  value={form.alertSize}
+                  onChange={(e) => handleFormChange("alertSize", e.target.value as CompanyFormData["alertSize"])}
+                  title="ขนาดแจ้งเตือน"
+                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="xs">XS</option>
+                  <option value="sm">S</option>
+                  <option value="md">M</option>
+                  <option value="lg">L</option>
+                  <option value="xl">XL</option>
+                </select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="co-alert-border">ขอบ</Label>
+                <select
+                  id="co-alert-border"
+                  value={form.alertBorder}
+                  onChange={(e) => handleFormChange("alertBorder", e.target.value as CompanyFormData["alertBorder"])}
+                  title="เอฟเฟกต์ขอบ"
+                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                >
+                  <option value="none">ไม่มี</option>
+                  <option value="glow">เรืองแสง</option>
+                  <option value="pulse">กระพริบ</option>
+                  <option value="shimmer">วิ่ง</option>
+                  <option value="bounce">เด้ง</option>
+                  <option value="shake">สั่น</option>
+                  <option value="rainbow">สายรุ้ง</option>
+                  <option value="blink">กระพริบจ้า</option>
+                </select>
+              </div>
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="co-clickable">คลิกได้ (ไม่ระงับ)</Label>

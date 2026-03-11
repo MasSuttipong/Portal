@@ -2,14 +2,16 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useAdminContent } from "@/lib/useAdminContent";
-import type { PortalSettings } from "@/types/portal";
+import type { PortalSettings, AlertType, AlertSize, AlertBorder } from "@/types/portal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { Save, Upload, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
+import AnnouncementBanner from "@/components/portal/AnnouncementBanner";
 
 export default function SettingsPage() {
   const { data, loading, error, save } = useAdminContent<PortalSettings>("settings");
@@ -21,6 +23,13 @@ export default function SettingsPage() {
   const [confirmOk, setConfirmOk] = useState("");
   const [confirmCancel, setConfirmCancel] = useState("");
   const [claimTypePrompt, setClaimTypePrompt] = useState("");
+  const [annEnabled, setAnnEnabled] = useState(false);
+  const [annText, setAnnText] = useState("");
+  const [annType, setAnnType] = useState<AlertType>("info");
+  const [annSize, setAnnSize] = useState<AlertSize>("md");
+  const [annBorder, setAnnBorder] = useState<AlertBorder>("none");
+  const [annLink, setAnnLink] = useState("");
+  const [annDismissible, setAnnDismissible] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -36,6 +45,13 @@ export default function SettingsPage() {
       setConfirmOk(data.iclaim?.confirmOk ?? "");
       setConfirmCancel(data.iclaim?.confirmCancel ?? "");
       setClaimTypePrompt(data.iclaim?.claimTypePrompt ?? "");
+      setAnnEnabled(data.announcement?.enabled ?? false);
+      setAnnText(data.announcement?.text ?? "");
+      setAnnType(data.announcement?.type ?? "info");
+      setAnnSize(data.announcement?.size ?? "md");
+      setAnnBorder(data.announcement?.border ?? (data.announcement?.glow ? "glow" : "none"));
+      setAnnLink(data.announcement?.link ?? "");
+      setAnnDismissible(data.announcement?.dismissible ?? true);
       setInitialized(true);
     }
   }, [data, initialized]);
@@ -84,6 +100,15 @@ export default function SettingsPage() {
         confirmCancel,
         claimTypePrompt,
       },
+      announcement: {
+        enabled: annEnabled,
+        text: annText,
+        type: annType,
+        size: annSize,
+        border: annBorder,
+        link: annLink.trim() || null,
+        dismissible: annDismissible,
+      },
     };
 
     await save(newData);
@@ -116,6 +141,124 @@ export default function SettingsPage() {
           {saving ? "กำลังบันทึก..." : "บันทึก"}
         </Button>
       </div>
+
+      {/* Announcement Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">ประกาศ</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="ann-enabled">เปิดใช้งานประกาศ</Label>
+            <Switch
+              id="ann-enabled"
+              checked={annEnabled}
+              onCheckedChange={setAnnEnabled}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="ann-text">ข้อความประกาศ</Label>
+            <Input
+              id="ann-text"
+              value={annText}
+              onChange={(e) => setAnnText(e.target.value)}
+              placeholder="เช่น ระบบจะปิดปรับปรุงวันที่ 15 มี.ค."
+            />
+          </div>
+
+          <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-end">
+            <div className="space-y-2">
+              <Label htmlFor="ann-link">ลิงก์ (ไม่บังคับ)</Label>
+              <Input
+                id="ann-link"
+                value={annLink}
+                onChange={(e) => setAnnLink(e.target.value)}
+                placeholder="https://..."
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ann-type">ประเภท</Label>
+              <select
+                id="ann-type"
+                value={annType}
+                onChange={(e) => setAnnType(e.target.value as AlertType)}
+                title="ประเภทแจ้งเตือน"
+                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="warning">⚠️ เตือน</option>
+                <option value="error">❌ สำคัญ</option>
+                <option value="info">ℹ️ แจ้งข้อมูล</option>
+                <option value="success">✅ สำเร็จ</option>
+                <option value="promo">🎉 โปรโมชั่น</option>
+                <option value="urgent">🚨 ด่วน</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ann-size">ขนาด</Label>
+              <select
+                id="ann-size"
+                value={annSize}
+                onChange={(e) => setAnnSize(e.target.value as AlertSize)}
+                title="ขนาดแจ้งเตือน"
+                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="xs">XS</option>
+                <option value="sm">S</option>
+                <option value="md">M</option>
+                <option value="lg">L</option>
+                <option value="xl">XL</option>
+              </select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="ann-border">ขอบ</Label>
+              <select
+                id="ann-border"
+                value={annBorder}
+                onChange={(e) => setAnnBorder(e.target.value as AlertBorder)}
+                title="เอฟเฟกต์ขอบ"
+                className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+              >
+                <option value="none">ไม่มี</option>
+                <option value="glow">เรืองแสง</option>
+                <option value="pulse">กระพริบ</option>
+                <option value="shimmer">วิ่ง</option>
+                <option value="bounce">เด้ง</option>
+                <option value="shake">สั่น</option>
+                <option value="rainbow">สายรุ้ง</option>
+                <option value="blink">กระพริบจ้า</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between">
+            <Label htmlFor="ann-dismissible">อนุญาตให้ปิดได้</Label>
+            <Switch
+              id="ann-dismissible"
+              checked={annDismissible}
+              onCheckedChange={setAnnDismissible}
+            />
+          </div>
+
+          {/* Live preview */}
+          {annText.trim() && (
+            <div className="space-y-2">
+              <Label className="text-xs text-gray-400">ตัวอย่าง</Label>
+              <AnnouncementBanner
+                announcement={{
+                  enabled: true,
+                  text: annText,
+                  type: annType,
+                  size: annSize,
+                  border: annBorder,
+                  link: annLink.trim() || null,
+                  dismissible: annDismissible,
+                }}
+              />
+            </div>
+          )}
+        </CardContent>
+      </Card>
 
       {/* Logo Section */}
       <Card>

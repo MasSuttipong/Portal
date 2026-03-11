@@ -1,9 +1,9 @@
+import { Badge } from "@/components/ui/badge";
+
 export default function NewBadge() {
   return (
-    <img
-      src="/icons/icon-new.gif"
-      alt="NEW"
-      className="inline-block w-8 h-4 ml-1 align-middle"
-    />
+    <Badge className="ml-1 bg-portal-gold text-primary text-[10px] font-semibold px-1.5 py-0 animate-pulse align-middle">
+      NEW
+    </Badge>
   );
 }

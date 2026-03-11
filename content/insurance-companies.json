@@ -2,34 +2,15 @@
   "heading": "บริษัทประกันภัยและประกันชีวิต",
   "companies": [
     {
-      "id": "ins-1",
-      "displayName": "U.S.Mission / U.S. Embassy (บมจ.ทิพย Non-Life Insurance)",
-      "code": "USDHIP",
-      "iclaimId": "140",
-      "isClickable": true,
-      "isNew": true,
-      "claimType": "OPD_IPD",
-      "remark": null
-    },
-    {
-      "id": "ins-2",
-      "displayName": "บริษัท กรุงเทพ Non-Life Insurance จำกัด (มหาชน)",
-      "code": "BKI",
-      "iclaimId": "23",
-      "isClickable": true,
-      "isNew": false,
-      "claimType": "OPD_IPD",
-      "remark": null
-    },
-    {
       "id": "ins-3",
       "displayName": "บริษัท กรุงเทพประกันสุขภาพ จำกัด (มหาชน)",
       "code": null,
       "iclaimId": null,
-      "isClickable": false,
+      "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "ins-4",
@@ -39,17 +20,19 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-4.png"
     },
     {
-      "id": "ins-5",
-      "displayName": "บริษัท เคดับบลิวไอ ประกันภัย จำกัด (มหาชน)",
-      "code": null,
-      "iclaimId": null,
-      "isClickable": false,
-      "isNew": false,
+      "id": "ins-2",
+      "displayName": "บริษัท กรุงเทพ Non-Life Insurance จำกัด (มหาชน)",
+      "code": "BKI",
+      "iclaimId": "23",
+      "isClickable": true,
+      "isNew": true,
       "claimType": "OPD_IPD",
-      "remark": "ระงับการใช้เครดิต กรุณาสำรองจ่ายทุกกรณี ตั้งแต่ 29.05.2025 เป็นต้นไป"
+      "remark": null,
+      "logoUrl": "/logos/ins-2.png"
     },
     {
       "id": "ins-6",
@@ -59,7 +42,30 @@
       "isClickable": false,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": "ระงับการใช้เครดิต กรุณาสำรองจ่ายทุกกรณี ตั้งแต่ 29.05.2025 เป็นต้นไป"
+      "remark": "ระงับการใช้เครดิต กรุณาสำรองจ่ายทุกกรณี ตั้งแต่ 29.05.2025 เป็นต้นไป",
+      "logoUrl": "/logos/ins-6.png"
+    },
+    {
+      "id": "ins-5",
+      "displayName": "บริษัท เคดับบลิวไอ ประกันภัย จำกัด (มหาชน)",
+      "code": null,
+      "iclaimId": null,
+      "isClickable": false,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": "ระงับการใช้เครดิต กรุณาสำรองจ่ายทุกกรณี ตั้งแต่ 29.05.2025 เป็นต้นไป",
+      "logoUrl": "/logos/ins-5.png"
+    },
+    {
+      "id": "ins-1",
+      "displayName": "U.S.Mission / U.S. Embassy (บมจ.ทิพย Non-Life Insurance)",
+      "code": "USDHIP",
+      "iclaimId": "140",
+      "isClickable": true,
+      "isNew": true,
+      "claimType": "OPD_IPD",
+      "remark": null,
+      "logoUrl": "/logos/ins-1.png"
     },
     {
       "id": "ins-7",
@@ -69,7 +75,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-7.png"
     },
     {
       "id": "ins-8",
@@ -79,7 +86,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-8.png"
     },
     {
       "id": "ins-9",
@@ -89,7 +97,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-9.png"
     },
     {
       "id": "ins-10",
@@ -99,7 +108,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-10.png"
     },
     {
       "id": "ins-11",
@@ -109,7 +119,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-11.png"
     },
     {
       "id": "ins-12",
@@ -119,7 +130,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "ins-13",
@@ -129,7 +141,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-13.png"
     },
     {
       "id": "ins-14",
@@ -139,7 +152,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-14.png"
     },
     {
       "id": "ins-15",
@@ -149,7 +163,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-15.png"
     },
     {
       "id": "ins-16",
@@ -159,7 +174,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-16.png"
     },
     {
       "id": "ins-17",
@@ -169,7 +185,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-17.png"
     },
     {
       "id": "ins-18",
@@ -179,7 +196,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "ins-19",
@@ -189,7 +207,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "ins-20",
@@ -199,7 +218,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "ins-21",
@@ -209,7 +229,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-21.png"
     },
     {
       "id": "ins-22",
@@ -219,7 +240,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "ins-23",
@@ -229,7 +251,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "ins-24",
@@ -239,7 +262,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "ins-25",
@@ -249,7 +273,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-25.png"
     },
     {
       "id": "ins-26",
@@ -259,7 +284,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "ins-27",
@@ -269,7 +295,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-27.png"
     },
     {
       "id": "ins-28",
@@ -279,7 +306,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-28.png"
     },
     {
       "id": "ins-29",
@@ -289,7 +317,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-29.png"
     },
     {
       "id": "ins-30",
@@ -299,7 +328,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-30.png"
     },
     {
       "id": "ins-31",
@@ -309,7 +339,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-31.png"
     },
     {
       "id": "ins-32",
@@ -319,7 +350,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "ins-33",
@@ -329,7 +361,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/ins-33.png"
     },
     {
       "id": "ins-34",
@@ -339,7 +372,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "ins-35",
@@ -349,7 +383,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     }
   ]
 }

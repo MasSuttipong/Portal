@@ -7,9 +7,14 @@
       "code": "BHOT",
       "iclaimId": "118",
       "isClickable": true,
-      "isNew": false,
-      "claimType": "OPD_IPD",
-      "remark": null
+      "isNew": true,
+      "claimType": "IPD_ONLY",
+      "remark": null,
+      "logoUrl": "/images/1773205706075-images.png",
+      "alertText": "OPD สำรองจ่าย",
+      "alertType": "error",
+      "alertSize": "xl",
+      "alertBorder": "pulse"
     },
     {
       "id": "si-2",
@@ -19,7 +24,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_ONLY",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-2.png"
     },
     {
       "id": "si-3",
@@ -29,7 +35,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-3.png"
     },
     {
       "id": "si-4",
@@ -39,7 +46,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-4.png"
     },
     {
       "id": "si-5",
@@ -49,7 +57,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-5.png"
     },
     {
       "id": "si-6",
@@ -59,7 +68,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-6.png"
     },
     {
       "id": "si-7",
@@ -69,7 +79,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-7.png"
     },
     {
       "id": "si-8",
@@ -79,7 +90,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "si-9",
@@ -89,7 +101,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-9.png"
     },
     {
       "id": "si-10",
@@ -99,7 +112,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-10.png"
     },
     {
       "id": "si-11",
@@ -109,7 +123,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-11.png"
     },
     {
       "id": "si-12",
@@ -119,7 +134,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-12.png"
     },
     {
       "id": "si-13",
@@ -129,7 +145,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-13.png"
     },
     {
       "id": "si-14",
@@ -139,7 +156,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-14.png"
     },
     {
       "id": "si-15",
@@ -149,7 +167,8 @@
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_IPD",
-      "remark": null
+      "remark": null,
+      "logoUrl": "/logos/si-15.png"
     }
   ],
   "groups": [
@@ -166,7 +185,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb1.png"
         },
         {
           "id": "si-grp-cb2",
@@ -176,7 +196,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb2.png"
         },
         {
           "id": "si-grp-cb3",
@@ -186,7 +207,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb3.png"
         },
         {
           "id": "si-grp-cb4",
@@ -196,7 +218,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb4.png"
         },
         {
           "id": "si-grp-cb5",
@@ -206,7 +229,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb5.png"
         },
         {
           "id": "si-grp-cb6",
@@ -216,7 +240,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb6.png"
         },
         {
           "id": "si-grp-cb7",
@@ -226,7 +251,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb7.png"
         },
         {
           "id": "si-grp-cb8",
@@ -236,7 +262,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb8.png"
         },
         {
           "id": "si-grp-cb9",
@@ -246,7 +273,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb9.png"
         },
         {
           "id": "si-grp-cb10",
@@ -256,7 +284,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb10.png"
         },
         {
           "id": "si-grp-cb11",
@@ -266,7 +295,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb11.png"
         },
         {
           "id": "si-grp-cb12",
@@ -276,7 +306,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb12.png"
         },
         {
           "id": "si-grp-cb13",
@@ -286,7 +317,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb13.png"
         },
         {
           "id": "si-grp-cb14",
@@ -296,9 +328,14 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-cb14.png"
         }
-      ]
+      ],
+      "alertText": "Sirirat ไม่จ่าย",
+      "alertType": "warning",
+      "alertSize": "lg",
+      "alertGlow": true
     },
     {
       "id": "grp-blueventure",
@@ -313,7 +350,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-bv1.png"
         },
         {
           "id": "si-grp-bv2",
@@ -323,7 +361,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-bv2.png"
         },
         {
           "id": "si-grp-bv3",
@@ -333,7 +372,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-bv3.png"
         },
         {
           "id": "si-grp-bv4",
@@ -343,7 +383,8 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-bv4.png"
         },
         {
           "id": "si-grp-bv5",
@@ -353,9 +394,11 @@
           "isClickable": true,
           "isNew": false,
           "claimType": "OPD_IPD",
-          "remark": null
+          "remark": null,
+          "logoUrl": "/logos/si-grp-bv5.png"
         }
       ]
     }
-  ]
+  ],
+  "alertText": null
 }
