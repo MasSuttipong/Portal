@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import PreviewButton from "@/components/admin/PreviewButton";
 import { Button } from "@/components/ui/button";
+import { withBasePathApi } from "@/lib/base-path";
 import { LogOut, Menu, X } from "lucide-react";
 
 export default function AdminLayout({
@@ -17,7 +18,7 @@ export default function AdminLayout({
 
   async function handleLogout() {
     try {
-      await fetch("/api/auth/logout", { method: "POST" });
+      await fetch(withBasePathApi("/api/auth/logout"), { method: "POST" });
     } catch {
       // ignore errors
     }

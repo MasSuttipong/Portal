@@ -36,6 +36,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Plus, Save, Upload, X } from "lucide-react";
 import DragDropList from "@/components/admin/DragDropList";
+import { withBasePath, withBasePathApi } from "@/lib/base-path";
 
 interface CompanySectionPageProps {
   filename: string;
@@ -215,7 +216,7 @@ export default function CompanySectionPage({
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      const res = await fetch(withBasePathApi("/api/admin/upload"), { method: "POST", body: formData });
       if (!res.ok) throw new Error("Upload failed");
       const { url } = await res.json();
       handleFormChange("logoUrl", url);
@@ -366,7 +367,7 @@ export default function CompanySectionPage({
                   <TableRow>
                     <TableCell className="w-12">
                       {company.logoUrl ? (
-                        <img src={company.logoUrl} alt="" className="w-8 h-8 object-contain rounded" />
+                        <img src={withBasePath(company.logoUrl)} alt="" className="w-8 h-8 object-contain rounded" />
                       ) : (
                         <div className="w-8 h-8 bg-gray-100 rounded flex items-center justify-center text-gray-400 text-xs">—</div>
                       )}
@@ -507,7 +508,7 @@ export default function CompanySectionPage({
               <Label>โลโก้บริษัท</Label>
               {form.logoUrl ? (
                 <div className="flex items-center gap-3">
-                  <img src={form.logoUrl} alt="logo" className="w-12 h-12 object-contain rounded border" />
+                  <img src={withBasePath(form.logoUrl)} alt="logo" className="w-12 h-12 object-contain rounded border" />
                   <Button
                     type="button"
                     variant="ghost"

@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
+import { withBasePath } from "@/lib/base-path";
 
 export default function AdminPage() {
-  redirect("/admin/news");
+  redirect(withBasePath("/admin/news"));
 }

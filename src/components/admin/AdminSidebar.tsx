@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { stripBasePath } from "@/lib/base-path";
 import { cn } from "@/lib/utils";
 
 interface NavItem {
@@ -24,7 +25,7 @@ interface AdminSidebarProps {
 }
 
 export default function AdminSidebar({ onNavigate }: AdminSidebarProps) {
-  const pathname = usePathname();
+  const pathname = stripBasePath(usePathname());
 
   return (
     <aside className="w-56 shrink-0 bg-white border-r border-gray-200 flex flex-col h-full min-h-screen md:min-h-0">

@@ -11,6 +11,7 @@ import type {
 import ManualSection from "./ManualSection";
 import NewsSection from "./NewsSection";
 import ClassicCompanyList from "./ClassicCompanyList";
+import { withBasePath } from "@/lib/base-path";
 
 interface ClassicViewProps {
   manual: ManualData;
@@ -37,7 +38,7 @@ export default function ClassicView({
     <div className="max-w-[1190px] mx-auto px-4">
       {/* Banner — full-width header image */}
       <img
-        src="/banner/TPA-Care-Portal-Final_Full.png"
+        src={withBasePath("/banner/TPA-Care-Portal-Final_Full.png")}
         alt={tpaCareCheck.heading}
         className="w-full h-auto rounded-lg shadow-sm mb-4"
       />

@@ -12,6 +12,7 @@ import { Save, Upload, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
 import Image from "next/image";
 import AnnouncementBanner from "@/components/portal/AnnouncementBanner";
+import { withBasePath, withBasePathApi } from "@/lib/base-path";
 
 export default function SettingsPage() {
   const { data, loading, error, save } = useAdminContent<PortalSettings>("settings");
@@ -65,7 +66,7 @@ export default function SettingsPage() {
       const formData = new FormData();
       formData.append("file", file);
 
-      const res = await fetch("/api/admin/upload", {
+      const res = await fetch(withBasePathApi("/api/admin/upload"), {
         method: "POST",
         body: formData,
       });
@@ -271,7 +272,7 @@ export default function SettingsPage() {
             <div className="size-24 border rounded-lg bg-gray-50 flex items-center justify-center overflow-hidden shrink-0">
               {logoUrl ? (
                 <Image
-                  src={logoUrl}
+                  src={withBasePath(logoUrl)}
                   alt={logoAlt || "Logo"}
                   width={96}
                   height={96}

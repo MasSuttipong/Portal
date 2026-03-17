@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { COOKIE_NAME, verifyToken } from "@/lib/auth";
+import { stripBasePath, withBasePath } from "@/lib/base-path";
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const pathname = stripBasePath(request.nextUrl.pathname);
 
   const token = request.cookies.get(COOKIE_NAME)?.value;
   const isValid = token ? await verifyToken(token) : false;
@@ -18,12 +19,12 @@ export async function middleware(request: NextRequest) {
 
     // Page routes redirect to login (skip if already on login page)
     if (pathname.startsWith("/admin/") && pathname !== "/admin/login") {
-      const loginUrl = new URL("/admin/login", request.url);
+      const loginUrl = new URL(withBasePath("/admin/login"), request.url);
       return NextResponse.redirect(loginUrl);
     }
 
     if (pathname === "/admin") {
-      const loginUrl = new URL("/admin/login", request.url);
+      const loginUrl = new URL(withBasePath("/admin/login"), request.url);
       return NextResponse.redirect(loginUrl);
     }
   }
@@ -32,5 +33,10 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/api/admin/:path*"],
+  matcher: [
+    "/admin/:path*",
+    "/api/admin/:path*",
+    "/:basePath/admin/:path*",
+    "/:basePath/api/admin/:path*",
+  ],
 };

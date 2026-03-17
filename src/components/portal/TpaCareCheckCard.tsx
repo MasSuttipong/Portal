@@ -1,6 +1,7 @@
 "use client";
 
 import type { TpaCareCheck, PortalSettings } from "@/types/portal";
+import { withBasePath } from "@/lib/base-path";
 import { buildIClaimUrl } from "@/lib/iclaim";
 
 interface TpaCareCheckCardProps {
@@ -54,7 +55,7 @@ export default function TpaCareCheckCard({
     >
       {data.imageUrl && (
         <img
-          src={data.imageUrl}
+          src={withBasePath(data.imageUrl)}
           alt=""
           className="mx-auto mb-4 h-16 w-auto object-contain"
         />

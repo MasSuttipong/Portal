@@ -2,6 +2,7 @@
 
 import type { Company, CompanyGroup as CompanyGroupType } from "@/types/portal";
 import type { ViewMode } from "./CompanyItem";
+import { withBasePath } from "@/lib/base-path";
 import CompanyItem from "./CompanyItem";
 import AlertBadge from "./AlertBadge";
 
@@ -21,7 +22,7 @@ export default function CompanyGroup({
       <div className="py-2">
         <div className="flex items-center gap-2 font-bold text-primary mb-1 font-heading">
           {group.headerIconUrl && (
-            <img src={group.headerIconUrl} alt="" className="w-5 h-5 object-contain" />
+            <img src={withBasePath(group.headerIconUrl)} alt="" className="w-5 h-5 object-contain" />
           )}
           <span>{group.headerName}</span>
           {group.alertText && <AlertBadge text={group.alertText} type={group.alertType} size={group.alertSize} glow={group.alertGlow} border={group.alertBorder} />}
@@ -45,7 +46,7 @@ export default function CompanyGroup({
       {/* Group header — spans full grid width */}
       <div className="col-span-full flex items-center gap-2 px-3 py-2 rounded-lg bg-secondary/70 font-bold text-primary font-heading">
         {group.headerIconUrl && (
-          <img src={group.headerIconUrl} alt="" className="w-5 h-5 object-contain" />
+          <img src={withBasePath(group.headerIconUrl)} alt="" className="w-5 h-5 object-contain" />
         )}
         <span>{group.headerName}</span>
         {group.alertText && <AlertBadge text={group.alertText} type={group.alertType} size={group.alertSize} glow={group.alertGlow} border={group.alertBorder} />}

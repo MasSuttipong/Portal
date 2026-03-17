@@ -3,6 +3,7 @@
 import type { Company } from "@/types/portal";
 import { Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { withBasePath } from "@/lib/base-path";
 import NewBadge from "./NewBadge";
 import AlertBadge from "./AlertBadge";
 import RemarkText from "./RemarkText";
@@ -45,7 +46,7 @@ export default function CompanyItem({
 
   // --- CARD MODE ---
   const logo = logoUrl ? (
-    <img src={logoUrl} alt="" className="w-12 h-12 object-contain rounded shrink-0" />
+    <img src={withBasePath(logoUrl)} alt="" className="w-12 h-12 object-contain rounded shrink-0" />
   ) : (
     <div className="w-12 h-12 rounded bg-secondary flex items-center justify-center shrink-0">
       <Building2 className="size-5 text-muted-foreground" />
@@ -87,7 +88,7 @@ export default function CompanyItem({
   if (redirectUrl) {
     return (
       <a
-        href={redirectUrl}
+        href={withBasePath(redirectUrl)}
         target="_blank"
         rel="noopener noreferrer"
         className={`${cardBase} company-card-clickable cursor-pointer border-l-3 border-l-portal-gold/60 hover:border-l-portal-gold hover:shadow-md`}
@@ -134,7 +135,7 @@ function ListItem({
   const { displayName, isClickable, isNew, remark, redirectUrl, claimType, code, iclaimId, logoUrl } = company;
 
   const logo = logoUrl ? (
-    <img src={logoUrl} alt="" className="w-6 h-6 object-contain rounded shrink-0" />
+    <img src={withBasePath(logoUrl)} alt="" className="w-6 h-6 object-contain rounded shrink-0" />
   ) : (
     <div className="w-6 h-6 rounded bg-secondary flex items-center justify-center shrink-0">
       <Building2 className="size-3.5 text-muted-foreground" />
@@ -176,7 +177,7 @@ function ListItem({
       <div className={`${rowBase} hover:bg-secondary/50`}>
         {logo}
         <a
-          href={redirectUrl}
+          href={withBasePath(redirectUrl)}
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm text-portal-link hover:text-portal-link-hover font-medium transition-colors truncate"

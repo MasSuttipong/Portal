@@ -44,6 +44,10 @@ env:
   value: "newcore2026portal"
 - name: JWT_SECRET
   value: "change-me-before-productionasfdas123"
+- name: COOKIE_SECURE
+  value: "false"
+- name: NEXT_PUBLIC_BASE_PATH
+  value: "/portal"
 
 imagePullSecrets:
 - name: bvtpa-registry-secret

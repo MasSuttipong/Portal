@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { TriangleAlert, AlertCircle, Info, CircleCheck, PartyPopper, Siren, X } from "lucide-react";
+import { withBasePath } from "@/lib/base-path";
 import type { AnnouncementConfig, AlertType, AlertSize, AlertBorder } from "@/types/portal";
 
 interface AnnouncementBannerProps {
@@ -63,7 +64,7 @@ export default function AnnouncementBanner({ announcement }: AnnouncementBannerP
     >
       {link ? (
         <a
-          href={link}
+          href={withBasePath(link)}
           target="_blank"
           rel="noopener noreferrer"
           className={`flex items-center ${s.gap} flex-1 underline underline-offset-2 hover:opacity-80 transition-opacity`}

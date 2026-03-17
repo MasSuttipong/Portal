@@ -1,11 +1,12 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
+import { withBasePath } from "@/lib/base-path";
 import { ExternalLink } from "lucide-react";
 
 export default function PreviewButton() {
   function handleClick() {
-    window.open("/", "_blank", "noopener,noreferrer");
+    window.open(withBasePath("/"), "_blank", "noopener,noreferrer");
   }
 
   return (

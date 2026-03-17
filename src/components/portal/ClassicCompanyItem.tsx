@@ -1,6 +1,7 @@
 "use client";
 
 import type { Company } from "@/types/portal";
+import { withBasePath } from "@/lib/base-path";
 import NewBadge from "./NewBadge";
 import AlertBadge from "./AlertBadge";
 import RemarkText from "./RemarkText";
@@ -37,7 +38,7 @@ export default function ClassicCompanyItem({ company, onCompanyClick }: ClassicC
     return (
       <li className="py-0.5 leading-relaxed">
         <a
-          href={redirectUrl}
+          href={withBasePath(redirectUrl)}
           target="_blank"
           rel="noopener noreferrer"
           className="text-sm text-blue-700 hover:text-blue-900 hover:underline"

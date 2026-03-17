@@ -21,6 +21,7 @@ import CompanyItem from "./CompanyItem";
 import ViewModeToggle from "./ViewModeToggle";
 import ClassicView from "./ClassicView";
 import AnnouncementBanner from "./AnnouncementBanner";
+import { withBasePath } from "@/lib/base-path";
 
 interface PortalPageProps {
   settings: PortalSettings;
@@ -157,7 +158,7 @@ export default function PortalPage({
           {/* Banner — full width */}
           <div className="animate-fade-in-up stagger-1">
             <img
-              src="/banner/TPA-Care-Portal-Final_Full.png"
+              src={withBasePath("/banner/TPA-Care-Portal-Final_Full.png")}
               alt={tpaCareCheck.heading}
               className="w-full h-auto rounded-lg shadow-sm"
             />

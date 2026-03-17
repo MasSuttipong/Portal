@@ -36,6 +36,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Pencil, Trash2, Plus, Save, ChevronDown, ChevronRight, Users, Upload, X } from "lucide-react";
 import DragDropList from "@/components/admin/DragDropList";
+import { withBasePath, withBasePathApi } from "@/lib/base-path";
 
 interface CompanyFormData {
   displayName: string;
@@ -362,7 +363,7 @@ export default function SelfInsuredPage() {
     try {
       const formData = new FormData();
       formData.append("file", file);
-      const res = await fetch("/api/admin/upload", { method: "POST", body: formData });
+      const res = await fetch(withBasePathApi("/api/admin/upload"), { method: "POST", body: formData });
       if (!res.ok) throw new Error("Upload failed");
       const { url } = await res.json();
       setCompanyForm((prev) => ({ ...prev, logoUrl: url }));
@@ -1008,7 +1009,7 @@ export default function SelfInsuredPage() {
               <Label>โลโก้บริษัท</Label>
               {companyForm.logoUrl ? (
                 <div className="flex items-center gap-3">
-                  <img src={companyForm.logoUrl} alt="logo" className="w-12 h-12 object-contain rounded border" />
+                  <img src={withBasePath(companyForm.logoUrl)} alt="logo" className="w-12 h-12 object-contain rounded border" />
                   <Button
                     type="button"
                     variant="ghost"

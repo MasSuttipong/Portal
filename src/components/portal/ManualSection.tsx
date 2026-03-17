@@ -1,5 +1,6 @@
 import { FileText } from "lucide-react";
 import type { ManualData } from "@/types/portal";
+import { withBasePath } from "@/lib/base-path";
 
 interface ManualSectionProps {
   data: ManualData;
@@ -23,7 +24,7 @@ export default function ManualSection({ data }: ManualSectionProps) {
             <li key={item.id} className="flex items-start gap-2">
               <FileText className="w-4 h-4 text-portal-gold mt-0.5 shrink-0" />
               <a
-                href={item.url}
+                href={withBasePath(item.url)}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="text-portal-link hover:text-portal-link-hover font-medium transition-colors duration-150 leading-relaxed"

@@ -70,7 +70,11 @@ cp .env.example .env.local
 | Variable         | Description                                    | Example                            |
 | ---------------- | ---------------------------------------------- | ---------------------------------- |
 | `ADMIN_PASSWORD` | Password used to log into the admin panel      | `my-secure-password`               |
-| `JWT_SECRET`     | Secret key for signing JWT session tokens       | `a-long-random-string-min-32-chars`|
+| `JWT_SECRET`     | Secret key for signing JWT session tokens      | `a-long-random-string-min-32-chars`|
+| `COOKIE_SECURE`  | Set to `true` only when the site is served over HTTPS | `false`                     |
+| `NEXT_PUBLIC_BASE_PATH` | Leave empty for root deployment, set to a subpath like `/portal` when the app is mounted under that prefix | `/portal` |
+
+`ADMIN_PASSWORD` and `JWT_SECRET` are required at runtime. The app now fails fast during server startup if either one is missing or blank.
 
 ### 4. Start the development server
 
@@ -78,7 +82,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the public portal and [http://localhost:3000/admin](http://localhost:3000/admin) to access the admin panel.
+Open [http://localhost:3000](http://localhost:3000) to view the public portal and [http://localhost:3000/admin](http://localhost:3000/admin) to access the admin panel. To simulate the Kong deployment under `/portal`, start the app with `NEXT_PUBLIC_BASE_PATH=/portal`.
 
 ## Available Scripts
 
@@ -153,13 +157,17 @@ The portal will be available at [http://localhost:3000](http://localhost:3000).
 
 ### Environment variables
 
-Set `ADMIN_PASSWORD` and `JWT_SECRET` in `docker-compose.yml` or pass them at runtime:
+Set `ADMIN_PASSWORD`, `JWT_SECRET`, and optionally `COOKIE_SECURE` / `NEXT_PUBLIC_BASE_PATH` in `docker-compose.yml` or pass them at runtime:
 
 ```bash
 docker compose up -d \
   -e ADMIN_PASSWORD=my-secure-password \
-  -e JWT_SECRET=my-random-secret
+  -e JWT_SECRET=my-random-secret \
+  -e COOKIE_SECURE=false \
+  -e NEXT_PUBLIC_BASE_PATH=/portal
 ```
+
+Leave `COOKIE_SECURE` unset or set it to `false` when you access the app over plain HTTP, such as the current NodePort deployment. Set it to `true` only after the app is fronted by HTTPS.
 
 ### Persistent content
 
@@ -211,6 +219,8 @@ The admin panel uses a simple shared-password authentication model -- there are 
 4. The Next.js middleware (`src/middleware.ts`) checks the cookie on every request to `/admin/*` and `/api/admin/*`.
 5. Invalid or missing tokens redirect page requests to the login page and return `401` for API requests.
 6. Logging out clears the cookie via `POST /api/auth/logout`.
+
+`COOKIE_SECURE` controls whether the browser sends the admin session cookie only over HTTPS. Keep it `false` for the current HTTP NodePort URL and switch it to `true` only when the deployment is served behind TLS.
 
 ## Key Data Models
 

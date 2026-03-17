@@ -1,5 +1,6 @@
 import { Newspaper } from "lucide-react";
 import type { NewsData } from "@/types/portal";
+import { withBasePath } from "@/lib/base-path";
 import NewBadge from "./NewBadge";
 
 interface NewsSectionProps {
@@ -22,7 +23,7 @@ export default function NewsSection({ data }: NewsSectionProps) {
               <Newspaper className="w-4 h-4 text-portal-gold mt-0.5 shrink-0" />
               <span className="leading-relaxed">
                 <a
-                  href={item.url}
+                  href={withBasePath(item.url)}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-portal-link hover:text-portal-link-hover font-medium transition-colors duration-150"

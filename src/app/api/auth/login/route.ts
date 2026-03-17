@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { signToken, COOKIE_NAME, cookieOptions } from "@/lib/auth";
+import { signToken, COOKIE_NAME, getCookieOptions } from "@/lib/auth";
+import { getRuntimeEnv } from "@/lib/runtime-env";
 
 export async function POST(request: NextRequest) {
   let body: { password?: string };
@@ -12,7 +13,7 @@ export async function POST(request: NextRequest) {
 
   const { password } = body;
 
-  if (!password || password !== process.env.ADMIN_PASSWORD) {
+  if (!password || password !== getRuntimeEnv().adminPassword) {
     return NextResponse.json(
       { error: "รหัสผ่านไม่ถูกต้อง" },
       { status: 401 }
@@ -22,7 +23,7 @@ export async function POST(request: NextRequest) {
   const token = await signToken();
 
   const response = NextResponse.json({ success: true });
-  response.cookies.set(COOKIE_NAME, token, cookieOptions);
+  response.cookies.set(COOKIE_NAME, token, getCookieOptions());
 
   return response;
 }

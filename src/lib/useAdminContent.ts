@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { withBasePathApi } from "@/lib/base-path";
 
 interface UseAdminContentResult<T> {
   data: T | null;
@@ -26,7 +27,7 @@ export function useAdminContent<T>(filename: string): UseAdminContentResult<T> {
       setLoading(true);
       setError(null);
       try {
-        const res = await fetch(`/api/admin/content/${filename}`);
+        const res = await fetch(withBasePathApi(`/api/admin/content/${filename}`));
         if (res.status === 401) {
           router.push("/admin/login");
           return;
@@ -60,7 +61,7 @@ export function useAdminContent<T>(filename: string): UseAdminContentResult<T> {
     async (newData: T): Promise<boolean> => {
       setSaving(true);
       try {
-        const res = await fetch(`/api/admin/content/${filename}`, {
+        const res = await fetch(withBasePathApi(`/api/admin/content/${filename}`), {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify(newData),
