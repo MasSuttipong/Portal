@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAdminContent } from "@/lib/useAdminContent";
-import type { CompanySection, CompanyGroup, Company } from "@/types/portal";
+import type { CompanySection, CompanyGroup, Company, AlertBorder } from "@/types/portal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -50,7 +50,7 @@ interface CompanyFormData {
   alertText: string;
   alertType: "warning" | "error" | "info" | "success" | "promo" | "urgent";
   alertSize: "xs" | "sm" | "md" | "lg" | "xl";
-  alertBorder: "none" | "glow" | "pulse" | "shimmer";
+  alertBorder: AlertBorder;
 }
 
 interface GroupFormData {
@@ -59,7 +59,7 @@ interface GroupFormData {
   alertText: string;
   alertType: "warning" | "error" | "info" | "success" | "promo" | "urgent";
   alertSize: "xs" | "sm" | "md" | "lg" | "xl";
-  alertBorder: "none" | "glow" | "pulse" | "shimmer";
+  alertBorder: AlertBorder;
 }
 
 const emptyCompanyForm: CompanyFormData = {
@@ -101,7 +101,7 @@ export default function SelfInsuredPage() {
   const [sectionAlertText, setSectionAlertText] = useState("");
   const [sectionAlertType, setSectionAlertType] = useState<"warning" | "error" | "info" | "success" | "promo" | "urgent">("warning");
   const [sectionAlertSize, setSectionAlertSize] = useState<"xs" | "sm" | "md" | "lg" | "xl">("sm");
-  const [sectionAlertBorder, setSectionAlertBorder] = useState<"none" | "glow" | "pulse" | "shimmer">("none");
+  const [sectionAlertBorder, setSectionAlertBorder] = useState<AlertBorder>("none");
   const [headingInitialized, setHeadingInitialized] = useState(false);
 
   // Company dialog state
@@ -471,7 +471,7 @@ export default function SelfInsuredPage() {
               <select
                 id="si-alert-border"
                 value={sectionAlertBorder}
-                onChange={(e) => setSectionAlertBorder(e.target.value as "none" | "glow" | "pulse" | "shimmer")}
+                onChange={(e) => setSectionAlertBorder(e.target.value as AlertBorder)}
                 title="เอฟเฟกต์ขอบ"
                 className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               >
@@ -891,7 +891,7 @@ export default function SelfInsuredPage() {
                   id="grp-alert-border"
                   value={groupForm.alertBorder}
                   onChange={(e) =>
-                    setGroupForm((prev) => ({ ...prev, alertBorder: e.target.value as "none" | "glow" | "pulse" | "shimmer" }))
+                    setGroupForm((prev) => ({ ...prev, alertBorder: e.target.value as AlertBorder }))
                   }
                   title="เอฟเฟกต์ขอบ"
                   className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
@@ -1102,7 +1102,7 @@ export default function SelfInsuredPage() {
                   id="co-alert-border"
                   value={companyForm.alertBorder}
                   onChange={(e) =>
-                    setCompanyForm((prev) => ({ ...prev, alertBorder: e.target.value as "none" | "glow" | "pulse" | "shimmer" }))
+                    setCompanyForm((prev) => ({ ...prev, alertBorder: e.target.value as AlertBorder }))
                   }
                   title="เอฟเฟกต์ขอบ"
                   className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"

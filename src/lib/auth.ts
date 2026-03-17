@@ -24,7 +24,7 @@ export async function verifyToken(token: string): Promise<boolean> {
 
 export const cookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
+  secure: process.env.COOKIE_SECURE === "true",
   sameSite: "lax" as const,
   path: "/",
   maxAge: 8 * 60 * 60, // 8 hours

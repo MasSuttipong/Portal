@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useAdminContent } from "@/lib/useAdminContent";
-import type { CompanySection, Company } from "@/types/portal";
+import type { CompanySection, Company, AlertBorder } from "@/types/portal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -55,7 +55,7 @@ interface CompanyFormData {
   alertText: string;
   alertType: "warning" | "error" | "info" | "success" | "promo" | "urgent";
   alertSize: "xs" | "sm" | "md" | "lg" | "xl";
-  alertBorder: "none" | "glow" | "pulse" | "shimmer";
+  alertBorder: AlertBorder;
 }
 
 const emptyForm: CompanyFormData = {
@@ -89,7 +89,7 @@ export default function CompanySectionPage({
   const [sectionAlertText, setSectionAlertText] = useState("");
   const [sectionAlertType, setSectionAlertType] = useState<CompanyFormData["alertType"]>("warning");
   const [sectionAlertSize, setSectionAlertSize] = useState<"xs" | "sm" | "md" | "lg" | "xl">("sm");
-  const [sectionAlertBorder, setSectionAlertBorder] = useState<"none" | "glow" | "pulse" | "shimmer">("none");
+  const [sectionAlertBorder, setSectionAlertBorder] = useState<AlertBorder>("none");
   const [headingInitialized, setHeadingInitialized] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
