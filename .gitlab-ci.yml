@@ -1,0 +1,417 @@
+stages:
+- check-skip-build
+- build
+- prepare-deploy
+- argo-sync
+
+workflow:
+  rules:
+  - if: $CI_COMMIT_BRANCH == "uat" # Change uat branch name
+    variables:
+      CI_ENVIRONMENT_NAME: "uat"
+      VALUES_FILE_NAME: values-uat.yaml
+      KUBERNETES_SERVER_URL: https://kubernetes.default.svc
+      ARGOCD_NAMESPACE: argocd # Change to kubernetes namespace of ArgoCD
+      ARGOCD_SERVER: $ARGOCD_SERVER_UAT_URL # Change ArgoCD server url
+      ARGOCD_TOKEN: $ARGOCD_UAT_AUTH_TOKEN # store in gitlab cicd variables
+      ARGOCD_USERNAME: $ARGOCD_USER_UAT # store in gitlab cicd variables
+      ARGOCD_PASSWORD: $ARGOCD_PASSWORD_UAT # store in gitlab cicd variables
+
+  - if: $CI_COMMIT_BRANCH == "dev" # Change dev branch name
+    variables:
+      CI_ENVIRONMENT_NAME: "dev"
+      VALUES_FILE_NAME: values-dev.yaml
+      KUBERNETES_SERVER_URL: https://kubernetes.default.svc
+      ARGOCD_NAMESPACE: argocd # Change to kubernetes namespace of ArgoCD
+      ARGOCD_SERVER: $ARGOCD_SERVER_UAT_URL # Change ArgoCD server url
+      ARGOCD_TOKEN: $ARGOCD_UAT_AUTH_TOKEN # store in gitlab cicd variables
+      ARGOCD_USERNAME: $ARGOCD_USER_UAT # store in gitlab cicd variables
+      ARGOCD_PASSWORD: $ARGOCD_PASSWORD_UAT # store in gitlab cicd variables
+
+  - if: $CI_COMMIT_BRANCH == "production" # Change production branch name
+    variables:
+      CI_ENVIRONMENT_NAME: "production"
+      VALUES_FILE_NAME: values-prod.yaml
+      KUBERNETES_SERVER_URL: https://kubernetes.default.svc
+      ARGOCD_NAMESPACE: argocd
+      ARGOCD_SERVER: ""
+      ARGOCD_TOKEN: ""
+      ARGOCD_USERNAME: ""
+      ARGOCD_PASSWORD: ""
+
+variables:
+  PROJECT_GROUP_NAME: "newcore-project" # ** Using Lowercase Only ** Name of the project in argocd .
+  ARGOCD_ALLOWED_SOURCE_NAMESPACES: "newcore-dev,newcore-uat"
+  FORCE_BUILD: "false" # Set to true to force image build in any pipeline run
+  GIT_DEPLOY_USER: oauth2 # Change to username for git or use oauth2
+  GIT_DEPLOY_TOKEN: $GIT_BVTPA_DEPLOY_TOKEN # Change token generate from user for git
+  HELM_TEMPLATE_REPO: https://gitlab.blueventuretpa.com/infrastructure-as-code/kubernetes/helm-template.git
+  HELM_TEMPLATE_BRANCH: "v1" # Branch name for helm template repo
+  ARGOCD_REPO: https://gitlab.blueventuretpa.com/infrastructure-as-code/kubernetes/project/newcore.git
+  ARGOCD_BRANCH: "main" # Branch name for argocd repo
+  IMAGE_REGISTRY_URL: $HARBOR_REGISTRY_URL
+  IMAGE_REGISTRY_USER: $HARBOR_REGISTRY_USER
+  IMAGE_REGISTRY_PASS: $HARBOR_REGISTRY_PASS
+  IMAGE_NAME: $CI_PROJECT_NAME
+  IMAGE_FULL_NAME_WITHOUT_TAG: $IMAGE_REGISTRY_URL/$HARBOR_NAME_NEWCORE/$IMAGE_NAME:$CI_ENVIRONMENT_NAME
+
+check-skip-build:
+  image: bitnamisecure/git:latest
+  stage: check-skip-build
+  interruptible: true
+  before_script:
+  - git config --global http.sslVerify false
+  - git config --global url."https://${GIT_DEPLOY_USER}:${GIT_DEPLOY_TOKEN}@${CI_SERVER_HOST}/".insteadOf "https://${CI_SERVER_HOST}/"
+  script:
+  - |
+    export COMMIT_BEFORE_SHA="$(git rev-parse HEAD~1)"
+    export COMMIT_SHA="$(git rev-parse HEAD~0)"
+
+    extract_image_repository() {
+      file_path="$1"
+      awk '
+        BEGIN { in_image = 0 }
+        /^[[:space:]]*image:[[:space:]]*$/ { in_image = 1; next }
+        in_image == 1 {
+          if ($0 ~ /^[^[:space:]]/) { in_image = 0 }
+          if (in_image == 1 && $0 ~ /^[[:space:]]*repository:[[:space:]]*/) {
+            value = $0
+            sub(/^[[:space:]]*repository:[[:space:]]*/, "", value)
+            gsub(/^[[:space:]]+|[[:space:]]+$/, "", value)
+            gsub(/^["'"'"']|["'"'"']$/, "", value)
+            print value
+            exit
+          }
+        }
+      ' "$file_path"
+    }
+
+    # check file values yaml
+    if [ ! -f "$VALUES_FILE_NAME" ]; then echo "Not found file $VALUES_FILE_NAME"; exit 1; fi
+
+    # Get a list of changed files
+    if [[ "$CI_COMMIT_BEFORE_SHA" =~ 000000 ]]; then
+      # This is likely the first push to a new branch, consider all files as changed.
+      changed_files=$(git ls-files)
+    else
+      changed_files=$(git diff --name-only $COMMIT_BEFORE_SHA $COMMIT_SHA)
+    fi
+
+    echo "Changed files: $changed_files"
+
+    # Initialize flag for non-skip files
+    other_files_changed=false
+    cicd_files_changed=false
+
+    # Check each changed file
+    for file in $changed_files; do
+      if [[ ! "$file" =~ ^($VALUES_FILE_NAME|.gitlab-ci.*)$ ]]; then
+        other_files_changed=true
+        break
+      elif [[ "$file" =~ ^($VALUES_FILE_NAME|.gitlab-ci.*)$ ]]; then
+        cicd_files_changed=true
+      fi
+    done
+
+    if [ "${FORCE_BUILD:-false}" = "true" ]; then
+      export IS_BUILD="true"
+      export BUILD_REASON="force_build_override"
+      echo "FORCE_BUILD=true, forcing build process."
+
+    elif [ "$other_files_changed" = true ]; then
+      export IS_BUILD="true"
+      export BUILD_REASON="source_changed"
+      echo "Other relevant files have been changed, next to build."
+
+    elif [ "$cicd_files_changed" = true ]; then
+      echo "Only helm values and/or .gitlab-ci files changed. Checking seeded image in ArgoCD repo..."
+      ARGOCD_TMP_DIR="$(mktemp -d)"
+      export CURRENT_SEED_IMAGE=""
+
+      if git clone --depth 1 --branch "${ARGOCD_BRANCH}" https://${GIT_DEPLOY_USER}:${GIT_DEPLOY_TOKEN}@${ARGOCD_REPO#https://} "$ARGOCD_TMP_DIR"; then
+        ARGO_VALUES_FILE="$ARGOCD_TMP_DIR/$CI_PROJECT_NAME/$VALUES_FILE_NAME"
+        if [ -f "$ARGO_VALUES_FILE" ]; then
+          CURRENT_SEED_IMAGE="$(extract_image_repository "$ARGO_VALUES_FILE")"
+          CURRENT_SEED_IMAGE="$(echo "$CURRENT_SEED_IMAGE" | tr -d '[:space:]')"
+          if [ "$CURRENT_SEED_IMAGE" = "null" ]; then
+            CURRENT_SEED_IMAGE=""
+          fi
+          echo "Detected seeded image in ArgoCD repo: ${CURRENT_SEED_IMAGE:-<empty>}"
+        else
+          echo "Values file not found in ArgoCD repo: $ARGO_VALUES_FILE"
+        fi
+
+        if [ -n "$CURRENT_SEED_IMAGE" ]; then
+          export IS_BUILD="false"
+          export BUILD_REASON="values_only_with_existing_image"
+          echo "Existing image found, skipping build."
+        else
+          export IS_BUILD="true"
+          export BUILD_REASON="missing_seed_image"
+          echo "No existing image found for values-only change, forcing build."
+        fi
+      else
+        export IS_BUILD="true"
+        export BUILD_REASON="inspect_failed_force_build"
+        echo "Failed to inspect ArgoCD repo for existing image, forcing build."
+      fi
+      rm -rf "$ARGOCD_TMP_DIR"
+
+    else
+      echo "No relevant files have been changed, skipping CI/CD."
+      curl --header "PRIVATE-TOKEN: $GIT_DEPLOY_TOKEN" --request "DELETE" "$CI_API_V4_URL/projects/$CI_PROJECT_ID/pipelines/$CI_PIPELINE_ID"
+      exit 0
+    fi
+    echo "IS_BUILD=$IS_BUILD" >> "$CI_PROJECT_DIR/variables.env"
+    echo "BUILD_REASON=$BUILD_REASON" >> "$CI_PROJECT_DIR/variables.env"
+    echo "IS_BUILD: $IS_BUILD"
+    echo "BUILD_REASON: $BUILD_REASON"
+    cat "$CI_PROJECT_DIR/variables.env"
+    echo "Files in current directory:"
+    ls -la
+
+  artifacts:
+    paths:
+    - variables.env
+    reports:
+      dotenv: variables.env
+
+build:
+  image: docker:cli
+  stage: build
+  services:
+  - name: docker:dind
+    alias: docker
+    command: [ "--network=host" ]
+  needs:
+  - job: check-skip-build
+    artifacts: true
+  before_script:
+  - |
+    echo "IS_BUILD: " $IS_BUILD
+    echo "BUILD_REASON: ${BUILD_REASON:-not_set}"
+    if [ "$IS_BUILD" != "true" ]; then
+        echo "Skipping build process. Reason: ${BUILD_REASON:-not_set}"
+        echo "CONTAINER_IMAGE_FULL_NAME_WITH_SHA=''" >> "$CI_PROJECT_DIR/variables.env"
+        exit 0
+    fi
+  script:
+  - echo "Building..."
+  - export CONTAINER_IMAGE_FULL_NAME_WITH_SHA=$IMAGE_FULL_NAME_WITHOUT_TAG"_"$CI_COMMIT_SHORT_SHA
+  - docker build -f ./Dockerfile --pull -t built-image .
+  - docker tag built-image "$CONTAINER_IMAGE_FULL_NAME_WITH_SHA"
+  - echo "$IMAGE_REGISTRY_PASS" | docker login -u "$IMAGE_REGISTRY_USER" --password-stdin "$IMAGE_REGISTRY_URL" # GitLab to login to image registry
+  - echo "Push Image"
+  - docker push "$CONTAINER_IMAGE_FULL_NAME_WITH_SHA"
+  - echo "CONTAINER_IMAGE_FULL_NAME_WITH_SHA=$CONTAINER_IMAGE_FULL_NAME_WITH_SHA" >> "$CI_PROJECT_DIR/variables.env"
+  - echo "$CONTAINER_IMAGE_FULL_NAME_WITH_SHA"
+  artifacts:
+    reports:
+      dotenv: variables.env
+
+prepare-deploy:
+  image: alpine:3.20.2
+  stage: prepare-deploy
+  before_script:
+  - apk update && apk add --no-cache git wget bash helm
+  - wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/bin/yq
+  - chmod +x /usr/bin/yq
+  - git config --global http.sslVerify false
+  - git config --global user.name "GitLab CI"
+  - git config --global user.email "gitlabcicd@gitlab.blueventuretpa.com"
+  - |
+    # Clone the repository if it exists, otherwise create it and push the initial branch
+    if git ls-remote --heads https://${GIT_DEPLOY_USER}:${GIT_DEPLOY_TOKEN}@${ARGOCD_REPO#https://} ${ARGOCD_BRANCH} | grep ${ARGOCD_BRANCH}; then
+      git clone --branch ${ARGOCD_BRANCH} https://${GIT_DEPLOY_USER}:${GIT_DEPLOY_TOKEN}@${ARGOCD_REPO#https://} argocd-repo
+    else
+      git clone https://${GIT_DEPLOY_USER}:${GIT_DEPLOY_TOKEN}@${ARGOCD_REPO#https://} argocd-repo
+      git checkout --orphan ${ARGOCD_BRANCH}
+    fi
+  script:
+  - |
+    cd argocd-repo
+    mkdir -p $CI_PROJECT_NAME
+    cd $CI_PROJECT_NAME
+    echo "Listing files:"
+    ls
+
+    if [ -f "$VALUES_FILE_NAME" ]; then
+      export CURRENT_APPVERSION=$(yq eval '.appVersion' $VALUES_FILE_NAME)
+      export CURRENT_IMAGE=$(yq eval '.image.repository' $VALUES_FILE_NAME)
+      # check null or empty values
+      if [ "$CURRENT_APPVERSION" = "null" ] || [ -z "$CURRENT_APPVERSION" ]; then
+          export CURRENT_APPVERSION=""
+      fi
+      if [ "$CURRENT_IMAGE" = "null" ] || [ -z "$CURRENT_IMAGE" ]; then
+          export CURRENT_IMAGE=""
+      fi
+      echo "Current appVersion: $CURRENT_APPVERSION"
+      echo "Current image repository: $CURRENT_IMAGE"
+    fi
+
+    if [ ! -d "templates" ] || [ ! -f "Chart.yaml" ]; then
+      git clone --branch ${HELM_TEMPLATE_BRANCH} https://${GIT_DEPLOY_USER}:${GIT_DEPLOY_TOKEN}@${HELM_TEMPLATE_REPO#https://} helm-template
+      cp -r helm-template/* .
+      rm -rf helm-template
+    fi
+  - |
+    cp $CI_PROJECT_DIR/$VALUES_FILE_NAME $VALUES_FILE_NAME
+    DEPLOY_NAMESPACE=$(yq e '.namespace' $VALUES_FILE_NAME)
+    if [ -z "$DEPLOY_NAMESPACE" ] || [ "$DEPLOY_NAMESPACE" = "null" ]; then
+      echo "namespace is empty in $VALUES_FILE_NAME"
+      exit 1
+    fi
+    echo "DEPLOY_NAMESPACE: $DEPLOY_NAMESPACE"
+    echo "APP_NAMESPACE=$DEPLOY_NAMESPACE" >> "$CI_PROJECT_DIR/variables.env"
+    CONTAINER_IMAGE_FULL_NAME_WITH_SHA=$(echo -e "$CONTAINER_IMAGE_FULL_NAME_WITH_SHA" | tr -d '[:space:]' | sed "s/^''$//")
+    echo "CONTAINER_IMAGE_FULL_NAME_WITH_SHA: " $CONTAINER_IMAGE_FULL_NAME_WITH_SHA
+    if [[ -n "$CONTAINER_IMAGE_FULL_NAME_WITH_SHA" ]]; then
+      sed -i 's|repository:.*|repository: '"$CONTAINER_IMAGE_FULL_NAME_WITH_SHA"'|' $VALUES_FILE_NAME
+      sed -i 's|appVersion:.*|appVersion: "'"$CI_COMMIT_SHORT_SHA"'"|' $VALUES_FILE_NAME
+      echo "Changed appVersion to $(grep 'appVersion:' $VALUES_FILE_NAME | awk '{print $2}')"
+    else
+      if [[ -z "$CURRENT_IMAGE" ]]; then
+        echo "No image available for deploy: build was skipped and existing image.repository in $VALUES_FILE_NAME is empty in ArgoCD repo."
+        echo "Build reason: ${BUILD_REASON:-not_set}"
+        echo "Trigger a build first (or set image.repository in ArgoCD repo values file) before running deploy-only pipeline."
+        exit 1
+      fi
+      sed -i 's|repository:.*|repository: '"$CURRENT_IMAGE"'|' $VALUES_FILE_NAME
+      sed -i 's|appVersion:.*|appVersion: "'"$CURRENT_APPVERSION"'"|' $VALUES_FILE_NAME
+      echo "Skipping change appVersion and image repository"
+    fi
+    RESOLVED_IMAGE=$(yq e '.image.repository // ""' $VALUES_FILE_NAME | tr -d '[:space:]')
+    if [[ -z "$RESOLVED_IMAGE" ]]; then
+      echo "Invalid values file: image.repository is empty after prepare step in $VALUES_FILE_NAME"
+      exit 1
+    fi
+    echo "Resolved image.repository: $RESOLVED_IMAGE"
+  - mkdir -p helm-results
+  - helm template . --values $VALUES_FILE_NAME > helm-results/result-$VALUES_FILE_NAME # Render and save the Helm template
+  - echo destination namespace is "$(grep 'namespace:' $VALUES_FILE_NAME | awk '{print $2}')"
+  - |
+    if [ ! -f "argocd-$CI_ENVIRONMENT_NAME.yaml" ]; then
+      cat <<EOF > argocd-$CI_ENVIRONMENT_NAME.yaml
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: $CI_PROJECT_NAME
+        namespace: $DEPLOY_NAMESPACE
+      spec:
+        project: '$PROJECT_GROUP_NAME'
+        destination:
+          name: ''
+          namespace: $DEPLOY_NAMESPACE
+          server: '$KUBERNETES_SERVER_URL'
+        source:
+          path: $CI_PROJECT_NAME
+          repoURL: '$ARGOCD_REPO'
+          targetRevision: ${ARGOCD_BRANCH}
+          helm:
+            valueFiles:
+              - $VALUES_FILE_NAME
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - CreateNamespace=true
+            - ServerSideApply=true
+            - PruneLast=true
+    EOF
+    else
+      DEPLOY_NAMESPACE=$(yq e '.namespace' $VALUES_FILE_NAME)
+      if [ -z "$DEPLOY_NAMESPACE" ] || [ "$DEPLOY_NAMESPACE" = "null" ]; then
+        echo "namespace is empty in $VALUES_FILE_NAME"
+        exit 1
+      fi
+      yq e '.spec.destination.namespace = "'"$DEPLOY_NAMESPACE"'"' -i argocd-$CI_ENVIRONMENT_NAME.yaml
+      yq e '.spec.destination.server = "'"$KUBERNETES_SERVER_URL"'"' -i argocd-$CI_ENVIRONMENT_NAME.yaml
+      yq e '.spec.project = "'"$PROJECT_GROUP_NAME"'"' -i argocd-$CI_ENVIRONMENT_NAME.yaml
+      yq e '.metadata.namespace = "'"$DEPLOY_NAMESPACE"'"' -i argocd-$CI_ENVIRONMENT_NAME.yaml
+      yq e '.spec.source.repoURL = "'"$ARGOCD_REPO"'"' -i argocd-$CI_ENVIRONMENT_NAME.yaml
+      echo "Updated exist file " argocd-$CI_ENVIRONMENT_NAME.yaml
+    fi
+  - |
+    echo "====== Content of file argocd-$CI_ENVIRONMENT_NAME.yaml ======"
+    cat argocd-$CI_ENVIRONMENT_NAME.yaml
+    echo "================================"
+    cd ..
+    git add .
+    if git diff --cached --exit-code; then
+      export ARGOCD_SYNC="false"
+      echo "No changes detected in ArgoCD repo. Skipping commit and push."
+    else
+      git commit -m "Gitlab CI Update $CI_PROJECT_NAME for $CI_ENVIRONMENT_NAME environment point to CommitID $CI_COMMIT_SHORT_SHA"
+      git push --set-upstream -o ci.skip https://$GIT_DEPLOY_USER:$GIT_DEPLOY_TOKEN@${ARGOCD_REPO#https://} HEAD:$ARGOCD_BRANCH
+      export ARGOCD_SYNC="true"
+      echo "Changes detected and pushed to ArgoCD repo."
+    fi
+    echo "ARGOCD_SYNC=$ARGOCD_SYNC" >> "$CI_PROJECT_DIR/variables.env"
+    echo "ARGOCD_SYNC: $ARGOCD_SYNC"
+  artifacts:
+    paths:
+    - variables.env
+    - argocd-repo/$CI_PROJECT_NAME/argocd-$CI_ENVIRONMENT_NAME.yaml
+    reports:
+      dotenv: variables.env
+
+argo-sync:
+  image: alpine:3.20.2
+  stage: argo-sync
+  needs:
+  - job: prepare-deploy
+    artifacts: true
+  retry:
+    max: 2
+    when:
+    - script_failure
+  script:
+  - |
+    echo "ARGOCD_SYNC: " $ARGOCD_SYNC
+    if [ "$ARGOCD_SYNC" != "true" ]; then
+        echo "skipping the argocd sync process"
+        exit 0
+    fi
+    if [ -z "$APP_NAMESPACE" ]; then
+      echo "APP_NAMESPACE is empty"
+      exit 1
+    fi
+    echo "APP_NAMESPACE: $APP_NAMESPACE"
+  - apk update && apk add --no-cache bash curl jq
+  - curl -sSL -o /usr/local/bin/argocd https://github.com/argoproj/argo-cd/releases/latest/download/argocd-linux-amd64
+  - chmod +x /usr/local/bin/argocd
+  - |
+    ls -la
+    echo "=========" argocd-$CI_ENVIRONMENT_NAME.yaml "=========="
+    cat argocd-repo/$CI_PROJECT_NAME/argocd-$CI_ENVIRONMENT_NAME.yaml
+    echo "================================================"
+    argocd repo add "$ARGOCD_REPO" --username "$GIT_DEPLOY_USER" --password "$GIT_DEPLOY_TOKEN" --insecure-skip-server-verification --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_TOKEN" --grpc-web --insecure --upsert --plaintext
+    echo "Argocd added repo successfuly."
+    echo "Allowed source namespaces: $ARGOCD_ALLOWED_SOURCE_NAMESPACES"
+    argocd proj create $PROJECT_GROUP_NAME \
+    --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_TOKEN" --grpc-web --insecure --upsert --plaintext \
+    --src "$ARGOCD_REPO" \
+    --dest "$KUBERNETES_SERVER_URL,newcore-dev" \
+    --dest "$KUBERNETES_SERVER_URL,newcore-uat" \
+    --source-namespaces "$ARGOCD_ALLOWED_SOURCE_NAMESPACES" \
+    --orphaned-resources-warn
+    echo "Argocd upsert project successfuly."
+    PROJECT_JSON="$(mktemp)"
+    argocd proj get "$PROJECT_GROUP_NAME" \
+    --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_TOKEN" --grpc-web --insecure --plaintext \
+    -o json > "$PROJECT_JSON"
+    echo "Verified project payload:"
+    cat "$PROJECT_JSON"
+    jq -e '
+      (.spec.sourceNamespaces // []) as $sourceNamespaces
+      | ($sourceNamespaces | index("newcore-dev")) != null
+        and ($sourceNamespaces | index("newcore-uat")) != null
+    ' "$PROJECT_JSON" >/dev/null || {
+      echo "Project validation failed: sourceNamespaces must include newcore-dev and newcore-uat"
+      exit 1
+    }
+  - argocd app create -f "argocd-repo/$CI_PROJECT_NAME/argocd-$CI_ENVIRONMENT_NAME.yaml" --app-namespace "$APP_NAMESPACE" --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_TOKEN" --grpc-web --insecure --upsert --plaintext
+  - echo "Argocd upsert application successfuly."
+  - argocd app sync "$CI_PROJECT_NAME" --app-namespace "$APP_NAMESPACE" --server "$ARGOCD_SERVER" --auth-token "$ARGOCD_TOKEN" --insecure --grpc-web --plaintext || true
+  - echo "ArgoCD apply completed"

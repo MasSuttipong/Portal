@@ -1,0 +1,117 @@
+# This is a YAML-formatted file.
+
+fullnameOverride: "portal"
+appVersion: "" # Please leave blank
+namespace: newcore-dev
+
+# =========== kind service ===========
+service:
+  enabled: true
+  type: NodePort
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80 # Port exposed within the cluster
+    targetPort: 3000 # Port on the pods
+    nodePort: 30099
+
+# =========== kind ingress ===========
+ingress:
+  enabled: false
+  className: "nginx"
+  annotations: {}
+#  hosts:
+#  - host: servicename.bvtpauat-k8s.th
+#    paths:
+#    - path: /
+#      pathType: Prefix
+#      servicePort: 80
+
+# =========== kind deployment ===========
+replicaCount: 2
+
+podAnnotations: {}
+podLabels: {}
+
+image:
+  repository: "" # Please leave blank
+  pullPolicy: Always
+
+env:
+- name: NODE_ENV
+  value: "production"
+- name: ADMIN_PASSWORD
+  value: "newcore2026portal"
+- name: JWT_SECRET
+  value: "change-me-before-productionasfdas123"
+
+imagePullSecrets:
+- name: bvtpa-registry-secret
+
+hostNetwork: false
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 2048Mi
+  requests:
+    cpu: 250m
+    memory: 512Mi
+
+livenessProbe:
+  enabled: false
+  port: 80
+  urlPath: "/health"
+
+readinessProbe:
+  enabled: false
+  port: 80
+  urlPath: "/app/status"
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 3
+  targetCPUUtilizationPercentage:
+  targetMemoryUtilizationPercentage: 90
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# - name: foo
+#   secret:
+#     secretName: mysecret
+#     optional: false
+
+# Additional volumeMounts on the container.
+volumeMounts: []
+# - name: foo
+#   mountPath: "/etc/foo"
+#   readOnly: true
+
+#if persistence is enable, please set pvcMountPath
+pvcMountPath: "/data"
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# =========== kind PersistentVolumeClaim ===========
+persistence:
+  enabled: false
+  ## A manually managed Persistent Volume and Claim
+  ## Requires persistence.enabled: true
+  ## If defined, PVC must be created manually before volume will be bound
+  existingClaim: ""
+  ## Persistent Volume Storage Class
+  ## If defined, storageClassName: <storageClass>
+  ## If set to "-", storageClassName: "", which disables dynamic provisioning
+  ## If undefined (the default) or set to null, no storageClassName spec is
+  ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
+  ##   GKE, AWS & OpenStack)
+  ##
+  storageClass: "longhorn"
+  accessMode: ReadWriteMany
+  size: 10Gi
+  annotations: {}
