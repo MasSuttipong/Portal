@@ -14,7 +14,7 @@
       "alertText": "OPD สำรองจ่าย",
       "alertType": "error",
       "alertSize": "xl",
-      "alertBorder": "pulse"
+      "alertBorder": "rainbow"
     },
     {
       "id": "si-2",
@@ -332,9 +332,7 @@
           "logoUrl": "/logos/si-grp-cb14.png"
         }
       ],
-      "alertText": "Sirirat ไม่จ่าย",
-      "alertType": "warning",
-      "alertSize": "lg",
+      "alertText": null,
       "alertGlow": true
     },
     {

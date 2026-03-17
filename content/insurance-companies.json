@@ -7,7 +7,7 @@
       "code": null,
       "iclaimId": null,
       "isClickable": true,
-      "isNew": false,
+      "isNew": true,
       "claimType": "OPD_IPD",
       "remark": null,
       "logoUrl": null

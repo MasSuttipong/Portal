@@ -14,8 +14,8 @@
     "enabled": false,
     "text": "",
     "type": "warning",
-    "size": "lg",
-    "border": "glow",
+    "size": "xl",
+    "border": "bounce",
     "link": null,
     "dismissible": false
   }

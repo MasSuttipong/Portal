@@ -14,7 +14,7 @@ node_modules
 
 # Local environment overrides (secrets must come from docker-compose env or runtime)
 .env.local
-.env*.local
+
 
 # Editor and tool config
 .claude
