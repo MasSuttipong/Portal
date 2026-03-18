@@ -18,8 +18,8 @@ export async function signToken(): Promise<string> {
 
 export async function verifyToken(token: string): Promise<boolean> {
   try {
-    await jwtVerify(token, getSecret());
-    return true;
+    const { payload } = await jwtVerify(token, getSecret());
+    return payload.role === "admin";
   } catch {
     return false;
   }
@@ -32,3 +32,26 @@ export const cookieOptions = {
   path: "/",
   maxAge: 8 * 60 * 60, // 8 hours
 };
+
+// Provider auth
+export const PROVIDER_COOKIE_NAME = "provider_token";
+
+export async function signProviderToken(providerCode: string): Promise<string> {
+  return new SignJWT({ providerCode, role: "provider" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setIssuedAt()
+    .setExpirationTime("8h")
+    .sign(getSecret());
+}
+
+export async function verifyProviderToken(token: string): Promise<{ providerCode: string } | null> {
+  try {
+    const { payload } = await jwtVerify(token, getSecret());
+    if (payload.role === "provider" && typeof payload.providerCode === "string") {
+      return { providerCode: payload.providerCode };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}

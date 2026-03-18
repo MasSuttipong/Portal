@@ -99,6 +99,17 @@ export interface PortalSettings {
   theme?: ThemeConfig;
 }
 
+export interface ProviderPermission {
+  providerCode: string;
+  name: string;
+  apiKey: string;
+  allowedCompanyIds: string[];
+}
+
+export interface ProviderPermissions {
+  providers: ProviderPermission[];
+}
+
 export interface TpaCareCheck {
   heading: string;
   description: string;

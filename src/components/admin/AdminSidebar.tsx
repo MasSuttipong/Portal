@@ -4,7 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { useLanguage, type TranslationKey } from "@/lib/i18n/LanguageContext";
-import { Newspaper, BookOpen, Shield, Building2, Globe, Receipt, Settings, type LucideIcon } from "lucide-react";
+import { Newspaper, BookOpen, Shield, Building2, Globe, Receipt, Settings, Users, type LucideIcon } from "lucide-react";
 
 interface NavItem {
   labelKey: TranslationKey;
@@ -19,6 +19,7 @@ const navItems: NavItem[] = [
   { labelKey: "nav.selfInsured", href: "/admin/self-insured", icon: Building2 },
   { labelKey: "nav.international", href: "/admin/international", icon: Globe },
   { labelKey: "nav.deductible", href: "/admin/deductible", icon: Receipt },
+  { labelKey: "nav.providers", href: "/admin/providers", icon: Users },
   { labelKey: "nav.settings", href: "/admin/settings", icon: Settings },
 ];
 

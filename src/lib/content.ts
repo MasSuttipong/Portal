@@ -12,6 +12,7 @@ export const ALLOWED_FILES = [
   "self-insured",
   "international-insurance",
   "deductible",
+  "provider-permissions",
 ] as const;
 
 export type ContentFilename = (typeof ALLOWED_FILES)[number];

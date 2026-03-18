@@ -42,6 +42,7 @@ interface PortalPageProps {
   internationalInsurance: CompanySection;
   deductible: CompanySection;
   activeTheme?: PortalTheme;
+  providerCode?: string | null;
 }
 
 interface TabData {
@@ -66,6 +67,7 @@ export default function PortalPage({
   internationalInsurance,
   deductible,
   activeTheme = "default",
+  providerCode,
 }: PortalPageProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
@@ -157,6 +159,25 @@ export default function PortalPage({
   return (
     <>
       <ThemeDecorations theme={activeTheme} />
+
+      {/* Provider badge */}
+      {providerCode && (
+        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-3 text-sm">
+          <span className="text-blue-800">
+            <strong>Provider:</strong> {providerCode}
+          </span>
+          <button
+            type="button"
+            onClick={async () => {
+              await fetch("/api/auth/provider-logout", { method: "POST" });
+              window.location.reload();
+            }}
+            className="text-blue-600 hover:text-blue-800 underline text-xs"
+          >
+            View All
+          </button>
+        </div>
+      )}
 
       {/* Announcement Banner — top, both views */}
       <AnnouncementBanner announcement={settings.announcement} />

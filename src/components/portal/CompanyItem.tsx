@@ -7,6 +7,15 @@ import NewBadge from "./NewBadge";
 import AlertBadge from "./AlertBadge";
 import RemarkText from "./RemarkText";
 
+function safeUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") return url;
+  } catch { /* invalid URL */ }
+  return undefined;
+}
+
 export type ViewMode = "card" | "list";
 
 interface CompanyItemProps {
@@ -27,7 +36,8 @@ export default function CompanyItem({
   sectionLabel,
   viewMode = "card",
 }: CompanyItemProps) {
-  const { displayName, isClickable, isNew, remark, redirectUrl, claimType, code, iclaimId, logoUrl } = company;
+  const { displayName, isClickable, isNew, remark, redirectUrl: rawRedirectUrl, claimType, code, iclaimId, logoUrl } = company;
+  const redirectUrl = safeUrl(rawRedirectUrl);
 
   const suspended = !isClickable || (!redirectUrl && (!code || !iclaimId));
 
@@ -131,7 +141,8 @@ function ListItem({
   onCompanyClick: (company: Company) => void;
   sectionLabel?: string;
 }) {
-  const { displayName, isClickable, isNew, remark, redirectUrl, claimType, code, iclaimId, logoUrl } = company;
+  const { displayName, isClickable, isNew, remark, redirectUrl: rawRedirectUrl2, claimType, code, iclaimId, logoUrl } = company;
+  const redirectUrl = safeUrl(rawRedirectUrl2);
 
   const logo = logoUrl ? (
     <img src={logoUrl} alt="" className="w-6 h-6 object-contain rounded shrink-0" />
