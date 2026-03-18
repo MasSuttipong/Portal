@@ -24,13 +24,14 @@ ENV NODE_ENV=production
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 nextjs
 
-# Copy the standalone output
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+# Copy the standalone output using the same layout as the local production starter
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./.next/standalone
 
 # Copy static assets
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
-# Copy runtime validation script
+# Copy production startup and runtime validation scripts
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/start-production.js ./scripts/start-production.js
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/validate-runtime-env.js ./scripts/validate-runtime-env.js
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/apply-runtime-base-path.js ./scripts/apply-runtime-base-path.js
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/runtime-base-path.js ./scripts/runtime-base-path.js
@@ -48,4 +49,4 @@ EXPOSE 3000
 ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
-CMD ["sh", "-c", "node ./scripts/apply-runtime-base-path.js && node ./scripts/validate-runtime-env.js && node server.js"]
+CMD ["node", "./scripts/start-production.js"]

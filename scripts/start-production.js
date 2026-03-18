@@ -7,6 +7,15 @@ const repoRoot = process.cwd();
 const runtimeDir = path.join(repoRoot, ".next", "runtime-standalone");
 const standaloneDir = path.join(repoRoot, ".next", "standalone");
 const staticDir = path.join(repoRoot, ".next", "static");
+const RUNTIME_SCRIPT_NAMES = [
+  "apply-runtime-base-path.js",
+  "runtime-base-path.js",
+  "validate-runtime-env.js",
+];
+
+function logStep(message) {
+  console.log(`[runtime] ${message}`);
+}
 
 function assertExists(targetPath, label) {
   if (!fs.existsSync(targetPath)) {
@@ -18,6 +27,7 @@ function prepareRuntimeDir() {
   assertExists(standaloneDir, "standalone build output");
   assertExists(staticDir, "static build output");
 
+  logStep(`Preparing runtime at "${runtimeDir}" from "${standaloneDir}".`);
   fs.rmSync(runtimeDir, { recursive: true, force: true });
   fs.cpSync(standaloneDir, runtimeDir, { recursive: true, force: true });
   fs.cpSync(staticDir, path.join(runtimeDir, ".next", "static"), {
@@ -38,11 +48,7 @@ function prepareRuntimeDir() {
 
   fs.mkdirSync(path.join(runtimeDir, "scripts"), { recursive: true });
 
-  for (const scriptName of [
-    "apply-runtime-base-path.js",
-    "runtime-base-path.js",
-    "validate-runtime-env.js",
-  ]) {
+  for (const scriptName of RUNTIME_SCRIPT_NAMES) {
     fs.copyFileSync(
       path.join(repoRoot, "scripts", scriptName),
       path.join(runtimeDir, "scripts", scriptName)
@@ -50,8 +56,9 @@ function prepareRuntimeDir() {
   }
 }
 
-function runNodeScript(scriptRelativePath) {
-  const result = spawnSync(process.execPath, [scriptRelativePath], {
+function runNodeScript(scriptName) {
+  logStep(`Running "${scriptName}" inside "${runtimeDir}".`);
+  const result = spawnSync(process.execPath, [scriptName], {
     cwd: runtimeDir,
     env: process.env,
     stdio: "inherit",
@@ -66,6 +73,8 @@ function main() {
   prepareRuntimeDir();
   runNodeScript(path.join("scripts", "apply-runtime-base-path.js"));
   runNodeScript(path.join("scripts", "validate-runtime-env.js"));
+
+  logStep(`Starting Next.js standalone server from "${runtimeDir}".`);
 
   const child = spawn(process.execPath, ["server.js"], {
     cwd: runtimeDir,

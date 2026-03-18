@@ -1,4 +1,6 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
+const fs = require("fs");
+const path = require("path");
 const { spawn } = require("child_process");
 const {
   BASE_PATH_ENV_NAME,
@@ -11,6 +13,12 @@ const env = {
   ...process.env,
   [BASE_PATH_ENV_NAME]: BASE_PATH_SENTINEL,
 };
+const runtimeDir = path.join(process.cwd(), ".next", "runtime-standalone");
+
+if (fs.existsSync(runtimeDir)) {
+  console.log(`Removing stale runtime directory at "${runtimeDir}" before build.`);
+  fs.rmSync(runtimeDir, { recursive: true, force: true });
+}
 
 if (
   process.env[BASE_PATH_ENV_NAME] &&

@@ -14,7 +14,9 @@ const TEXT_FILE_EXTENSIONS = new Set([
   ".js",
   ".json",
   ".map",
+  ".meta",
   ".mjs",
+  ".rsc",
   ".txt",
 ]);
 
@@ -41,6 +43,18 @@ function collectPatchableFiles(directoryPath, markerPath, files = []) {
   }
 
   return files;
+}
+
+function collectRuntimeFiles(rootDir, markerPath) {
+  const nextDir = path.join(rootDir, ".next");
+  const filesToPatch = collectPatchableFiles(nextDir, markerPath);
+  const standaloneServerPath = path.join(rootDir, "server.js");
+
+  if (fs.existsSync(standaloneServerPath)) {
+    filesToPatch.push(standaloneServerPath);
+  }
+
+  return filesToPatch;
 }
 
 function countOccurrences(source, searchValue) {
@@ -120,6 +134,47 @@ function writeMarker(markerPath, runtimeBasePath) {
   );
 }
 
+function findRemainingSentinelOccurrences(filePaths) {
+  const matches = [];
+
+  for (const filePath of filePaths) {
+    const contents = fs.readFileSync(filePath, "utf8");
+    // Escaped variants still include the raw sentinel token, so one check catches all forms.
+    const remainingCount = countOccurrences(contents, BASE_PATH_SENTINEL);
+
+    if (remainingCount > 0) {
+      matches.push({ filePath, remainingCount });
+    }
+  }
+
+  return matches;
+}
+
+function verifyRuntimeOutput(rootDir, markerPath) {
+  const filePaths = collectRuntimeFiles(rootDir, markerPath);
+  const remainingOccurrences = findRemainingSentinelOccurrences(filePaths);
+
+  if (remainingOccurrences.length > 0) {
+    const formattedMatches = remainingOccurrences
+      .slice(0, 5)
+      .map(
+        ({ filePath, remainingCount }) =>
+          `"${path.relative(rootDir, filePath)}" (${remainingCount})`
+      )
+      .join(", ");
+
+    throw new Error(
+      `Runtime base path sentinel "${BASE_PATH_SENTINEL}" is still present after patching ` +
+        `"${rootDir}". Remaining matches were found in ${remainingOccurrences.length} files: ` +
+        `${formattedMatches}.`
+    );
+  }
+
+  console.log(
+    `Verified runtime output in "${rootDir}". No "${BASE_PATH_SENTINEL}" placeholders remain.`
+  );
+}
+
 function main() {
   const runtimeBasePath = readValidatedBasePath();
   const rootDir = process.cwd();
@@ -137,9 +192,11 @@ function main() {
       );
     }
 
+    verifyRuntimeOutput(rootDir, markerPath);
+
     console.log(
       `Runtime base path already applied: ` +
-        `"${runtimeBasePath || DISPLAY_ROOT_BASE_PATH}".`
+        `"${runtimeBasePath || DISPLAY_ROOT_BASE_PATH}" in "${rootDir}".`
     );
     return;
   }
@@ -151,12 +208,7 @@ function main() {
     );
   }
 
-  const filesToPatch = collectPatchableFiles(nextDir, markerPath);
-  const standaloneServerPath = path.join(rootDir, "server.js");
-
-  if (fs.existsSync(standaloneServerPath)) {
-    filesToPatch.push(standaloneServerPath);
-  }
+  const filesToPatch = collectRuntimeFiles(rootDir, markerPath);
 
   let patchedFileCount = 0;
   let replacementCount = 0;
@@ -173,15 +225,16 @@ function main() {
   if (replacementCount === 0) {
     throw new Error(
       `Runtime base path sentinel "${BASE_PATH_SENTINEL}" was not found in the built output. ` +
-        `Rebuild the app with "npm run build" before starting it.`
+      `Rebuild the app with "npm run build" before starting it.`
     );
   }
 
+  verifyRuntimeOutput(rootDir, markerPath);
   writeMarker(markerPath, runtimeBasePath);
 
   console.log(
     `Applied runtime base path "${runtimeBasePath || DISPLAY_ROOT_BASE_PATH}" ` +
-      `to ${patchedFileCount} files (${replacementCount} replacements).`
+      `to ${patchedFileCount} files (${replacementCount} replacements) in "${rootDir}".`
   );
 }
 
