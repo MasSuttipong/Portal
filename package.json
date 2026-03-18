@@ -4,8 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "node scripts/validate-runtime-env.js && next dev",
-    "build": "next build",
-    "start": "node scripts/validate-runtime-env.js && next start",
+    "build": "node scripts/build-production.js",
+    "start": "node scripts/start-production.js",
     "lint": "eslint"
   },
   "dependencies": {

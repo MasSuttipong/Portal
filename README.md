@@ -72,7 +72,7 @@ cp .env.example .env.local
 | `ADMIN_PASSWORD` | Password used to log into the admin panel      | `my-secure-password`               |
 | `JWT_SECRET`     | Secret key for signing JWT session tokens      | `a-long-random-string-min-32-chars`|
 | `COOKIE_SECURE`  | Set to `true` only when the site is served over HTTPS | `false`                     |
-| `NEXT_PUBLIC_BASE_PATH` | Leave empty for root deployment, set to a subpath like `/portal` when the app is mounted under that prefix | `/portal` |
+| `NEXT_PUBLIC_BASE_PATH` | Runtime-only in production. Leave empty for root deployment, set to a subpath like `/portal` when the app is mounted under that prefix | `/portal` |
 
 `ADMIN_PASSWORD` and `JWT_SECRET` are required at runtime. The app now fails fast during server startup if either one is missing or blank.
 
@@ -89,9 +89,11 @@ Open [http://localhost:3000](http://localhost:3000) to view the public portal an
 | Command           | Description                              |
 | ----------------- | ---------------------------------------- |
 | `npm run dev`     | Start the development server             |
-| `npm run build`   | Create a production build                |
-| `npm run start`   | Start the production server              |
+| `npm run build`   | Create a generic production build with a base-path placeholder |
+| `npm run start`   | Stage a local standalone runtime, patch it from the OS environment, and start the production server |
 | `npm run lint`    | Run ESLint                               |
+
+`npm run start` prepares a fresh runtime directory under `.next/runtime-standalone` on each launch, so the same build output can be reused with different `NEXT_PUBLIC_BASE_PATH` values between restarts.
 
 ## Project Structure
 
@@ -147,6 +149,8 @@ Portal/
 
 The project ships with a multi-stage Dockerfile that produces a minimal standalone image.
 
+The production image is now environment-agnostic. `npm run build` always embeds a placeholder base path, and container startup replaces that placeholder using the OS environment variable `NEXT_PUBLIC_BASE_PATH`.
+
 ### Build and run with Docker Compose
 
 ```bash
@@ -157,7 +161,7 @@ The portal will be available at [http://localhost:3000](http://localhost:3000).
 
 ### Environment variables
 
-Set `ADMIN_PASSWORD`, `JWT_SECRET`, and optionally `COOKIE_SECURE` / `NEXT_PUBLIC_BASE_PATH` in `docker-compose.yml` or pass them at runtime:
+Set `ADMIN_PASSWORD`, `JWT_SECRET`, and optionally `COOKIE_SECURE` / `NEXT_PUBLIC_BASE_PATH` in `docker-compose.yml` or pass them at container runtime. `NEXT_PUBLIC_BASE_PATH` is not read during image build:
 
 ```bash
 docker compose up -d \

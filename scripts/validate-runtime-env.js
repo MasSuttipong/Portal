@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
+const { readValidatedBasePath } = require("./runtime-base-path");
+
 function readRequiredEnv(name) {
   const value = process.env[name];
 
@@ -20,6 +23,11 @@ function validateCookieSecure() {
   }
 }
 
+function validateBasePath() {
+  readValidatedBasePath();
+}
+
 readRequiredEnv("ADMIN_PASSWORD");
 readRequiredEnv("JWT_SECRET");
 validateCookieSecure();
+validateBasePath();
