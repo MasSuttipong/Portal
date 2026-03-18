@@ -22,11 +22,14 @@ export default function Page() {
   );
   const deductible = readContent<CompanySection>("deductible");
 
+  const activeTheme = settings.theme?.activeTheme ?? "default";
+
   return (
-    <main className="min-h-screen bg-background">
-      <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-10 xl:px-16 py-4 min-h-screen">
+    <main className="min-h-screen bg-background" data-theme={activeTheme !== "default" ? activeTheme : undefined}>
+      <div className="mx-auto w-full max-w-screen-2xl px-4 sm:px-6 lg:px-10 xl:px-16 py-4 min-h-screen relative z-10">
         <PortalPage
           settings={settings}
+          activeTheme={activeTheme}
           manual={manual}
           news={news}
           tpaCareCheck={tpaCareCheck}

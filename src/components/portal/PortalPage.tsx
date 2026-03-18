@@ -8,6 +8,7 @@ import type {
   ManualData,
   NewsData,
   PortalSettings,
+  PortalTheme,
   TpaCareCheck,
 } from "@/types/portal";
 import type { ViewMode } from "./CompanyItem";
@@ -22,6 +23,7 @@ import CompanyItem from "./CompanyItem";
 import ViewModeToggle from "./ViewModeToggle";
 import ClassicView from "./ClassicView";
 import AnnouncementBanner from "./AnnouncementBanner";
+import ThemeDecorations from "./ThemeDecorations";
 
 const TAB_ICONS: Record<string, React.ReactNode> = {
   insurance: <Shield className="size-4" />,
@@ -39,6 +41,7 @@ interface PortalPageProps {
   selfInsured: CompanySection;
   internationalInsurance: CompanySection;
   deductible: CompanySection;
+  activeTheme?: PortalTheme;
 }
 
 interface TabData {
@@ -62,6 +65,7 @@ export default function PortalPage({
   selfInsured,
   internationalInsurance,
   deductible,
+  activeTheme = "default",
 }: PortalPageProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
@@ -152,6 +156,8 @@ export default function PortalPage({
 
   return (
     <>
+      <ThemeDecorations theme={activeTheme} />
+
       {/* Announcement Banner — top, both views */}
       <AnnouncementBanner announcement={settings.announcement} />
 

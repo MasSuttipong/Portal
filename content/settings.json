@@ -18,5 +18,8 @@
     "border": "shake",
     "link": null,
     "dismissible": false
+  },
+  "theme": {
+    "activeTheme": "default"
   }
 }

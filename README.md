@@ -14,6 +14,8 @@ A modern Next.js web application that serves as the insurance company portal for
 - **Announcements** -- configurable site-wide announcement banner with multiple alert styles, glow effects, and border animations.
 - **Classic View Toggle** -- users can switch between default and classic list layouts.
 - **Thai Language UI** -- portal content is primarily in Thai with Thai-optimized fonts (Prompt and Sarabun).
+- **Bilingual Search** -- search companies by both Thai and English names.
+- **Holiday Themes** -- 14 theme presets with seasonal decorations (e.g., Songkran, Christmas, Loy Krathong).
 
 ### Admin Panel (`/admin/*`)
 
@@ -23,6 +25,8 @@ A modern Next.js web application that serves as the insurance company portal for
 - **Portal Settings** -- configure the site logo, iClaim base URL, confirmation text, and announcement banners.
 - **Live Preview** -- preview changes before publishing.
 - **Password-Protected** -- secured with a single shared password and JWT-based session tokens.
+- **Admin i18n** -- admin panel supports Thai and English interface languages.
+- **Security Hardened** -- secure cookie controls, security headers, and environment-based configuration.
 
 ## Tech Stack
 
@@ -71,6 +75,7 @@ cp .env.example .env.local
 | ---------------- | ---------------------------------------------- | ---------------------------------- |
 | `ADMIN_PASSWORD` | Password used to log into the admin panel      | `my-secure-password`               |
 | `JWT_SECRET`     | Secret key for signing JWT session tokens       | `a-long-random-string-min-32-chars`|
+| `COOKIE_SECURE`  | Set cookie `secure` flag (`true` for HTTPS)     | `false`                            |
 
 ### 4. Start the development server
 
@@ -123,12 +128,15 @@ Portal/
 │   │           └── upload/     #   File upload endpoint
 │   ├── components/
 │   │   ├── portal/             # Public-facing components
+│   │   │   └── ThemeDecorations.tsx  # Seasonal theme visual effects
 │   │   ├── admin/              # Admin panel components
+│   │   │   └── LanguageToggle.tsx   # TH/EN language switcher
 │   │   └── ui/                 # shadcn/ui primitives
 │   ├── lib/
 │   │   ├── content.ts          # JSON read/write helpers
 │   │   ├── auth.ts             # JWT sign/verify, cookie config
-│   │   └── useAdminContent.ts  # React hook for admin CRUD operations
+│   │   ├── useAdminContent.ts  # React hook for admin CRUD operations
+│   │   └── i18n/               # Internationalization (translations, context, hook)
 │   ├── types/
 │   │   └── portal.ts           # TypeScript interfaces
 │   └── middleware.ts           # Auth guard for /admin/* routes
@@ -153,7 +161,7 @@ The portal will be available at [http://localhost:3000](http://localhost:3000).
 
 ### Environment variables
 
-Set `ADMIN_PASSWORD` and `JWT_SECRET` in `docker-compose.yml` or pass them at runtime:
+Set `ADMIN_PASSWORD`, `JWT_SECRET`, and `COOKIE_SECURE` in `docker-compose.yml` or pass them at runtime. When running Docker over plain HTTP, keep `COOKIE_SECURE=false` (the default):
 
 ```bash
 docker compose up -d \
@@ -229,6 +237,8 @@ interface Company {
   claimType: "OPD_IPD" | "OPD_ONLY" | "IPD_ONLY";
   remark: string | null;      // shown in red when suspended
   redirectUrl?: string;       // custom redirect URL (skips iClaim modal)
+  nameEn?: string | null;    // English name (for bilingual search)
+  nameTh?: string | null;    // Thai name (for bilingual search)
   logoUrl?: string | null;
   alertText?: string | null;  // inline alert badge text
   alertType?: AlertType;      // "warning" | "error" | "info" | "success" | "promo" | "urgent"
@@ -265,6 +275,29 @@ When a user clicks a clickable company:
 3. The browser redirects to `{iClaim.baseUrl}?code={company.code}&id={company.iclaimId}&type={OPD|IPD}`.
 
 Companies with a `redirectUrl` skip the modal entirely and navigate directly to that URL.
+
+## Theme System
+
+The portal supports 14 visual theme presets that can be selected from the admin settings page. Themes are stored in `settings.json` and applied via CSS variable overrides using the `[data-theme]` attribute. The `ThemeDecorations` component renders seasonal visual effects (falling snowflakes, cherry blossoms, etc.).
+
+### Available Themes
+
+| Theme | Description |
+| ----- | ----------- |
+| `default` | Standard BVTPA branding |
+| `ocean` | Blue ocean tones |
+| `forest` | Green nature palette |
+| `sunset` | Warm orange/red gradient |
+| `cherry-blossom` | Pink sakura theme |
+| `songkran` | Thai New Year celebration |
+| `loy-krathong` | Festival of lights |
+| `christmas` | Holiday red and green |
+| `new-year` | New Year celebration |
+| `halloween` | Orange and black |
+| `valentine` | Romantic pink and red |
+| `spring` | Fresh pastel greens |
+| `summer` | Bright warm colors |
+| `winter` | Cool blue and white |
 
 ## License
 

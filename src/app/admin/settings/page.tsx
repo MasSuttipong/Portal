@@ -3,11 +3,12 @@
 import { useState, useEffect, useRef } from "react";
 import { useAdminContent } from "@/lib/useAdminContent";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
-import type { PortalSettings, AlertType, AlertSize, AlertBorder } from "@/types/portal";
+import type { PortalSettings, PortalTheme, AlertType, AlertSize, AlertBorder } from "@/types/portal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import ThemeDecorations from "@/components/portal/ThemeDecorations";
 import { Switch } from "@/components/ui/switch";
 import { Save, Upload, ImageIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -17,6 +18,24 @@ import AnnouncementBanner from "@/components/portal/AnnouncementBanner";
 export default function SettingsPage() {
   const { data, loading, error, save } = useAdminContent<PortalSettings>("settings");
   const { t } = useLanguage();
+
+  const THEME_OPTIONS: { value: PortalTheme; icon: string; label: string }[] = [
+    { value: "default", icon: "🎨", label: t("settings.themeDefault") },
+    { value: "christmas", icon: "🎄", label: t("settings.themeChristmas") },
+    { value: "newyear", icon: "🎆", label: t("settings.themeNewyear") },
+    { value: "songkran", icon: "💦", label: t("settings.themeSongkran") },
+    { value: "valentine", icon: "💕", label: t("settings.themeValentine") },
+    { value: "chinese-newyear", icon: "🏮", label: t("settings.themeChineseNewyear") },
+    { value: "halloween", icon: "🎃", label: t("settings.themeHalloween") },
+    { value: "mothers-day", icon: "🌸", label: t("settings.themeMothersDay") },
+    { value: "fathers-day", icon: "💛", label: t("settings.themeFathersDay") },
+    { value: "spring", icon: "🌷", label: t("settings.themeSpring") },
+    { value: "summer", icon: "☀️", label: t("settings.themeSummer") },
+    { value: "autumn", icon: "🍂", label: t("settings.themeAutumn") },
+    { value: "winter", icon: "⛄", label: t("settings.themeWinter") },
+    { value: "party", icon: "🎉", label: t("settings.themeParty") },
+    { value: "pride", icon: "🌈", label: t("settings.themePride") },
+  ];
 
   const [logoUrl, setLogoUrl] = useState("");
   const [logoAlt, setLogoAlt] = useState("");
@@ -32,6 +51,7 @@ export default function SettingsPage() {
   const [annBorder, setAnnBorder] = useState<AlertBorder>("none");
   const [annLink, setAnnLink] = useState("");
   const [annDismissible, setAnnDismissible] = useState(true);
+  const [activeTheme, setActiveTheme] = useState<PortalTheme>("default");
   const [uploading, setUploading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [initialized, setInitialized] = useState(false);
@@ -54,6 +74,7 @@ export default function SettingsPage() {
       setAnnBorder(data.announcement?.border ?? (data.announcement?.glow ? "glow" : "none"));
       setAnnLink(data.announcement?.link ?? "");
       setAnnDismissible(data.announcement?.dismissible ?? true);
+      setActiveTheme(data.theme?.activeTheme ?? "default");
       setInitialized(true);
     }
   }, [data, initialized]);
@@ -111,6 +132,7 @@ export default function SettingsPage() {
         link: annLink.trim() || null,
         dismissible: annDismissible,
       },
+      theme: { activeTheme },
     };
 
     await save(newData);
@@ -395,6 +417,43 @@ export default function SettingsPage() {
               <Button size="sm">{confirmOk || "ตกลง"}</Button>
             </div>
           </div>
+        </CardContent>
+      </Card>
+
+      {/* Theme Section */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("settings.theme")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="theme-select">{t("settings.themeLabel")}</Label>
+            <select
+              id="theme-select"
+              title={t("settings.themeLabel")}
+              value={activeTheme}
+              onChange={(e) => setActiveTheme(e.target.value as PortalTheme)}
+              className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+            >
+              {THEME_OPTIONS.map((opt) => (
+                <option key={opt.value} value={opt.value}>
+                  {opt.icon} {opt.label}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {activeTheme !== "default" && (
+            <div className="relative h-40 rounded-lg border overflow-hidden" data-theme={activeTheme}>
+              <div className="absolute inset-0 bg-background" />
+              <ThemeDecorations theme={activeTheme} />
+              <div className="relative z-10 flex items-center justify-center h-full">
+                <span className="text-4xl">
+                  {THEME_OPTIONS.find((o) => o.value === activeTheme)?.icon}
+                </span>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

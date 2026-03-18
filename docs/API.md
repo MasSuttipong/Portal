@@ -54,6 +54,7 @@ All routes matching `/admin/*` and `/api/admin/*` are protected by middleware (`
 ```bash
 ADMIN_PASSWORD=your-secure-password-here
 JWT_SECRET=your-jwt-secret-key-change-in-production
+COOKIE_SECURE=false   # Set to "true" for HTTPS environments; default is "false" for Docker HTTP access
 ```
 
 ---
@@ -111,6 +112,16 @@ Returned when the request body is not valid JSON.
 ```
 
 Returned when the password is incorrect or missing. The error message is in Thai: "Incorrect password".
+
+**Response (Error - 500)**:
+
+```json
+{
+  "error": "Server configuration error"
+}
+```
+
+Returned when the `ADMIN_PASSWORD` environment variable is not set on the server.
 
 **Example cURL**:
 
@@ -434,7 +445,7 @@ Upload an image file to the server. The file is stored in `/public/images/` and 
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `file` | File | Yes | The image file to upload. Accepted formats: PNG, JPG, JPEG, GIF, WebP, SVG. Max size: no hard limit (browser/server dependent). |
+| `file` | File | Yes | The image file to upload. Accepted formats: PNG, JPG, JPEG, GIF, WebP. Max file size: 5MB. |
 
 **Response (Success - 200)**:
 
@@ -458,7 +469,7 @@ or
 
 ```json
 {
-  "error": "Invalid file type. Allowed types: png, jpg, jpeg, gif, webp, svg"
+  "error": "Invalid file type. Allowed types: png, jpg, jpeg, gif, webp"
 }
 ```
 
@@ -576,6 +587,8 @@ interface Company {
   claimType: "OPD_IPD" | "OPD_ONLY" | "IPD_ONLY";  // Types of claims supported
   remark: string | null;                            // Remark shown in red when company is suspended
   redirectUrl?: string;                             // Custom redirect URL (skips iClaim modal)
+  nameEn?: string | null;                           // English company name (for bilingual search)
+  nameTh?: string | null;                           // Thai company name (for bilingual search)
   logoUrl?: string | null;                          // URL to company logo image
   alertText?: string | null;                        // Alert message (e.g., "OPD self-pay")
   alertType?: AlertType;                            // Alert style type
@@ -751,7 +764,30 @@ interface PortalSettings {
     claimTypePrompt: string;   // Prompt for claim type selection
   };
   announcement?: AnnouncementConfig; // Optional: site-wide announcement
+  theme?: ThemeConfig;               // Optional: portal theme configuration
 }
+```
+
+### ThemeConfig
+
+Configuration for the portal visual theme.
+
+```typescript
+interface ThemeConfig {
+  preset: PortalTheme;  // Selected theme preset
+}
+```
+
+### PortalTheme
+
+Available theme presets.
+
+```typescript
+type PortalTheme =
+  | "default" | "ocean" | "forest" | "sunset"
+  | "cherry-blossom" | "songkran" | "loy-krathong"
+  | "christmas" | "new-year" | "halloween"
+  | "valentine" | "spring" | "summer" | "winter";
 ```
 
 **Example**:
@@ -1129,7 +1165,7 @@ or
 ### Image Uploads
 
 - **Optimize images**: Compress images before uploading to save storage.
-- **Use appropriate formats**: PNG for logos, JPEG for photos, SVG for icons.
+- **Use appropriate formats**: PNG for logos, JPEG for photos, WebP for optimized images.
 - **Store URLs**: After uploading, store the returned URL in content files (e.g., as `logoUrl`).
 - **Cleanup old images**: The server keeps all uploaded images; periodically remove unused files from `/public/images/`.
 
@@ -1302,7 +1338,7 @@ if (response.status === 401) {
 - Check disk space on the server
 - Verify `/public/images/` directory exists and is writable
 - Ensure file size is reasonable
-- Check file type is allowed (PNG, JPG, JPEG, GIF, WebP, SVG)
+- Check file type is allowed (PNG, JPG, JPEG, GIF, WebP)
 - Check server logs for detailed error messages
 
 ### Content Not Updating
@@ -1337,6 +1373,19 @@ The current API has no explicit versioning. All endpoints are stable. If breakin
 5. **CORS**: The API does not restrict Cross-Origin requests by default. Add CORS middleware if deploying the admin panel separately from the API.
 
 6. **Audit Logging**: Consider adding audit logs for sensitive operations (login, content updates).
+
+---
+
+## Security Headers
+
+The application sets the following security headers on responses:
+
+| Header | Value | Purpose |
+|--------|-------|---------|
+| `X-Frame-Options` | `DENY` | Prevents the page from being embedded in iframes (clickjacking protection) |
+| `X-Content-Type-Options` | `nosniff` | Prevents browsers from MIME-type sniffing |
+| `Referrer-Policy` | `strict-origin-when-cross-origin` | Controls how much referrer information is sent with requests |
+| `Permissions-Policy` | `camera=(), microphone=(), geolocation=()` | Restricts access to browser features not used by the application |
 
 ---
 
