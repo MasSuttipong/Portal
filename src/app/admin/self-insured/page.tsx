@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useAdminContent } from "@/lib/useAdminContent";
 import type { CompanySection, CompanyGroup, Company, AlertBorder } from "@/types/portal";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -34,11 +35,14 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Plus, Save, ChevronDown, ChevronRight, Users, Upload, X } from "lucide-react";
+import { Pencil, Trash2, Plus, Save, ChevronDown, ChevronRight, Users, Upload, X, Search } from "lucide-react";
+import { toast } from "sonner";
 import DragDropList from "@/components/admin/DragDropList";
 
 interface CompanyFormData {
   displayName: string;
+  nameEn: string;
+  nameTh: string;
   code: string;
   iclaimId: string;
   isClickable: boolean;
@@ -64,6 +68,8 @@ interface GroupFormData {
 
 const emptyCompanyForm: CompanyFormData = {
   displayName: "",
+  nameEn: "",
+  nameTh: "",
   code: "",
   iclaimId: "",
   isClickable: true,
@@ -85,12 +91,6 @@ const emptyGroupForm: GroupFormData = {
   alertType: "warning",
   alertSize: "sm",
   alertBorder: "none",
-};
-
-const CLAIM_TYPE_LABELS: Record<string, string> = {
-  OPD_IPD: "OPD + IPD",
-  OPD_ONLY: "OPD เท่านั้น",
-  IPD_ONLY: "IPD เท่านั้น",
 };
 
 export default function SelfInsuredPage() {
@@ -124,6 +124,16 @@ export default function SelfInsuredPage() {
 
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [tableFilter, setTableFilter] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const { t } = useLanguage();
+
+  const CLAIM_TYPE_LABELS: Record<string, string> = {
+    OPD_IPD: t("company.opdIpd"),
+    OPD_ONLY: t("company.opdOnly"),
+    IPD_ONLY: t("company.ipdOnly"),
+  };
 
   if (data && !headingInitialized) {
     setHeadingValue(data.heading ?? "");
@@ -244,6 +254,8 @@ export default function SelfInsuredPage() {
     setEditingGroupId(groupId);
     setCompanyForm({
       displayName: company.displayName,
+      nameEn: company.nameEn ?? "",
+      nameTh: company.nameTh ?? "",
       code: company.code ?? "",
       iclaimId: company.iclaimId ?? "",
       isClickable: company.isClickable,
@@ -264,6 +276,8 @@ export default function SelfInsuredPage() {
     return {
       id,
       displayName: companyForm.displayName,
+      nameEn: companyForm.nameEn.trim() || null,
+      nameTh: companyForm.nameTh.trim() || null,
       code: companyForm.code.trim() || null,
       iclaimId: companyForm.iclaimId.trim() || null,
       isClickable: companyForm.isClickable,
@@ -367,7 +381,7 @@ export default function SelfInsuredPage() {
       const { url } = await res.json();
       setCompanyForm((prev) => ({ ...prev, logoUrl: url }));
     } catch {
-      alert("อัปโหลดไม่สำเร็จ");
+      alert(t("company.uploadFailed"));
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -377,7 +391,7 @@ export default function SelfInsuredPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-40 text-gray-500 text-sm">
-        กำลังโหลด...
+        {t("common.loading")}
       </div>
     );
   }
@@ -385,7 +399,7 @@ export default function SelfInsuredPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-40 text-red-500 text-sm">
-        เกิดข้อผิดพลาด: {error}
+        {t("common.errorPrefix")} {error}
       </div>
     );
   }
@@ -393,30 +407,30 @@ export default function SelfInsuredPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">จัดการสวัสดิการพนักงาน</h1>
+        <h1 className="text-xl font-bold text-gray-900">{t("selfInsured.pageTitle")}</h1>
         <div className="flex gap-2">
           <Button onClick={openAddUngroupedCompany} variant="outline" size="sm" className="gap-1.5">
             <Plus className="size-4" />
-            เพิ่มบริษัท
+            {t("company.addCompany")}
           </Button>
           <Button onClick={openAddGroupDialog} variant="outline" size="sm" className="gap-1.5">
             <Plus className="size-4" />
-            เพิ่มกลุ่ม
+            {t("selfInsured.addGroup")}
           </Button>
           <Button onClick={handleSave} disabled={saving} size="sm" className="gap-1.5">
             <Save className="size-4" />
-            {saving ? "กำลังบันทึก..." : "บันทึก"}
+            {saving ? t("common.saving") : t("common.save")}
           </Button>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">ชื่อส่วน</CardTitle>
+          <CardTitle className="text-base">{t("company.sectionName")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Label htmlFor="si-heading">หัวข้อส่วน</Label>
+            <Label htmlFor="si-heading">{t("company.sectionHeading")}</Label>
             <Input
               id="si-heading"
               value={headingValue}
@@ -425,38 +439,38 @@ export default function SelfInsuredPage() {
           </div>
           <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 mt-3 items-end">
             <div className="space-y-2">
-              <Label htmlFor="si-alert">ข้อความแจ้งเตือนส่วน (ถ้ามี)</Label>
+              <Label htmlFor="si-alert">{t("company.sectionAlert")}</Label>
               <Input
                 id="si-alert"
                 value={sectionAlertText}
                 onChange={(e) => setSectionAlertText(e.target.value)}
-                placeholder="เช่น OPD ให้สำรองจ่าย"
+                placeholder={t("company.sectionAlertPlaceholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="si-alert-type">ประเภท</Label>
+              <Label htmlFor="si-alert-type">{t("common.type")}</Label>
               <select
                 id="si-alert-type"
                 value={sectionAlertType}
                 onChange={(e) => setSectionAlertType(e.target.value as "warning" | "error" | "info" | "success" | "promo" | "urgent")}
-                title="ประเภทแจ้งเตือน"
+                title={t("common.type")}
                 className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               >
-                <option value="warning">⚠️ เตือน</option>
-                <option value="error">❌ สำคัญ</option>
-                <option value="info">ℹ️ แจ้งข้อมูล</option>
-                <option value="success">✅ สำเร็จ</option>
-                <option value="promo">🎉 โปรโมชั่น</option>
-                <option value="urgent">🚨 ด่วน</option>
+                <option value="warning">{t("alertOptions.warning")}</option>
+                <option value="error">{t("alertOptions.error")}</option>
+                <option value="info">{t("alertOptions.info")}</option>
+                <option value="success">{t("alertOptions.success")}</option>
+                <option value="promo">{t("alertOptions.promo")}</option>
+                <option value="urgent">{t("alertOptions.urgent")}</option>
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="si-alert-size">ขนาด</Label>
+              <Label htmlFor="si-alert-size">{t("common.size")}</Label>
               <select
                 id="si-alert-size"
                 value={sectionAlertSize}
                 onChange={(e) => setSectionAlertSize(e.target.value as "xs" | "sm" | "md" | "lg" | "xl")}
-                title="ขนาดแจ้งเตือน"
+                title={t("common.size")}
                 className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               >
                 <option value="xs">XS</option>
@@ -467,22 +481,22 @@ export default function SelfInsuredPage() {
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="si-alert-border">ขอบ</Label>
+              <Label htmlFor="si-alert-border">{t("common.border")}</Label>
               <select
                 id="si-alert-border"
                 value={sectionAlertBorder}
                 onChange={(e) => setSectionAlertBorder(e.target.value as AlertBorder)}
-                title="เอฟเฟกต์ขอบ"
+                title={t("common.border")}
                 className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               >
-                <option value="none">ไม่มี</option>
-                <option value="glow">เรืองแสง</option>
-                <option value="pulse">กระพริบ</option>
-                <option value="shimmer">วิ่ง</option>
-                <option value="bounce">เด้ง</option>
-                <option value="shake">สั่น</option>
-                <option value="rainbow">สายรุ้ง</option>
-                <option value="blink">กระพริบจ้า</option>
+                <option value="none">{t("alertOptions.none")}</option>
+                <option value="glow">{t("alertOptions.glow")}</option>
+                <option value="pulse">{t("alertOptions.pulse")}</option>
+                <option value="shimmer">{t("alertOptions.shimmer")}</option>
+                <option value="bounce">{t("alertOptions.bounce")}</option>
+                <option value="shake">{t("alertOptions.shake")}</option>
+                <option value="rainbow">{t("alertOptions.rainbow")}</option>
+                <option value="blink">{t("alertOptions.blink")}</option>
               </select>
             </div>
           </div>
@@ -492,33 +506,41 @@ export default function SelfInsuredPage() {
       {/* Standalone Companies */}
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-3">
-          <CardTitle className="text-base">บริษัทเดี่ยว ({ungroupedCompanies.length})</CardTitle>
+          <CardTitle className="text-base">{t("selfInsured.standaloneCompanies")} ({ungroupedCompanies.length})</CardTitle>
           <Button onClick={openAddUngroupedCompany} variant="ghost" size="sm" className="gap-1.5 text-xs h-7">
             <Plus className="size-3.5" />
-            เพิ่มบริษัท
+            {t("company.addCompany")}
           </Button>
         </CardHeader>
         <CardContent>
           {ungroupedCompanies.length === 0 ? (
             <div className="text-center py-6 text-gray-400 text-sm">
-              ยังไม่มีบริษัทเดี่ยว กดปุ่ม &quot;เพิ่มบริษัท&quot; เพื่อเพิ่ม
+              {t("selfInsured.noStandaloneCompanies")}
             </div>
           ) : (
             <>
+              {ungroupedCompanies.length > 5 && (
+                <div className="p-3 border-b">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+                    <input type="text" value={tableFilter} onChange={(e) => setTableFilter(e.target.value)} placeholder={t("company.searchPlaceholder")} className="w-full pl-9 pr-3 py-1.5 text-sm rounded-md border border-input bg-transparent focus:outline-none focus:ring-1 focus:ring-ring" />
+                  </div>
+                </div>
+              )}
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-8"></TableHead>
-                    <TableHead>ชื่อบริษัท</TableHead>
-                    <TableHead className="w-28">ประเภท</TableHead>
-                    <TableHead className="w-24 text-center">คลิกได้</TableHead>
-                    <TableHead className="w-20 text-center">ใหม่</TableHead>
-                    <TableHead className="w-24 text-right">จัดการ</TableHead>
+                    <TableHead>{t("company.companyName")}</TableHead>
+                    <TableHead className="w-28">{t("common.type")}</TableHead>
+                    <TableHead className="w-24 text-center">{t("common.clickable")}</TableHead>
+                    <TableHead className="w-20 text-center">{t("common.new")}</TableHead>
+                    <TableHead className="w-24 text-right">{t("common.manage")}</TableHead>
                   </TableRow>
                 </TableHeader>
               </Table>
               <DragDropList
-                items={ungroupedCompanies}
+                items={ungroupedCompanies.filter((c) => !tableFilter || c.displayName.toLowerCase().includes(tableFilter.toLowerCase()) || (c.nameEn && c.nameEn.toLowerCase().includes(tableFilter.toLowerCase())) || (c.nameTh && c.nameTh.toLowerCase().includes(tableFilter.toLowerCase())))}
                 onReorder={handleReorderUngroupedCompanies}
                 renderItem={(company) => (
                   <Table>
@@ -528,6 +550,11 @@ export default function SelfInsuredPage() {
                           <span className="text-sm text-gray-800">
                             {company.displayName}
                           </span>
+                          {(company.nameEn || company.nameTh) && (
+                            <span className="block text-xs text-gray-400">
+                              {[company.nameEn, company.nameTh].filter(Boolean).join(" / ")}
+                            </span>
+                          )}
                           {company.remark && (
                             <span className="block text-xs text-red-500 mt-0.5">
                               {company.remark}
@@ -548,6 +575,14 @@ export default function SelfInsuredPage() {
                                 c.id === company.id ? { ...c, isClickable: val } : c
                               );
                               void save({ ...data, ...sectionFields(), groups, companies: newCompanies });
+                              toast(val ? t("company.clickableEnabled") : t("company.clickableDisabled"), {
+                                action: { label: t("company.undoToggle"), onClick: () => {
+                                  const revertCompanies = ungroupedCompanies.map((c) =>
+                                    c.id === company.id ? { ...c, isClickable: !val } : c
+                                  );
+                                  void save({ ...data, ...sectionFields(), groups, companies: revertCompanies });
+                                } },
+                              });
                             }}
                           />
                         </TableCell>
@@ -560,6 +595,14 @@ export default function SelfInsuredPage() {
                                 c.id === company.id ? { ...c, isNew: val } : c
                               );
                               void save({ ...data, ...sectionFields(), groups, companies: newCompanies });
+                              toast(val ? t("company.newBadgeEnabled") : t("company.newBadgeDisabled"), {
+                                action: { label: t("company.undoToggle"), onClick: () => {
+                                  const revertCompanies = ungroupedCompanies.map((c) =>
+                                    c.id === company.id ? { ...c, isNew: !val } : c
+                                  );
+                                  void save({ ...data, ...sectionFields(), groups, companies: revertCompanies });
+                                } },
+                              });
                             }}
                           />
                         </TableCell>
@@ -574,6 +617,8 @@ export default function SelfInsuredPage() {
                                 setEditingGroupId(null);
                                 setCompanyForm({
                                   displayName: company.displayName,
+                                  nameEn: company.nameEn ?? "",
+                                  nameTh: company.nameTh ?? "",
                                   code: company.code ?? "",
                                   iclaimId: company.iclaimId ?? "",
                                   isClickable: company.isClickable,
@@ -620,7 +665,7 @@ export default function SelfInsuredPage() {
       {/* Groups List */}
       {groups.length === 0 ? (
         <div className="text-center py-12 text-gray-400 text-sm border rounded-lg bg-white">
-          ยังไม่มีกลุ่มบริษัท กดปุ่ม "เพิ่มกลุ่ม" เพื่อเพิ่ม
+          {t("selfInsured.noGroups")}
         </div>
       ) : (
         <div className="space-y-3">
@@ -646,7 +691,7 @@ export default function SelfInsuredPage() {
                       {group.headerName}
                     </span>
                     <Badge variant="secondary" className="text-xs ml-1">
-                      {group.companies.length} บริษัท
+                      {group.companies.length} {t("selfInsured.companiesCount")}
                     </Badge>
                   </button>
                   <div className="flex gap-1">
@@ -657,7 +702,7 @@ export default function SelfInsuredPage() {
                       onClick={() => openAddCompanyDialog(group.id)}
                     >
                       <Plus className="size-3.5" />
-                      เพิ่มบริษัท
+                      {t("company.addCompany")}
                     </Button>
                     <Button
                       variant="ghost"
@@ -683,24 +728,32 @@ export default function SelfInsuredPage() {
                   <div className="p-2">
                     {group.companies.length === 0 ? (
                       <div className="text-center py-6 text-gray-400 text-sm">
-                        ยังไม่มีบริษัทในกลุ่มนี้
+                        {t("selfInsured.noCompaniesInGroup")}
                       </div>
                     ) : (
                       <>
+                        {group.companies.length > 5 && (
+                          <div className="p-3 border-b">
+                            <div className="relative">
+                              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+                              <input type="text" value={tableFilter} onChange={(e) => setTableFilter(e.target.value)} placeholder={t("company.searchPlaceholder")} className="w-full pl-9 pr-3 py-1.5 text-sm rounded-md border border-input bg-transparent focus:outline-none focus:ring-1 focus:ring-ring" />
+                            </div>
+                          </div>
+                        )}
                         <Table>
                           <TableHeader>
                             <TableRow>
                               <TableHead className="w-8"></TableHead>
-                              <TableHead>ชื่อบริษัท</TableHead>
-                              <TableHead className="w-28">ประเภท</TableHead>
-                              <TableHead className="w-24 text-center">คลิกได้</TableHead>
-                              <TableHead className="w-20 text-center">ใหม่</TableHead>
-                              <TableHead className="w-24 text-right">จัดการ</TableHead>
+                              <TableHead>{t("company.companyName")}</TableHead>
+                              <TableHead className="w-28">{t("common.type")}</TableHead>
+                              <TableHead className="w-24 text-center">{t("common.clickable")}</TableHead>
+                              <TableHead className="w-20 text-center">{t("common.new")}</TableHead>
+                              <TableHead className="w-24 text-right">{t("common.manage")}</TableHead>
                             </TableRow>
                           </TableHeader>
                         </Table>
                         <DragDropList
-                          items={group.companies}
+                          items={group.companies.filter((c) => !tableFilter || c.displayName.toLowerCase().includes(tableFilter.toLowerCase()) || (c.nameEn && c.nameEn.toLowerCase().includes(tableFilter.toLowerCase())) || (c.nameTh && c.nameTh.toLowerCase().includes(tableFilter.toLowerCase())))}
                           onReorder={(reordered) =>
                             handleReorderCompanies(group.id, reordered)
                           }
@@ -712,6 +765,11 @@ export default function SelfInsuredPage() {
                                     <span className="text-sm text-gray-800">
                                       {company.displayName}
                                     </span>
+                                    {(company.nameEn || company.nameTh) && (
+                                      <span className="block text-xs text-gray-400">
+                                        {[company.nameEn, company.nameTh].filter(Boolean).join(" / ")}
+                                      </span>
+                                    )}
                                     {company.remark && (
                                       <span className="block text-xs text-red-500 mt-0.5">
                                         {company.remark}
@@ -740,6 +798,15 @@ export default function SelfInsuredPage() {
                                           };
                                         });
                                         void save({ ...data, ...sectionFields(), groups: newGroups });
+                                        toast(val ? t("company.clickableEnabled") : t("company.clickableDisabled"), {
+                                          action: { label: t("company.undoToggle"), onClick: () => {
+                                            const revertGroups = groups.map((g) => {
+                                              if (g.id !== group.id) return g;
+                                              return { ...g, companies: g.companies.map((c) => c.id === company.id ? { ...c, isClickable: !val } : c) };
+                                            });
+                                            void save({ ...data, ...sectionFields(), groups: revertGroups });
+                                          } },
+                                        });
                                       }}
                                     />
                                   </TableCell>
@@ -760,6 +827,15 @@ export default function SelfInsuredPage() {
                                           };
                                         });
                                         void save({ ...data, ...sectionFields(), groups: newGroups });
+                                        toast(val ? t("company.newBadgeEnabled") : t("company.newBadgeDisabled"), {
+                                          action: { label: t("company.undoToggle"), onClick: () => {
+                                            const revertGroups = groups.map((g) => {
+                                              if (g.id !== group.id) return g;
+                                              return { ...g, companies: g.companies.map((c) => c.id === company.id ? { ...c, isNew: !val } : c) };
+                                            });
+                                            void save({ ...data, ...sectionFields(), groups: revertGroups });
+                                          } },
+                                        });
                                       }}
                                     />
                                   </TableCell>
@@ -810,23 +886,23 @@ export default function SelfInsuredPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingGroupFormId ? "แก้ไขกลุ่ม" : "เพิ่มกลุ่ม"}
+              {editingGroupFormId ? t("selfInsured.editGroup") : t("selfInsured.addGroup")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="grp-name">ชื่อกลุ่ม</Label>
+              <Label htmlFor="grp-name">{t("selfInsured.groupName")}</Label>
               <Input
                 id="grp-name"
                 value={groupForm.headerName}
                 onChange={(e) =>
                   setGroupForm((prev) => ({ ...prev, headerName: e.target.value }))
                 }
-                placeholder="เช่น คาราบาวกรุ๊ป"
+                placeholder={t("selfInsured.groupNamePlaceholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="grp-icon">URL ไอคอน (ถ้ามี)</Label>
+              <Label htmlFor="grp-icon">{t("selfInsured.groupIconUrl")}</Label>
               <Input
                 id="grp-icon"
                 value={groupForm.headerIconUrl}
@@ -838,44 +914,44 @@ export default function SelfInsuredPage() {
             </div>
             <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-end">
               <div className="space-y-2">
-                <Label htmlFor="grp-alert">ข้อความแจ้งเตือนกลุ่ม (ถ้ามี)</Label>
+                <Label htmlFor="grp-alert">{t("selfInsured.groupAlert")}</Label>
                 <Input
                   id="grp-alert"
                   value={groupForm.alertText}
                   onChange={(e) =>
                     setGroupForm((prev) => ({ ...prev, alertText: e.target.value }))
                   }
-                  placeholder="เช่น OPD ให้สำรองจ่าย"
+                  placeholder={t("company.sectionAlertPlaceholder")}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="grp-alert-type">ประเภท</Label>
+                <Label htmlFor="grp-alert-type">{t("common.type")}</Label>
                 <select
                   id="grp-alert-type"
                   value={groupForm.alertType}
                   onChange={(e) =>
                     setGroupForm((prev) => ({ ...prev, alertType: e.target.value as "warning" | "error" | "info" | "success" | "promo" | "urgent" }))
                   }
-                  title="ประเภทแจ้งเตือน"
+                  title={t("common.type")}
                   className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                 >
-                  <option value="warning">⚠️ เตือน</option>
-                  <option value="error">❌ สำคัญ</option>
-                  <option value="info">ℹ️ แจ้งข้อมูล</option>
-                  <option value="success">✅ สำเร็จ</option>
-                  <option value="promo">🎉 โปรโมชั่น</option>
-                  <option value="urgent">🚨 ด่วน</option>
+                  <option value="warning">{t("alertOptions.warning")}</option>
+                  <option value="error">{t("alertOptions.error")}</option>
+                  <option value="info">{t("alertOptions.info")}</option>
+                  <option value="success">{t("alertOptions.success")}</option>
+                  <option value="promo">{t("alertOptions.promo")}</option>
+                  <option value="urgent">{t("alertOptions.urgent")}</option>
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="grp-alert-size">ขนาด</Label>
+                <Label htmlFor="grp-alert-size">{t("common.size")}</Label>
                 <select
                   id="grp-alert-size"
                   value={groupForm.alertSize}
                   onChange={(e) =>
                     setGroupForm((prev) => ({ ...prev, alertSize: e.target.value as "xs" | "sm" | "md" | "lg" | "xl" }))
                   }
-                  title="ขนาดแจ้งเตือน"
+                  title={t("common.size")}
                   className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                 >
                   <option value="xs">XS</option>
@@ -886,37 +962,37 @@ export default function SelfInsuredPage() {
                 </select>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="grp-alert-border">ขอบ</Label>
+                <Label htmlFor="grp-alert-border">{t("common.border")}</Label>
                 <select
                   id="grp-alert-border"
                   value={groupForm.alertBorder}
                   onChange={(e) =>
                     setGroupForm((prev) => ({ ...prev, alertBorder: e.target.value as AlertBorder }))
                   }
-                  title="เอฟเฟกต์ขอบ"
+                  title={t("common.border")}
                   className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
                 >
-                  <option value="none">ไม่มี</option>
-                  <option value="glow">เรืองแสง</option>
-                  <option value="pulse">กระพริบ</option>
-                  <option value="shimmer">วิ่ง</option>
-                  <option value="bounce">เด้ง</option>
-                  <option value="shake">สั่น</option>
-                  <option value="rainbow">สายรุ้ง</option>
-                  <option value="blink">กระพริบจ้า</option>
+                  <option value="none">{t("alertOptions.none")}</option>
+                  <option value="glow">{t("alertOptions.glow")}</option>
+                  <option value="pulse">{t("alertOptions.pulse")}</option>
+                  <option value="shimmer">{t("alertOptions.shimmer")}</option>
+                  <option value="bounce">{t("alertOptions.bounce")}</option>
+                  <option value="shake">{t("alertOptions.shake")}</option>
+                  <option value="rainbow">{t("alertOptions.rainbow")}</option>
+                  <option value="blink">{t("alertOptions.blink")}</option>
                 </select>
               </div>
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setGroupDialogOpen(false)}>
-              ยกเลิก
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={handleGroupDialogSave}
               disabled={!groupForm.headerName.trim()}
             >
-              {editingGroupFormId ? "บันทึก" : "เพิ่ม"}
+              {editingGroupFormId ? t("common.save") : t("common.add")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -927,12 +1003,12 @@ export default function SelfInsuredPage() {
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {editingCompanyId ? "แก้ไขบริษัท" : "เพิ่มบริษัท"}
+              {editingCompanyId ? t("company.editCompany") : t("company.addCompany")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2 max-h-[60vh] overflow-y-auto pr-1">
             <div className="space-y-2">
-              <Label htmlFor="co-name">ชื่อบริษัท</Label>
+              <Label htmlFor="co-name">{t("company.companyName")}</Label>
               <Input
                 id="co-name"
                 value={companyForm.displayName}
@@ -942,19 +1018,47 @@ export default function SelfInsuredPage() {
                     displayName: e.target.value,
                   }))
                 }
-                placeholder="กรอกชื่อบริษัท"
+                placeholder={t("company.companyNamePlaceholder")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="co-name-en">{t("company.nameEn")}</Label>
+              <Input
+                id="co-name-en"
+                value={companyForm.nameEn}
+                onChange={(e) =>
+                  setCompanyForm((prev) => ({
+                    ...prev,
+                    nameEn: e.target.value,
+                  }))
+                }
+                placeholder={t("company.nameEnPlaceholder")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="co-name-th">{t("company.nameTh")}</Label>
+              <Input
+                id="co-name-th"
+                value={companyForm.nameTh}
+                onChange={(e) =>
+                  setCompanyForm((prev) => ({
+                    ...prev,
+                    nameTh: e.target.value,
+                  }))
+                }
+                placeholder={t("company.nameThPlaceholder")}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="co-code">รหัสบริษัท (code)</Label>
+                <Label htmlFor="co-code">{t("company.companyCode")}</Label>
                 <Input
                   id="co-code"
                   value={companyForm.code}
                   onChange={(e) =>
                     setCompanyForm((prev) => ({ ...prev, code: e.target.value }))
                   }
-                  placeholder="เช่น AIA"
+                  placeholder={t("company.codePlaceholder")}
                 />
               </div>
               <div className="space-y-2">
@@ -968,12 +1072,12 @@ export default function SelfInsuredPage() {
                       iclaimId: e.target.value,
                     }))
                   }
-                  placeholder="เช่น 123"
+                  placeholder={t("company.iclaimIdPlaceholder")}
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="co-claimtype">ประเภทการเบิก</Label>
+              <Label htmlFor="co-claimtype">{t("company.claimType")}</Label>
               <select
                 id="co-claimtype"
                 value={companyForm.claimType}
@@ -983,171 +1087,180 @@ export default function SelfInsuredPage() {
                     claimType: e.target.value as "OPD_IPD" | "OPD_ONLY" | "IPD_ONLY",
                   }))
                 }
+                title={t("company.claimType")}
                 className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               >
-                <option value="OPD_IPD">OPD + IPD</option>
-                <option value="OPD_ONLY">OPD เท่านั้น</option>
-                <option value="IPD_ONLY">IPD เท่านั้น</option>
+                <option value="OPD_IPD">{t("company.opdIpd")}</option>
+                <option value="OPD_ONLY">{t("company.opdOnly")}</option>
+                <option value="IPD_ONLY">{t("company.ipdOnly")}</option>
               </select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="co-redirect">Redirect URL (ถ้ามี)</Label>
-              <Input
-                id="co-redirect"
-                value={companyForm.redirectUrl}
-                onChange={(e) =>
-                  setCompanyForm((prev) => ({
-                    ...prev,
-                    redirectUrl: e.target.value,
-                  }))
-                }
-                placeholder="https://..."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>โลโก้บริษัท</Label>
-              {companyForm.logoUrl ? (
-                <div className="flex items-center gap-3">
-                  <img src={companyForm.logoUrl} alt="logo" className="w-12 h-12 object-contain rounded border" />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-500 hover:text-red-700 gap-1"
-                    onClick={() => setCompanyForm((prev) => ({ ...prev, logoUrl: "" }))}
-                  >
-                    <X className="size-3.5" />
-                    ลบโลโก้
-                  </Button>
+            <button type="button" onClick={() => setShowAdvanced(!showAdvanced)} className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
+              <ChevronDown className={`size-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+              {t("company.advancedOptions")}
+            </button>
+            {showAdvanced && (
+              <>
+                <div className="space-y-2">
+                  <Label htmlFor="co-redirect">{t("company.redirectUrl")}</Label>
+                  <Input
+                    id="co-redirect"
+                    value={companyForm.redirectUrl}
+                    onChange={(e) =>
+                      setCompanyForm((prev) => ({
+                        ...prev,
+                        redirectUrl: e.target.value,
+                      }))
+                    }
+                    placeholder="https://..."
+                  />
                 </div>
-              ) : (
-                <div>
-                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
-                    <Upload className="size-3.5" />
-                    {uploading ? "กำลังอัปโหลด..." : "อัปโหลดโลโก้"}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleLogoUpload}
-                      disabled={uploading}
+                <div className="space-y-2">
+                  <Label>{t("company.companyLogo")}</Label>
+                  {companyForm.logoUrl ? (
+                    <div className="flex items-center gap-3">
+                      <img src={companyForm.logoUrl} alt="logo" className="w-12 h-12 object-contain rounded border" />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700 gap-1"
+                        onClick={() => setCompanyForm((prev) => ({ ...prev, logoUrl: "" }))}
+                      >
+                        <X className="size-3.5" />
+                        {t("company.removeLogo")}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
+                        <Upload className="size-3.5" />
+                        {uploading ? t("company.uploading") : t("company.uploadLogo")}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleLogoUpload}
+                          disabled={uploading}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="co-remark">{t("company.remark")}</Label>
+                  <Input
+                    id="co-remark"
+                    value={companyForm.remark}
+                    onChange={(e) =>
+                      setCompanyForm((prev) => ({ ...prev, remark: e.target.value }))
+                    }
+                    placeholder={t("company.remarkPlaceholder")}
+                  />
+                </div>
+                <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-end">
+                  <div className="space-y-2">
+                    <Label htmlFor="co-alert">{t("company.alertText")}</Label>
+                    <Input
+                      id="co-alert"
+                      value={companyForm.alertText}
+                      onChange={(e) =>
+                        setCompanyForm((prev) => ({ ...prev, alertText: e.target.value }))
+                      }
+                      placeholder={t("company.alertPlaceholder")}
                     />
-                  </label>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="co-alert-type">{t("common.type")}</Label>
+                    <select
+                      id="co-alert-type"
+                      value={companyForm.alertType}
+                      onChange={(e) =>
+                        setCompanyForm((prev) => ({ ...prev, alertType: e.target.value as "warning" | "error" | "info" | "success" | "promo" | "urgent" }))
+                      }
+                      title={t("common.type")}
+                      className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="warning">{t("alertOptions.warning")}</option>
+                      <option value="error">{t("alertOptions.error")}</option>
+                      <option value="info">{t("alertOptions.info")}</option>
+                      <option value="success">{t("alertOptions.success")}</option>
+                      <option value="promo">{t("alertOptions.promo")}</option>
+                      <option value="urgent">{t("alertOptions.urgent")}</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="co-alert-size">{t("common.size")}</Label>
+                    <select
+                      id="co-alert-size"
+                      value={companyForm.alertSize}
+                      onChange={(e) =>
+                        setCompanyForm((prev) => ({ ...prev, alertSize: e.target.value as "xs" | "sm" | "md" | "lg" | "xl" }))
+                      }
+                      title={t("common.size")}
+                      className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="xs">XS</option>
+                      <option value="sm">S</option>
+                      <option value="md">M</option>
+                      <option value="lg">L</option>
+                      <option value="xl">XL</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="co-alert-border">{t("common.border")}</Label>
+                    <select
+                      id="co-alert-border"
+                      value={companyForm.alertBorder}
+                      onChange={(e) =>
+                        setCompanyForm((prev) => ({ ...prev, alertBorder: e.target.value as AlertBorder }))
+                      }
+                      title={t("common.border")}
+                      className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="none">{t("alertOptions.none")}</option>
+                      <option value="glow">{t("alertOptions.glow")}</option>
+                      <option value="pulse">{t("alertOptions.pulse")}</option>
+                      <option value="shimmer">{t("alertOptions.shimmer")}</option>
+                      <option value="bounce">{t("alertOptions.bounce")}</option>
+                      <option value="shake">{t("alertOptions.shake")}</option>
+                      <option value="rainbow">{t("alertOptions.rainbow")}</option>
+                      <option value="blink">{t("alertOptions.blink")}</option>
+                    </select>
+                  </div>
                 </div>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="co-remark">หมายเหตุ</Label>
-              <Input
-                id="co-remark"
-                value={companyForm.remark}
-                onChange={(e) =>
-                  setCompanyForm((prev) => ({ ...prev, remark: e.target.value }))
-                }
-                placeholder="ข้อความหมายเหตุ"
-              />
-            </div>
-            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 items-end">
-              <div className="space-y-2">
-                <Label htmlFor="co-alert">ข้อความแจ้งเตือน (ถ้ามี)</Label>
-                <Input
-                  id="co-alert"
-                  value={companyForm.alertText}
-                  onChange={(e) =>
-                    setCompanyForm((prev) => ({ ...prev, alertText: e.target.value }))
-                  }
-                  placeholder="เช่น OPD ให้สำรองจ่าย"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="co-alert-type">ประเภท</Label>
-                <select
-                  id="co-alert-type"
-                  value={companyForm.alertType}
-                  onChange={(e) =>
-                    setCompanyForm((prev) => ({ ...prev, alertType: e.target.value as "warning" | "error" | "info" | "success" | "promo" | "urgent" }))
-                  }
-                  title="ประเภทแจ้งเตือน"
-                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="warning">⚠️ เตือน</option>
-                  <option value="error">❌ สำคัญ</option>
-                  <option value="info">ℹ️ แจ้งข้อมูล</option>
-                  <option value="success">✅ สำเร็จ</option>
-                  <option value="promo">🎉 โปรโมชั่น</option>
-                  <option value="urgent">🚨 ด่วน</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="co-alert-size">ขนาด</Label>
-                <select
-                  id="co-alert-size"
-                  value={companyForm.alertSize}
-                  onChange={(e) =>
-                    setCompanyForm((prev) => ({ ...prev, alertSize: e.target.value as "xs" | "sm" | "md" | "lg" | "xl" }))
-                  }
-                  title="ขนาดแจ้งเตือน"
-                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="xs">XS</option>
-                  <option value="sm">S</option>
-                  <option value="md">M</option>
-                  <option value="lg">L</option>
-                  <option value="xl">XL</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="co-alert-border">ขอบ</Label>
-                <select
-                  id="co-alert-border"
-                  value={companyForm.alertBorder}
-                  onChange={(e) =>
-                    setCompanyForm((prev) => ({ ...prev, alertBorder: e.target.value as AlertBorder }))
-                  }
-                  title="เอฟเฟกต์ขอบ"
-                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="none">ไม่มี</option>
-                  <option value="glow">เรืองแสง</option>
-                  <option value="pulse">กระพริบ</option>
-                  <option value="shimmer">วิ่ง</option>
-                  <option value="bounce">เด้ง</option>
-                  <option value="shake">สั่น</option>
-                  <option value="rainbow">สายรุ้ง</option>
-                  <option value="blink">กระพริบจ้า</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="co-clickable">คลิกได้ (ไม่ระงับ)</Label>
-              <Switch
-                id="co-clickable"
-                checked={companyForm.isClickable}
-                onCheckedChange={(val) =>
-                  setCompanyForm((prev) => ({ ...prev, isClickable: val }))
-                }
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="co-isnew">แสดงป้าย "ใหม่"</Label>
-              <Switch
-                id="co-isnew"
-                checked={companyForm.isNew}
-                onCheckedChange={(val) =>
-                  setCompanyForm((prev) => ({ ...prev, isNew: val }))
-                }
-              />
-            </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="co-clickable">{t("company.isClickable")}</Label>
+                  <Switch
+                    id="co-clickable"
+                    checked={companyForm.isClickable}
+                    onCheckedChange={(val) =>
+                      setCompanyForm((prev) => ({ ...prev, isClickable: val }))
+                    }
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="co-isnew">{t("company.showNewBadge")}</Label>
+                  <Switch
+                    id="co-isnew"
+                    checked={companyForm.isNew}
+                    onCheckedChange={(val) =>
+                      setCompanyForm((prev) => ({ ...prev, isNew: val }))
+                    }
+                  />
+                </div>
+              </>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setCompanyDialogOpen(false)}>
-              ยกเลิก
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={handleCompanyDialogSave}
               disabled={!companyForm.displayName.trim()}
             >
-              {editingCompanyId ? "บันทึก" : "เพิ่ม"}
+              {editingCompanyId ? t("common.save") : t("common.add")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1160,18 +1273,18 @@ export default function SelfInsuredPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>ยืนยันการลบกลุ่ม?</AlertDialogTitle>
+            <AlertDialogTitle>{t("selfInsured.confirmDeleteGroup")}</AlertDialogTitle>
             <AlertDialogDescription>
-              การลบกลุ่มจะลบบริษัททั้งหมดในกลุ่มด้วย และไม่สามารถกู้คืนได้
+              {t("selfInsured.deleteGroupDescription")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700"
               onClick={() => deleteGroupId && handleDeleteGroup(deleteGroupId)}
             >
-              ลบ
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -1184,13 +1297,13 @@ export default function SelfInsuredPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>ยืนยันการลบ?</AlertDialogTitle>
+            <AlertDialogTitle>{t("common.confirmDelete")}</AlertDialogTitle>
             <AlertDialogDescription>
-              การลบนี้ไม่สามารถกู้คืนได้
+              {t("common.cannotUndo")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700"
               onClick={() =>
@@ -1201,7 +1314,7 @@ export default function SelfInsuredPage() {
                 )
               }
             >
-              ลบ
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

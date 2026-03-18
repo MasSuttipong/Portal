@@ -2,17 +2,6 @@
   "heading": "บริษัทประกันภัยและประกันชีวิต",
   "companies": [
     {
-      "id": "ins-3",
-      "displayName": "บริษัท กรุงเทพประกันสุขภาพ จำกัด (มหาชน)",
-      "code": null,
-      "iclaimId": null,
-      "isClickable": true,
-      "isNew": true,
-      "claimType": "OPD_IPD",
-      "remark": null,
-      "logoUrl": null
-    },
-    {
       "id": "ins-4",
       "displayName": "บริษัท กรุงไทยพานิชประกันภัย จำกัด (มหาชน)",
       "code": "KTP",
@@ -33,6 +22,17 @@
       "claimType": "OPD_IPD",
       "remark": null,
       "logoUrl": "/logos/ins-2.png"
+    },
+    {
+      "id": "ins-3",
+      "displayName": "บริษัท กรุงเทพประกันสุขภาพ จำกัด (มหาชน)",
+      "code": null,
+      "iclaimId": null,
+      "isClickable": true,
+      "isNew": true,
+      "claimType": "OPD_IPD",
+      "remark": null,
+      "logoUrl": null
     },
     {
       "id": "ins-6",
@@ -90,17 +90,6 @@
       "logoUrl": "/logos/ins-8.png"
     },
     {
-      "id": "ins-9",
-      "displayName": "บริษัท ทิพย Non-Life Insurance จำกัด (มหาชน)",
-      "code": "TIP",
-      "iclaimId": "3",
-      "isClickable": true,
-      "isNew": false,
-      "claimType": "OPD_IPD",
-      "remark": null,
-      "logoUrl": "/logos/ins-9.png"
-    },
-    {
       "id": "ins-10",
       "displayName": "บริษัท ทิพยประกันชีวิต จำกัด (มหาชน)",
       "code": "TIPLIFE",
@@ -132,6 +121,17 @@
       "claimType": "OPD_IPD",
       "remark": null,
       "logoUrl": null
+    },
+    {
+      "id": "ins-9",
+      "displayName": "บริษัท ทิพย Non-Life Insurance จำกัด (มหาชน)",
+      "code": "TIP",
+      "iclaimId": "3",
+      "isClickable": true,
+      "isNew": false,
+      "claimType": "OPD_IPD",
+      "remark": null,
+      "logoUrl": "/logos/ins-9.png"
     },
     {
       "id": "ins-13",

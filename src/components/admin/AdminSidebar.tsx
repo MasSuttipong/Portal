@@ -3,20 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
+import { useLanguage, type TranslationKey } from "@/lib/i18n/LanguageContext";
+import { Newspaper, BookOpen, Shield, Building2, Globe, Receipt, Settings, type LucideIcon } from "lucide-react";
 
 interface NavItem {
-  label: string;
+  labelKey: TranslationKey;
   href: string;
+  icon: LucideIcon;
 }
 
 const navItems: NavItem[] = [
-  { label: "ข่าวสาร", href: "/admin/news" },
-  { label: "คู่มือ", href: "/admin/manual" },
-  { label: "บริษัทประกัน", href: "/admin/insurance" },
-  { label: "สวัสดิการพนักงาน", href: "/admin/self-insured" },
-  { label: "ประกันต่างประเทศ", href: "/admin/international" },
-  { label: "Deductible", href: "/admin/deductible" },
-  { label: "ตั้งค่า", href: "/admin/settings" },
+  { labelKey: "nav.news", href: "/admin/news", icon: Newspaper },
+  { labelKey: "nav.manual", href: "/admin/manual", icon: BookOpen },
+  { labelKey: "nav.insurance", href: "/admin/insurance", icon: Shield },
+  { labelKey: "nav.selfInsured", href: "/admin/self-insured", icon: Building2 },
+  { labelKey: "nav.international", href: "/admin/international", icon: Globe },
+  { labelKey: "nav.deductible", href: "/admin/deductible", icon: Receipt },
+  { labelKey: "nav.settings", href: "/admin/settings", icon: Settings },
 ];
 
 interface AdminSidebarProps {
@@ -25,6 +28,7 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({ onNavigate }: AdminSidebarProps) {
   const pathname = usePathname();
+  const { t } = useLanguage();
 
   return (
     <aside className="w-56 shrink-0 bg-white border-r border-gray-200 flex flex-col h-full min-h-screen md:min-h-0">
@@ -43,13 +47,14 @@ export default function AdminSidebar({ onNavigate }: AdminSidebarProps) {
                   href={item.href}
                   onClick={onNavigate}
                   className={cn(
-                    "block px-4 py-2 rounded text-sm transition-colors",
+                    "flex items-center gap-2.5 px-4 py-2 rounded text-sm transition-colors",
                     isActive
                       ? "bg-blue-50 text-blue-700 font-medium"
                       : "text-gray-700 hover:bg-gray-100 hover:text-gray-900"
                   )}
                 >
-                  {item.label}
+                  <item.icon className="size-4 shrink-0" />
+                  {t(item.labelKey)}
                 </Link>
               </li>
             );

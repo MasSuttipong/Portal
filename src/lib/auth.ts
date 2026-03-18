@@ -2,8 +2,11 @@ import { SignJWT, jwtVerify } from "jose";
 
 export const COOKIE_NAME = "admin_token";
 
-const getSecret = () =>
-  new TextEncoder().encode(process.env.JWT_SECRET || "fallback-secret");
+const getSecret = () => {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET environment variable is required");
+  return new TextEncoder().encode(secret);
+};
 
 export async function signToken(): Promise<string> {
   return new SignJWT({ role: "admin" })

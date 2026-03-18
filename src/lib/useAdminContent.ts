@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 interface UseAdminContentResult<T> {
   data: T | null;
@@ -18,6 +19,7 @@ export function useAdminContent<T>(filename: string): UseAdminContentResult<T> {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const router = useRouter();
+  const { t } = useLanguage();
 
   useEffect(() => {
     let cancelled = false;
@@ -40,7 +42,7 @@ export function useAdminContent<T>(filename: string): UseAdminContentResult<T> {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err instanceof Error ? err.message : "เกิดข้อผิดพลาดในการโหลดข้อมูล");
+          setError(err instanceof Error ? err.message : t("messages.loadError"));
         }
       } finally {
         if (!cancelled) {
@@ -54,6 +56,7 @@ export function useAdminContent<T>(filename: string): UseAdminContentResult<T> {
     return () => {
       cancelled = true;
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filename, router]);
 
   const save = useCallback(
@@ -76,16 +79,16 @@ export function useAdminContent<T>(filename: string): UseAdminContentResult<T> {
         }
 
         setData(newData);
-        toast.success("บันทึกสำเร็จ");
+        toast.success(t("messages.saveSuccess"));
         return true;
       } catch {
-        toast.error("เกิดข้อผิดพลาด");
+        toast.error(t("messages.saveError"));
         return false;
       } finally {
         setSaving(false);
       }
     },
-    [filename, router]
+    [filename, router, t]
   );
 
   return { data, loading, saving, error, save };

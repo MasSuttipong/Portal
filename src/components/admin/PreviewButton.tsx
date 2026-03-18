@@ -2,8 +2,11 @@
 
 import { Button } from "@/components/ui/button";
 import { ExternalLink } from "lucide-react";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 
 export default function PreviewButton() {
+  const { t } = useLanguage();
+
   function handleClick() {
     window.open("/", "_blank", "noopener,noreferrer");
   }
@@ -11,7 +14,7 @@ export default function PreviewButton() {
   return (
     <Button variant="outline" size="sm" onClick={handleClick} className="gap-1.5">
       <ExternalLink className="size-4" />
-      ดูตัวอย่าง
+      {t("common.preview")}
     </Button>
   );
 }

@@ -76,7 +76,7 @@ export default function CompanyItem({
       <div className={`${cardBase} opacity-60 grayscale`}>
         {logo}
         <div className="min-w-0 flex-1">
-          <span className="text-sm text-portal-suspended block truncate">{displayName}</span>
+          <span className="text-base text-portal-suspended block truncate">{displayName}</span>
           {badges}
           {remark && <RemarkText remark={remark} />}
         </div>
@@ -94,7 +94,7 @@ export default function CompanyItem({
       >
         {logo}
         <div className="min-w-0 flex-1">
-          <span className="text-sm font-medium text-portal-link block truncate">{displayName}</span>
+          <span className="text-base font-medium text-portal-link block truncate">{displayName}</span>
           {badges}
           {remark && <RemarkText remark={remark} />}
         </div>
@@ -110,7 +110,7 @@ export default function CompanyItem({
     >
       {logo}
       <div className="min-w-0 flex-1">
-        <span className="text-sm font-medium text-portal-link block truncate">{displayName}</span>
+        <span className="text-base font-medium text-portal-link block truncate">{displayName}</span>
         {badges}
         {remark && <RemarkText remark={remark} />}
       </div>
@@ -164,7 +164,7 @@ function ListItem({
     return (
       <div className={`${rowBase} opacity-60`}>
         {logo}
-        <span className="text-sm text-portal-suspended truncate">{displayName}</span>
+        <span className="text-base text-portal-suspended truncate">{displayName}</span>
         {inlineBadges}
         {remark && <RemarkText remark={remark} />}
       </div>

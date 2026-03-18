@@ -12,10 +12,10 @@
   },
   "announcement": {
     "enabled": false,
-    "text": "",
-    "type": "warning",
+    "text": "วันนี้ปิดนะจ๊ะ",
+    "type": "urgent",
     "size": "xl",
-    "border": "bounce",
+    "border": "shake",
     "link": null,
     "dismissible": false
   }

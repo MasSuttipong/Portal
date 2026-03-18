@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAdminContent } from "@/lib/useAdminContent";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { ManualData, ManualItem } from "@/types/portal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,7 @@ const emptyForm: ManualFormData = {
 
 export default function ManualPage() {
   const { data, loading, error, save } = useAdminContent<ManualData>("manual");
+  const { t } = useLanguage();
   const [subHeading, setSubHeading] = useState<string>("");
   const [subHeadingInitialized, setSubHeadingInitialized] = useState(false);
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -58,7 +60,6 @@ export default function ManualPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  // Initialize subHeading from loaded data once
   if (data && !subHeadingInitialized) {
     setSubHeading(data.subHeading ?? "");
     setSubHeadingInitialized(true);
@@ -139,7 +140,7 @@ export default function ManualPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-40 text-gray-500 text-sm">
-        กำลังโหลด...
+        {t("common.loading")}
       </div>
     );
   }
@@ -147,7 +148,7 @@ export default function ManualPage() {
   if (error) {
     return (
       <div className="flex items-center justify-center h-40 text-red-500 text-sm">
-        เกิดข้อผิดพลาด: {error}
+        {t("common.errorPrefix")} {error}
       </div>
     );
   }
@@ -156,15 +157,15 @@ export default function ManualPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-xl font-bold text-gray-900">จัดการคู่มือ</h1>
+        <h1 className="text-xl font-bold text-gray-900">{t("manual.pageTitle")}</h1>
         <div className="flex gap-2">
           <Button onClick={openAddDialog} variant="outline" size="sm" className="gap-1.5">
             <Plus className="size-4" />
-            เพิ่มคู่มือ
+            {t("manual.addManual")}
           </Button>
           <Button onClick={handleSave} disabled={saving} size="sm" className="gap-1.5">
             <Save className="size-4" />
-            {saving ? "กำลังบันทึก..." : "บันทึก"}
+            {saving ? t("common.saving") : t("common.save")}
           </Button>
         </div>
       </div>
@@ -172,16 +173,16 @@ export default function ManualPage() {
       {/* Sub-heading */}
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">คำอธิบายส่วน</CardTitle>
+          <CardTitle className="text-base">{t("manual.sectionDescription")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Label htmlFor="manual-subheading">หัวข้อรอง</Label>
+            <Label htmlFor="manual-subheading">{t("manual.subHeading")}</Label>
             <Input
               id="manual-subheading"
               value={subHeading}
               onChange={(e) => setSubHeading(e.target.value)}
-              placeholder="กรอกหัวข้อรอง (ถ้ามี)"
+              placeholder={t("manual.subHeadingPlaceholder")}
             />
           </div>
         </CardContent>
@@ -190,7 +191,7 @@ export default function ManualPage() {
       {/* List */}
       {items.length === 0 ? (
         <div className="text-center py-12 text-gray-400 text-sm border rounded-lg bg-white">
-          ยังไม่มีคู่มือ กดปุ่ม "เพิ่มคู่มือ" เพื่อเพิ่ม
+          {t("manual.noManuals")}
         </div>
       ) : (
         <div className="bg-white rounded-lg border overflow-hidden">
@@ -198,9 +199,9 @@ export default function ManualPage() {
             <TableHeader>
               <TableRow>
                 <TableHead className="w-8"></TableHead>
-                <TableHead>ชื่อคู่มือ</TableHead>
-                <TableHead className="w-28 text-center">เผยแพร่</TableHead>
-                <TableHead className="w-24 text-right">จัดการ</TableHead>
+                <TableHead>{t("manual.manualName")}</TableHead>
+                <TableHead className="w-28 text-center">{t("common.published")}</TableHead>
+                <TableHead className="w-24 text-right">{t("common.manage")}</TableHead>
               </TableRow>
             </TableHeader>
           </Table>
@@ -260,17 +261,17 @@ export default function ManualPage() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>
-              {editingId ? "แก้ไขคู่มือ" : "เพิ่มคู่มือ"}
+              {editingId ? t("manual.editManual") : t("manual.addManual")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2">
             <div className="space-y-2">
-              <Label htmlFor="manual-title">ชื่อคู่มือ</Label>
+              <Label htmlFor="manual-title">{t("manual.manualName")}</Label>
               <Input
                 id="manual-title"
                 value={form.title}
                 onChange={(e) => handleFormChange("title", e.target.value)}
-                placeholder="กรอกชื่อคู่มือ"
+                placeholder={t("manual.manualNamePlaceholder")}
               />
             </div>
             <div className="space-y-2">
@@ -284,7 +285,7 @@ export default function ManualPage() {
               />
             </div>
             <div className="flex items-center justify-between">
-              <Label htmlFor="manual-isPublished">เผยแพร่</Label>
+              <Label htmlFor="manual-isPublished">{t("common.published")}</Label>
               <Switch
                 id="manual-isPublished"
                 checked={form.isPublished}
@@ -294,10 +295,10 @@ export default function ManualPage() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              ยกเลิก
+              {t("common.cancel")}
             </Button>
             <Button onClick={handleDialogSave} disabled={!form.title.trim()}>
-              {editingId ? "บันทึก" : "เพิ่ม"}
+              {editingId ? t("common.save") : t("common.add")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -310,18 +311,18 @@ export default function ManualPage() {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>ยืนยันการลบ?</AlertDialogTitle>
+            <AlertDialogTitle>{t("common.confirmDelete")}</AlertDialogTitle>
             <AlertDialogDescription>
-              การลบนี้ไม่สามารถกู้คืนได้
+              {t("common.cannotUndo")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700"
               onClick={() => deleteId && handleDelete(deleteId)}
             >
-              ลบ
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

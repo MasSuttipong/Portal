@@ -1,19 +1,30 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import PreviewButton from "@/components/admin/PreviewButton";
+import LanguageToggle from "@/components/admin/LanguageToggle";
+import { LanguageProvider, useLanguage } from "@/lib/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { LogOut, Menu, X } from "lucide-react";
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
+  const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  const sectionMap: Record<string, string> = {
+    "/admin/news": t("nav.news"),
+    "/admin/manual": t("nav.manual"),
+    "/admin/insurance": t("nav.insurance"),
+    "/admin/self-insured": t("nav.selfInsured"),
+    "/admin/international": t("nav.international"),
+    "/admin/deductible": t("nav.deductible"),
+    "/admin/settings": t("nav.settings"),
+  };
+  const currentSection = sectionMap[pathname] ?? "";
 
   async function handleLogout() {
     try {
@@ -33,15 +44,21 @@ export default function AdminLayout({
           <button
             onClick={() => setSidebarOpen((prev) => !prev)}
             className="md:hidden inline-flex items-center justify-center rounded-md p-1.5 text-gray-600 hover:bg-gray-100 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
-            aria-label={sidebarOpen ? "ปิดเมนู" : "เปิดเมนู"}
+            aria-label={sidebarOpen ? t("common.closeMenu") : t("common.openMenu")}
           >
             {sidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
           </button>
           <span className="text-base font-semibold text-gray-900">
             BVTPA Portal Admin
           </span>
+          {currentSection && (
+            <span className="text-sm text-gray-500 md:hidden">
+              / {currentSection}
+            </span>
+          )}
         </div>
         <div className="flex items-center gap-3">
+          <LanguageToggle />
           <PreviewButton />
           <Button
             variant="ghost"
@@ -50,7 +67,7 @@ export default function AdminLayout({
             className="gap-1.5 text-gray-600 hover:text-red-600"
           >
             <LogOut className="size-4" />
-            <span className="hidden sm:inline">ออกจากระบบ</span>
+            <span className="hidden sm:inline">{t("common.logout")}</span>
           </Button>
         </div>
       </header>
@@ -83,5 +100,17 @@ export default function AdminLayout({
         </main>
       </div>
     </div>
+  );
+}
+
+export default function AdminLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return (
+    <LanguageProvider>
+      <AdminLayoutInner>{children}</AdminLayoutInner>
+    </LanguageProvider>
   );
 }

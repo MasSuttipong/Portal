@@ -5,6 +5,8 @@ export type AlertBorder = "none" | "glow" | "pulse" | "shimmer" | "bounce" | "sh
 export interface Company {
   id: string;
   displayName: string;
+  nameEn?: string | null;
+  nameTh?: string | null;
   code: string | null;
   iclaimId: string | null;
   isClickable: boolean;
