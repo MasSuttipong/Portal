@@ -3,6 +3,7 @@
 import type { TpaCareCheck, PortalSettings } from "@/types/portal";
 import { withBasePath } from "@/lib/base-path";
 import { buildIClaimUrl } from "@/lib/iclaim";
+import SanitizedHtml from "./SanitizedHtml";
 
 interface TpaCareCheckCardProps {
   data: TpaCareCheck;
@@ -62,7 +63,11 @@ export default function TpaCareCheckCard({
       )}
       <h2 className="text-xl font-bold leading-relaxed font-heading">{data.heading}</h2>
       {data.description && (
-        <p className="mt-2 text-blue-100 leading-relaxed">{data.description}</p>
+        <SanitizedHtml
+          as="p"
+          className="mt-2 text-blue-100 leading-relaxed"
+          html={data.description}
+        />
       )}
     </div>
   );

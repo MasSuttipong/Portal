@@ -51,7 +51,7 @@ npm run lint         # ESLint
 ### Auth
 - `POST /api/auth/login` — validates password, sets HTTP-only JWT cookie (8h expiry)
 - `POST /api/auth/logout` — clears cookie
-- `src/middleware.ts` — checks cookie on `/admin/*` and `/api/admin/*` routes
+- `src/proxy.ts` — checks cookie on `/admin/*` and `/api/admin/*` routes
 - No user accounts — single shared password only
 
 ### i18n System

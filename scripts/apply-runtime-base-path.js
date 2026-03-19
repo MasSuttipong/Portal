@@ -1,12 +1,15 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 const fs = require("fs");
 const path = require("path");
+const { loadScriptEnv } = require("./load-env");
 const {
   BASE_PATH_ENV_NAME,
   BASE_PATH_MARKER_PATH,
   BASE_PATH_SENTINEL,
   readValidatedBasePath,
 } = require("./runtime-base-path");
+
+loadScriptEnv();
 
 const TEXT_FILE_EXTENSIONS = new Set([
   ".css",

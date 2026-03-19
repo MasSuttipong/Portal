@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { COOKIE_NAME, verifyToken } from "@/lib/auth";
 import { stripBasePath, withBasePath } from "@/lib/base-path";
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   const pathname = stripBasePath(request.nextUrl.pathname);
 
   const token = request.cookies.get(COOKIE_NAME)?.value;

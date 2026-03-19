@@ -16,7 +16,6 @@ import type { ViewMode } from "./CompanyItem";
 import ManualSection from "./ManualSection";
 import NewsSection from "./NewsSection";
 import CompanySectionComponent from "./CompanySection";
-import TpaCareCheckCard from "./TpaCareCheckCard";
 import IClaimModal from "./IClaimModal";
 import { buildIClaimUrl } from "@/lib/iclaim";
 import CompanyItem from "./CompanyItem";
@@ -31,7 +30,7 @@ const TAB_ICONS: Record<string, React.ReactNode> = {
   international: <Globe className="size-4" />,
   deductible: <Receipt className="size-4" />,
 };
-import { withBasePath } from "@/lib/base-path";
+import { withBasePath, withBasePathApi } from "@/lib/base-path";
 
 interface PortalPageProps {
   settings: PortalSettings;
@@ -75,13 +74,23 @@ export default function PortalPage({
   const [activeTab, setActiveTab] = useState("insurance");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("card");
-  const [isClassic, setIsClassic] = useState(false);
+  const [isClassic, setIsClassic] = useState(() => {
+    if (typeof window === "undefined") {
+      return false;
+    }
+
+    return localStorage.getItem("portal-view-mode") === "classic";
+  });
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("portal-view-mode");
-    if (saved === "classic") setIsClassic(true);
-    setMounted(true);
+    const frameId = window.requestAnimationFrame(() => {
+      setMounted(true);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frameId);
+    };
   }, []);
 
   function handleToggleClassic() {
@@ -170,7 +179,9 @@ export default function PortalPage({
           <button
             type="button"
             onClick={async () => {
-              await fetch("/api/auth/provider-logout", { method: "POST" });
+              await fetch(withBasePathApi("/api/auth/provider-logout"), {
+                method: "POST",
+              });
               window.location.reload();
             }}
             className="text-blue-600 hover:text-blue-800 underline text-xs"

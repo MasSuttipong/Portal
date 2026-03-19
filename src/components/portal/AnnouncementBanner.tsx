@@ -4,6 +4,7 @@ import { useState } from "react";
 import { TriangleAlert, AlertCircle, Info, CircleCheck, PartyPopper, Siren, X } from "lucide-react";
 import { withBasePath } from "@/lib/base-path";
 import type { AnnouncementConfig, AlertType, AlertSize, AlertBorder } from "@/types/portal";
+import SanitizedHtml from "./SanitizedHtml";
 
 interface AnnouncementBannerProps {
   announcement?: AnnouncementConfig;
@@ -53,7 +54,11 @@ export default function AnnouncementBanner({ announcement }: AnnouncementBannerP
   const content = (
     <>
       <Icon className={`${s.icon} shrink-0`} />
-      <span className="flex-1">{announcement.text}</span>
+      <SanitizedHtml
+        as="span"
+        className="flex-1"
+        html={announcement.text}
+      />
     </>
   );
 

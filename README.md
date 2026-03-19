@@ -68,7 +68,7 @@ npm install
 Copy the example file and fill in the values:
 
 ```bash
-cp .env.example .env.local
+cp .env.example .env
 ```
 
 | Variable                | Description                                                                                                                                   | Example                             |
@@ -79,7 +79,9 @@ cp .env.example .env.local
 | `NEXT_PUBLIC_BASE_PATH` | Runtime-only in production. Leave empty for root deployment, or set a subpath like `/portal` when the public URL is mounted under that prefix | `/portal`                           |
 
 `ADMIN_PASSWORD` and `JWT_SECRET` are required at runtime. The app now fails fast during server startup if either one is missing or blank.
-| `COOKIE_SECURE` | Set cookie `secure` flag (`true` for HTTPS) | `false` |
+Local commands now load `.env*` with the same precedence as Next.js itself, so `.env`, `.env.local`, `.env.development`, and `.env.production` are supported. OS environment variables still override file-based values.
+
+`npm run dev`, `npm run start`, and `node scripts/validate-runtime-env.js` all read from `.env*` when present. Container images do not bundle `.env*`, so Docker and deployments must continue to inject `ADMIN_PASSWORD`, `JWT_SECRET`, `COOKIE_SECURE`, and `NEXT_PUBLIC_BASE_PATH` from the runtime OS environment.
 
 ### 4. Start the development server
 
@@ -98,7 +100,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the public portal an
 | `npm run start` | Stage a local standalone runtime, patch it from the OS environment, and start the production server |
 | `npm run lint`  | Run ESLint                                                                                          |
 
-`npm run start` prepares a fresh runtime directory under `.next/runtime-standalone` on each launch, so the same build output can be reused with different `NEXT_PUBLIC_BASE_PATH` values between restarts. The Docker image uses the same startup script so container runtime patching matches local production behavior.
+`npm run start` prepares a fresh runtime directory under `.next/runtime-standalone` on each launch, so the same build output can be reused with different `NEXT_PUBLIC_BASE_PATH` values between restarts. The Docker image uses the same startup script so container runtime patching matches local production behavior. For local development, both `npm run dev` and `npm run start` preload `.env*` before the runtime validation scripts run.
 
 ## Project Structure
 
@@ -145,7 +147,7 @@ Portal/
 │   │   └── i18n/               # Internationalization (translations, context, hook)
 │   ├── types/
 │   │   └── portal.ts           # TypeScript interfaces
-│   └── middleware.ts           # Auth guard for /admin/* routes
+│   └── proxy.ts                # Auth guard for /admin/* routes
 ├── Dockerfile
 ├── docker-compose.yml
 ├── .env.example
@@ -157,7 +159,7 @@ Portal/
 
 The project ships with a multi-stage Dockerfile that produces a minimal standalone image.
 
-The production image is now environment-agnostic. `npm run build` always embeds a placeholder base path, and container startup replaces that placeholder using the OS environment variable `NEXT_PUBLIC_BASE_PATH` inside the same staged standalone runtime used by local `npm run start`.
+The production image is now environment-agnostic. `npm run build` always embeds a placeholder base path, and container startup replaces that placeholder using the OS environment variable `NEXT_PUBLIC_BASE_PATH` inside the same staged standalone runtime used by local `npm run start`. The image still does not copy `.env*` files, so container runtime configuration must come from the container OS environment.
 
 ### Build and run with Docker Compose
 
@@ -230,7 +232,7 @@ The admin panel uses a simple shared-password authentication model -- there are 
 1. A user navigates to `/admin` and is redirected to `/admin/login`.
 2. The user enters the password configured in the `ADMIN_PASSWORD` environment variable.
 3. On success, `POST /api/auth/login` creates a signed JWT and stores it in an HTTP-only cookie.
-4. The Next.js middleware (`src/middleware.ts`) checks the cookie on every request to `/admin/*` and `/api/admin/*`.
+4. The Next.js proxy (`src/proxy.ts`) checks the cookie on every request to `/admin/*` and `/api/admin/*`.
 5. Invalid or missing tokens redirect page requests to the login page and return `401` for API requests.
 6. Logging out clears the cookie via `POST /api/auth/logout`.
 

@@ -7,12 +7,12 @@ import PreviewButton from "@/components/admin/PreviewButton";
 import LanguageToggle from "@/components/admin/LanguageToggle";
 import { LanguageProvider, useLanguage } from "@/lib/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
-import { withBasePathApi } from "@/lib/base-path";
+import { stripBasePath, withBasePathApi } from "@/lib/base-path";
 import { LogOut, Menu, X } from "lucide-react";
 
 function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const router = useRouter();
-  const pathname = usePathname();
+  const pathname = stripBasePath(usePathname());
   const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
 

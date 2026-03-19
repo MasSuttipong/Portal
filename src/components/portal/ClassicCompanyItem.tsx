@@ -2,6 +2,7 @@
 
 import type { Company } from "@/types/portal";
 import { withBasePath } from "@/lib/base-path";
+import { normalizeAllowedUrl } from "@/lib/url-policy";
 import NewBadge from "./NewBadge";
 import AlertBadge from "./AlertBadge";
 import RemarkText from "./RemarkText";
@@ -17,7 +18,10 @@ const CLAIM_LABEL: Record<string, string> = {
 };
 
 export default function ClassicCompanyItem({ company, onCompanyClick }: ClassicCompanyItemProps) {
-  const { displayName, isClickable, isNew, remark, redirectUrl, claimType, code, iclaimId } = company;
+  const { displayName, isClickable, isNew, remark, redirectUrl: rawRedirectUrl, claimType, code, iclaimId } = company;
+  const redirectUrl = rawRedirectUrl
+    ? normalizeAllowedUrl(rawRedirectUrl, { allowRootRelative: true }) ?? undefined
+    : undefined;
   const suspended = !isClickable || (!redirectUrl && (!code || !iclaimId));
 
   const claimLabel = CLAIM_LABEL[claimType];

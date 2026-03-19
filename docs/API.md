@@ -27,7 +27,7 @@ The BVTPA Portal uses a **single-password authentication system** with JWT token
 1. User submits password to `/api/auth/login`
 2. Server validates password against `ADMIN_PASSWORD` environment variable
 3. On success, server issues a signed JWT token and sets it in an HTTP-only, secure cookie
-4. Subsequent requests to `/api/admin/*` routes are automatically protected by middleware
+4. Subsequent requests to `/api/admin/*` routes are automatically protected by the Next.js proxy
 5. Token expires after 8 hours; user must log in again
 
 ### Cookie Details
@@ -41,9 +41,9 @@ The BVTPA Portal uses a **single-password authentication system** with JWT token
   - `sameSite: lax` — Protection against CSRF attacks
   - `path: /` — Available to all routes
 
-### Middleware Protection
+### Proxy Protection
 
-All routes matching `/admin/*` and `/api/admin/*` are protected by middleware (`src/middleware.ts`):
+All routes matching `/admin/*` and `/api/admin/*` are protected by the Next.js proxy (`src/proxy.ts`):
 
 - **API Routes** (`/api/admin/*`): Return `401 Unauthorized` as JSON if token is invalid
 - **Page Routes** (`/admin/*`): Redirect to `/admin/login` if token is invalid
@@ -1199,7 +1199,7 @@ or
 
 ### Rate Limiting
 
-Currently, there is no built-in rate limiting. If deploying at scale, consider adding rate limiting middleware to prevent abuse.
+Currently, there is no built-in rate limiting. If deploying at scale, consider adding rate limiting in the proxy or at the edge to prevent abuse.
 
 ---
 
@@ -1406,7 +1406,7 @@ The current API has no explicit versioning. All endpoints are stable. If breakin
 
 4. **File Uploads**: Uploaded files are not validated beyond file extension. Implement additional validation if user-generated files are a concern.
 
-5. **CORS**: The API does not restrict Cross-Origin requests by default. Add CORS middleware if deploying the admin panel separately from the API.
+5. **CORS**: The API does not restrict Cross-Origin requests by default. Add CORS handling in the proxy or a dedicated route layer if deploying the admin panel separately from the API.
 
 6. **Audit Logging**: Consider adding audit logs for sensitive operations (login, content updates).
 

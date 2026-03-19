@@ -1,18 +1,33 @@
 import type { Metadata } from "next";
-import { Prompt, Sarabun } from "next/font/google";
+import localFont from "next/font/local";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
-const prompt = Prompt({
-  variable: "--font-heading",
-  subsets: ["thai", "latin"],
-  weight: ["400", "500", "600", "700"],
-});
-
-const sarabun = Sarabun({
+const ibmPlexSansThai = localFont({
   variable: "--font-sans",
-  subsets: ["thai", "latin"],
-  weight: ["300", "400", "500", "600", "700"],
+  display: "swap",
+  src: [
+    {
+      path: "./fonts/IBMPlexSansThai-Regular.ttf",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "./fonts/IBMPlexSansThai-Medium.ttf",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "./fonts/IBMPlexSansThai-SemiBold.ttf",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "./fonts/IBMPlexSansThai-Bold.ttf",
+      weight: "700",
+      style: "normal",
+    },
+  ],
 });
 
 export const metadata: Metadata = {
@@ -28,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="th">
       <body
-        className={`${prompt.variable} ${sarabun.variable} antialiased`}
+        className={`${ibmPlexSansThai.variable} portal-font-aliases antialiased`}
       >
         {children}
         <Toaster />

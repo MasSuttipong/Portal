@@ -32,6 +32,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 
 # Copy production startup and runtime validation scripts
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/start-production.js ./scripts/start-production.js
+COPY --from=builder --chown=nextjs:nodejs /app/scripts/load-env.js ./scripts/load-env.js
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/validate-runtime-env.js ./scripts/validate-runtime-env.js
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/apply-runtime-base-path.js ./scripts/apply-runtime-base-path.js
 COPY --from=builder --chown=nextjs:nodejs /app/scripts/runtime-base-path.js ./scripts/runtime-base-path.js

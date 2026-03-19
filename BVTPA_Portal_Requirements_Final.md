@@ -143,7 +143,7 @@ ADMIN_PASSWORD=your-secret-password-here
 // If password matches ADMIN_PASSWORD → set HTTP-only cookie → return success
 // If wrong → return 401
 
-// Middleware: check cookie on all /admin routes and /api/admin/* routes
+// Proxy: check cookie on all /admin routes and /api/admin/* routes
 // If no valid cookie → redirect to /admin/login
 ```
 
@@ -840,7 +840,7 @@ bvtpa-portal/
 │   │   │   ├── PasswordPrompt.tsx
 │   │   │   └── PreviewButton.tsx
 │   │   └── ui/                           # shadcn/ui (Dialog, Button, Card, Table, etc.)
-│   ├── middleware.ts                     # Check admin cookie on /admin/* routes
+│   ├── proxy.ts                          # Check admin cookie on /admin/* routes
 │   ├── types/
 │   │   └── portal.ts                    # All TypeScript interfaces
 │   └── lib/
@@ -944,7 +944,7 @@ bvtpa-portal/
 
 ### Phase 3: Admin — Auth + CRUD API (Day 6–7)
 
-- Password login page + cookie-based auth middleware
+- Password login page + cookie-based auth proxy
 - API routes: `GET/PUT /api/admin/content/:filename`
 - File upload endpoint
 - Test JSON read/write round-trip

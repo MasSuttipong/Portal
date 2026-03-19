@@ -14,6 +14,30 @@ interface UseAdminContentResult<T> {
   save: (newData: T) => Promise<boolean>;
 }
 
+type ApiErrorPayload = {
+  error?: string;
+  issues?: string[];
+};
+
+async function readApiError(res: Response): Promise<string> {
+  try {
+    const payload = (await res.json()) as ApiErrorPayload;
+    const issues = payload.issues?.filter(Boolean) ?? [];
+
+    if (issues.length > 0) {
+      return `${payload.error ?? "Request failed"}: ${issues.join(" | ")}`;
+    }
+
+    if (payload.error) {
+      return payload.error;
+    }
+  } catch {
+    // Ignore JSON parse failures and fall back to HTTP status.
+  }
+
+  return `HTTP ${res.status}`;
+}
+
 export function useAdminContent<T>(filename: string): UseAdminContentResult<T> {
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(true);
@@ -35,7 +59,7 @@ export function useAdminContent<T>(filename: string): UseAdminContentResult<T> {
           return;
         }
         if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
+          throw new Error(await readApiError(res));
         }
         const json = await res.json();
         if (!cancelled) {
@@ -76,14 +100,14 @@ export function useAdminContent<T>(filename: string): UseAdminContentResult<T> {
         }
 
         if (!res.ok) {
-          throw new Error(`HTTP ${res.status}`);
+          throw new Error(await readApiError(res));
         }
 
         setData(newData);
         toast.success(t("messages.saveSuccess"));
         return true;
-      } catch {
-        toast.error(t("messages.saveError"));
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : t("messages.saveError"));
         return false;
       } finally {
         setSaving(false);

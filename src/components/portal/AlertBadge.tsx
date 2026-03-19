@@ -1,5 +1,6 @@
 import { TriangleAlert, AlertCircle, Info, CircleCheck, PartyPopper, Siren } from "lucide-react";
 import type { AlertType, AlertSize, AlertBorder } from "@/types/portal";
+import SanitizedHtml from "./SanitizedHtml";
 
 interface AlertBadgeProps {
   text: string;
@@ -46,7 +47,7 @@ export default function AlertBadge({ text, type = "warning", size = "sm", glow, 
   return (
     <span className={`inline-flex items-center gap-1 ${s.px} ${s.py} rounded ${s.text} font-semibold border ${bg} ${textColor} ${borderColor} align-middle ml-1 ${borderClass[effect]}`}>
       <Icon className={`${s.icon} shrink-0`} />
-      {text}
+      <SanitizedHtml as="span" html={text} />
     </span>
   );
 }

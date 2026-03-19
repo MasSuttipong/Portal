@@ -4,17 +4,14 @@ import type { Company } from "@/types/portal";
 import { Building2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { withBasePath } from "@/lib/base-path";
+import { normalizeAllowedUrl } from "@/lib/url-policy";
 import NewBadge from "./NewBadge";
 import AlertBadge from "./AlertBadge";
 import RemarkText from "./RemarkText";
 
 function safeUrl(url: string | undefined): string | undefined {
   if (!url) return undefined;
-  try {
-    const parsed = new URL(url);
-    if (parsed.protocol === "https:" || parsed.protocol === "http:") return url;
-  } catch { /* invalid URL */ }
-  return undefined;
+  return normalizeAllowedUrl(url, { allowRootRelative: true }) ?? undefined;
 }
 
 export type ViewMode = "card" | "list";
@@ -142,7 +139,7 @@ function ListItem({
   onCompanyClick: (company: Company) => void;
   sectionLabel?: string;
 }) {
-  const { displayName, isClickable, isNew, remark, redirectUrl: rawRedirectUrl2, claimType, code, iclaimId, logoUrl } = company;
+  const { displayName, isNew, remark, redirectUrl: rawRedirectUrl2, claimType, logoUrl } = company;
   const redirectUrl = safeUrl(rawRedirectUrl2);
 
   const logo = logoUrl ? (

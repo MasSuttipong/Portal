@@ -1,5 +1,9 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
+const { loadScriptEnv } = require("./load-env");
 const { readValidatedBasePath } = require("./runtime-base-path");
+
+process.env.NODE_ENV = process.env.NODE_ENV || "development";
+loadScriptEnv();
 
 function readRequiredEnv(name) {
   const value = process.env[name];

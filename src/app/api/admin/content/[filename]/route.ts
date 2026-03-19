@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ContentValidationError } from "@/lib/content-validation";
 import { isValidFilename, readContent, writeContent } from "@/lib/content";
 
 type RouteParams = { params: Promise<{ filename: string }> };
@@ -17,6 +18,16 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const data = readContent(filename);
     return NextResponse.json(data);
   } catch (err) {
+    if (err instanceof ContentValidationError) {
+      return NextResponse.json(
+        {
+          error: "Stored content is invalid",
+          issues: err.issues,
+        },
+        { status: 500 }
+      );
+    }
+
     console.error(`Failed to read content file "${filename}":`, err);
     return NextResponse.json(
       { error: "Failed to read content file" },
@@ -50,6 +61,16 @@ export async function PUT(request: NextRequest, { params }: RouteParams) {
     writeContent(filename, body);
     return NextResponse.json({ success: true });
   } catch (err) {
+    if (err instanceof ContentValidationError) {
+      return NextResponse.json(
+        {
+          error: "Validation failed",
+          issues: err.issues,
+        },
+        { status: 400 }
+      );
+    }
+
     console.error(`Failed to write content file "${filename}":`, err);
     return NextResponse.json(
       { error: "Failed to write content file" },

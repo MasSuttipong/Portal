@@ -134,14 +134,24 @@
 }
 
 @layer base {
+  .portal-font-aliases {
+    --font-heading: var(--font-sans);
+  }
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans;
+    line-height: 1.6;
   }
   html {
     @apply font-sans;
+  }
+  button,
+  input,
+  select,
+  textarea {
+    font: inherit;
   }
 }
 

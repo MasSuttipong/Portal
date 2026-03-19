@@ -1,9 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { signToken, COOKIE_NAME, getCookieOptions } from "@/lib/auth";
 import { getRuntimeEnv } from "@/lib/runtime-env";
+import {
+  parseAdminLoginBody,
+  RequestValidationError,
+} from "@/lib/request-validation";
 
 export async function POST(request: NextRequest) {
-  let body: { password?: string };
+  let body: unknown;
 
   try {
     body = await request.json();
@@ -11,23 +15,40 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 
-  const { password } = body;
+  let password: string;
 
-  if (!process.env.ADMIN_PASSWORD) {
-    return NextResponse.json(
-      { error: "Server misconfigured: ADMIN_PASSWORD not set" },
-      { status: 500 }
-    );
+  try {
+    password = parseAdminLoginBody(body).password;
+  } catch (error) {
+    if (error instanceof RequestValidationError) {
+      return NextResponse.json(
+        { error: "Validation failed", issues: error.issues },
+        { status: 400 }
+      );
+    }
+
+    throw error;
   }
 
-  if (!process.env.ADMIN_PASSWORD) {
-    return NextResponse.json(
-      { error: "Server misconfigured: ADMIN_PASSWORD not set" },
-      { status: 500 }
-    );
+  let adminPassword: string;
+
+  try {
+    adminPassword = getRuntimeEnv().adminPassword;
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      error.message.includes("ADMIN_PASSWORD")
+    ) {
+      return NextResponse.json(
+        { error: "Server misconfigured: ADMIN_PASSWORD not set" },
+        { status: 500 }
+      );
+    }
+
+    throw error;
   }
 
-  if (!password || password !== getRuntimeEnv().adminPassword) {
+  if (password !== adminPassword) {
     return NextResponse.json(
       { error: "รหัสผ่านไม่ถูกต้อง" },
       { status: 401 }

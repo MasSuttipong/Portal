@@ -2,10 +2,14 @@
 const fs = require("fs");
 const path = require("path");
 const { spawn } = require("child_process");
+const { loadScriptEnv } = require("./load-env");
 const {
   BASE_PATH_ENV_NAME,
   BASE_PATH_SENTINEL,
 } = require("./runtime-base-path");
+
+process.env.NODE_ENV = process.env.NODE_ENV || "production";
+loadScriptEnv();
 
 const nextCli = require.resolve("next/dist/bin/next");
 

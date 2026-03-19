@@ -2,6 +2,10 @@
 const fs = require("fs");
 const path = require("path");
 const { spawn, spawnSync } = require("child_process");
+const { loadScriptEnv } = require("./load-env");
+
+process.env.NODE_ENV = process.env.NODE_ENV || "production";
+loadScriptEnv();
 
 const repoRoot = process.cwd();
 const runtimeDir = path.join(repoRoot, ".next", "runtime-standalone");
@@ -9,6 +13,7 @@ const standaloneDir = path.join(repoRoot, ".next", "standalone");
 const staticDir = path.join(repoRoot, ".next", "static");
 const RUNTIME_SCRIPT_NAMES = [
   "apply-runtime-base-path.js",
+  "load-env.js",
   "runtime-base-path.js",
   "validate-runtime-env.js",
 ];

@@ -26,7 +26,7 @@ export default function NewsSection({ data }: NewsSectionProps) {
                   href={withBasePath(item.url)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-portal-link hover:text-portal-link-hover font-medium transition-colors duration-150"
+                  className="text-portal-link hover:text-portal-link-hover font-normal transition-colors duration-150"
                 >
                   {item.title}
                 </a>

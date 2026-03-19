@@ -1,6 +1,7 @@
 import { FileText } from "lucide-react";
 import type { ManualData } from "@/types/portal";
 import { withBasePath } from "@/lib/base-path";
+import SanitizedHtml from "./SanitizedHtml";
 
 interface ManualSectionProps {
   data: ManualData;
@@ -16,7 +17,11 @@ export default function ManualSection({ data }: ManualSectionProps) {
         Manual
       </h2>
       {data.subHeading && (
-        <p className="text-foreground/80 mb-3 leading-relaxed">{data.subHeading}</p>
+        <SanitizedHtml
+          as="p"
+          className="text-foreground/80 mb-3 leading-relaxed"
+          html={data.subHeading}
+        />
       )}
       {publishedItems.length > 0 && (
         <ul className="space-y-2 pl-2">
@@ -27,7 +32,7 @@ export default function ManualSection({ data }: ManualSectionProps) {
                 href={withBasePath(item.url)}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-portal-link hover:text-portal-link-hover font-medium transition-colors duration-150 leading-relaxed"
+                className="text-portal-link hover:text-portal-link-hover font-normal transition-colors duration-150 leading-relaxed"
               >
                 {item.title}
               </a>

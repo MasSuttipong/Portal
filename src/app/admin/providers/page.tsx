@@ -34,6 +34,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import { withBasePathApi } from "@/lib/base-path";
 import { Pencil, Trash2, Plus, ChevronDown, ChevronRight, ShieldCheck } from "lucide-react";
 
 // ---------------------------------------------------------------------------
@@ -237,7 +238,7 @@ export default function ProvidersPage() {
     try {
       const results = await Promise.all(
         SECTION_ENDPOINTS.map(async ({ filename, sectionKey }) => {
-          const res = await fetch(`/api/admin/content/${filename}`);
+          const res = await fetch(withBasePathApi(`/api/admin/content/${filename}`));
           if (!res.ok) return { sectionKey, companies: [] as CompanyEntry[] };
           const section = (await res.json()) as CompanySection;
           return { sectionKey, companies: flattenSection(section) };

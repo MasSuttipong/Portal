@@ -39,7 +39,7 @@ npm run lint         # ESLint
 
 ### Auth Flow
 - `POST /api/auth/login` — validates password, sets HTTP-only cookie
-- `src/middleware.ts` — checks cookie on all `/admin/*` and `/api/admin/*` routes, redirects to `/admin/login` if invalid
+- `src/proxy.ts` — checks cookie on all `/admin/*` and `/api/admin/*` routes, redirects to `/admin/login` if invalid
 - No user accounts — single shared password only
 - `COOKIE_SECURE` env var controls the cookie `secure` flag (default `false` for Docker HTTP access)
 

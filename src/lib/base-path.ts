@@ -20,6 +20,11 @@ export function isExternalUrl(path: string): boolean {
   return EXTERNAL_URL_PATTERN.test(path);
 }
 
+// Use this only for browser/network primitives that do not understand Next.js
+// basePath automatically, such as fetch(), raw <a href>, <img src>,
+// window.open(), or NextResponse.redirect(new URL(...)).
+// Do not wrap Next-managed navigation APIs like <Link>, router.push(),
+// router.replace(), or redirect() with this helper.
 export function withBasePath(path: string): string {
   if (!path || isExternalUrl(path) || path.startsWith("#")) {
     return path;
@@ -58,6 +63,7 @@ export function stripBasePath(pathname: string): string {
     : pathname;
 }
 
+// API URLs are still browser/network paths, so they need the same prefixing behavior.
 export function withBasePathApi(path: string): string {
   return withBasePath(path);
 }
