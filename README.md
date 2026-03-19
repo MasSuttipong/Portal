@@ -183,7 +183,7 @@ services:
       NEXT_PUBLIC_BASE_PATH: /portal
 ```
 
-Leave `COOKIE_SECURE` unset or set it to `false` when you access the app over plain HTTP, such as the current NodePort deployment. Set it to `true` only after the app is fronted by HTTPS. The current dev deployment is expected to run at the domain root, so users should access `https://devnewcore.blueventuretpa.com/...` and keep `NEXT_PUBLIC_BASE_PATH` empty there.
+Leave `COOKIE_SECURE` unset or set it to `false` when you access the app over plain HTTP, such as the current NodePort deployment. Set it to `true` only after the app is fronted by HTTPS. The current dev deployment is mounted under `/portal`, so users should access `https://devnewcore.blueventuretpa.com/portal/...`, keep `NEXT_PUBLIC_BASE_PATH=/portal`, and ensure the workload starts through `node ./scripts/start-production.js` rather than `.next/standalone/server.js`.
 
 ### Persistent content
 

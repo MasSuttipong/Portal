@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
 import { useLanguage } from "@/lib/i18n/LanguageContext";
 import LanguageToggle from "@/components/admin/LanguageToggle";
 import {
@@ -13,10 +12,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { withBasePathApi } from "@/lib/base-path";
+import { withBasePath, withBasePathApi } from "@/lib/base-path";
 
 export default function LoginPage() {
-  const router = useRouter();
   const { t } = useLanguage();
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -35,7 +33,8 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        router.replace("/admin/news");
+        window.location.replace(withBasePath("/admin/news"));
+        return;
       } else {
         setError(t("login.invalidPassword"));
       }
