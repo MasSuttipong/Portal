@@ -54,7 +54,12 @@ All routes matching `/admin/*` and `/api/admin/*` are protected by middleware (`
 ```bash
 ADMIN_PASSWORD=your-secure-password-here
 JWT_SECRET=your-jwt-secret-key-change-in-production
+COOKIE_SECURE=false
 ```
+
+`ADMIN_PASSWORD` and `JWT_SECRET` are required. The server will fail fast during startup if either variable is missing or blank.
+
+Set `COOKIE_SECURE=true` only when the application is served over HTTPS. Keep it unset or `false` for plain HTTP access such as a direct NodePort URL.
 
 ---
 
@@ -1276,6 +1281,7 @@ if (response.status === 401) {
 **Solutions**:
 - Ensure cookies are enabled in your browser
 - Check that the login response set a cookie (inspect browser DevTools > Application > Cookies)
+- For plain HTTP access, keep `COOKIE_SECURE` unset or set to `false`
 - Verify `credentials: 'include'` is in your fetch options
 - Log in again—your token may have expired
 - Check server logs for JWT validation errors

@@ -13,4 +13,7 @@ services:
     environment:
       - ADMIN_PASSWORD=change-me-before-production
       - JWT_SECRET=change-me-to-a-long-random-secret
+      - COOKIE_SECURE=false
+      # Runtime-only in production. Leave empty for root deployment.
+      # - NEXT_PUBLIC_BASE_PATH=/portal
     restart: unless-stopped

@@ -72,7 +72,7 @@ cp .env.example .env.local
 | `ADMIN_PASSWORD` | Password used to log into the admin panel      | `my-secure-password`               |
 | `JWT_SECRET`     | Secret key for signing JWT session tokens      | `a-long-random-string-min-32-chars`|
 | `COOKIE_SECURE`  | Set to `true` only when the site is served over HTTPS | `false`                     |
-| `NEXT_PUBLIC_BASE_PATH` | Runtime-only in production. Leave empty for root deployment, set to a subpath like `/portal` when the app is mounted under that prefix | `/portal` |
+| `NEXT_PUBLIC_BASE_PATH` | Runtime-only in production. Leave empty for root deployment, or set a subpath like `/portal` when the public URL is mounted under that prefix | `/portal` |
 
 `ADMIN_PASSWORD` and `JWT_SECRET` are required at runtime. The app now fails fast during server startup if either one is missing or blank.
 
@@ -82,7 +82,7 @@ cp .env.example .env.local
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the public portal and [http://localhost:3000/admin](http://localhost:3000/admin) to access the admin panel. To simulate the Kong deployment under `/portal`, start the app with `NEXT_PUBLIC_BASE_PATH=/portal`.
+Open [http://localhost:3000](http://localhost:3000) to view the public portal and [http://localhost:3000/admin](http://localhost:3000/admin) to access the admin panel. To simulate the Kong deployment under `/portal`, start the app with `NEXT_PUBLIC_BASE_PATH=/portal` and browse to [http://localhost:3000/portal](http://localhost:3000/portal).
 
 ## Available Scripts
 
@@ -93,7 +93,7 @@ Open [http://localhost:3000](http://localhost:3000) to view the public portal an
 | `npm run start`   | Stage a local standalone runtime, patch it from the OS environment, and start the production server |
 | `npm run lint`    | Run ESLint                               |
 
-`npm run start` prepares a fresh runtime directory under `.next/runtime-standalone` on each launch, so the same build output can be reused with different `NEXT_PUBLIC_BASE_PATH` values between restarts.
+`npm run start` prepares a fresh runtime directory under `.next/runtime-standalone` on each launch, so the same build output can be reused with different `NEXT_PUBLIC_BASE_PATH` values between restarts. The Docker image uses the same startup script so container runtime patching matches local production behavior.
 
 ## Project Structure
 
@@ -149,7 +149,7 @@ Portal/
 
 The project ships with a multi-stage Dockerfile that produces a minimal standalone image.
 
-The production image is now environment-agnostic. `npm run build` always embeds a placeholder base path, and container startup replaces that placeholder using the OS environment variable `NEXT_PUBLIC_BASE_PATH`.
+The production image is now environment-agnostic. `npm run build` always embeds a placeholder base path, and container startup replaces that placeholder using the OS environment variable `NEXT_PUBLIC_BASE_PATH` inside the same staged standalone runtime used by local `npm run start`.
 
 ### Build and run with Docker Compose
 
@@ -161,17 +161,19 @@ The portal will be available at [http://localhost:3000](http://localhost:3000).
 
 ### Environment variables
 
-Set `ADMIN_PASSWORD`, `JWT_SECRET`, and optionally `COOKIE_SECURE` / `NEXT_PUBLIC_BASE_PATH` in `docker-compose.yml` or pass them at container runtime. `NEXT_PUBLIC_BASE_PATH` is not read during image build:
+Set `ADMIN_PASSWORD`, `JWT_SECRET`, and optionally `COOKIE_SECURE` / `NEXT_PUBLIC_BASE_PATH` in `docker-compose.yml` or pass them at container runtime. `NEXT_PUBLIC_BASE_PATH` is not read during image build, and the public URL must include the same prefix:
 
-```bash
-docker compose up -d \
-  -e ADMIN_PASSWORD=my-secure-password \
-  -e JWT_SECRET=my-random-secret \
-  -e COOKIE_SECURE=false \
-  -e NEXT_PUBLIC_BASE_PATH=/portal
+```yaml
+services:
+  portal:
+    environment:
+      ADMIN_PASSWORD: my-secure-password
+      JWT_SECRET: my-random-secret
+      COOKIE_SECURE: "false"
+      NEXT_PUBLIC_BASE_PATH: /portal
 ```
 
-Leave `COOKIE_SECURE` unset or set it to `false` when you access the app over plain HTTP, such as the current NodePort deployment. Set it to `true` only after the app is fronted by HTTPS.
+Leave `COOKIE_SECURE` unset or set it to `false` when you access the app over plain HTTP, such as the current NodePort deployment. Set it to `true` only after the app is fronted by HTTPS. For the current dev deployment, `NEXT_PUBLIC_BASE_PATH=/portal` means users should access `https://devnewcore.blueventuretpa.com/portal/...`.
 
 ### Persistent content
 
