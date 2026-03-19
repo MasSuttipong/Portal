@@ -26,6 +26,26 @@ const TEXT_FILE_EXTENSIONS = new Set([
 const DISPLAY_ROOT_BASE_PATH = "/";
 const ESCAPED_BASE_PATH_SENTINEL = `\\${BASE_PATH_SENTINEL}`;
 const DOUBLE_ESCAPED_BASE_PATH_SENTINEL = `\\\\${BASE_PATH_SENTINEL}`;
+const HTML_FLIGHT_BOUNDARY = `"])</script><script>self.__next_f.push([1,"`;
+
+function createSplitSentinelPatterns() {
+  const patterns = [];
+
+  for (let index = 1; index < BASE_PATH_SENTINEL.length; index += 1) {
+    const leftPart = BASE_PATH_SENTINEL.slice(0, index);
+    const rightPart = BASE_PATH_SENTINEL.slice(index);
+
+    patterns.push({
+      leftPart,
+      rightPart,
+      pattern: `${leftPart}${HTML_FLIGHT_BOUNDARY}${rightPart}`,
+    });
+  }
+
+  return patterns;
+}
+
+const SPLIT_SENTINEL_PATTERNS = createSplitSentinelPatterns();
 
 function collectPatchableFiles(directoryPath, markerPath, files = []) {
   for (const entry of fs.readdirSync(directoryPath, { withFileTypes: true })) {
@@ -88,12 +108,11 @@ function normalizeRoutesManifest(filePath, contents, runtimeBasePath) {
   return JSON.stringify(manifest, null, 2);
 }
 
-function applyReplacement(filePath, runtimeBasePath) {
-  const contents = fs.readFileSync(filePath, "utf8");
+function applyDirectSentinelReplacement(contents, runtimeBasePath) {
   const replacements = countOccurrences(contents, BASE_PATH_SENTINEL);
 
   if (replacements === 0) {
-    return 0;
+    return { contents, replacements: 0 };
   }
 
   const updatedContents =
@@ -104,12 +123,60 @@ function applyReplacement(filePath, runtimeBasePath) {
           .replaceAll(BASE_PATH_SENTINEL, "")
       : contents.replaceAll(BASE_PATH_SENTINEL, runtimeBasePath);
 
+  return { contents: updatedContents, replacements };
+}
+
+function applySplitHtmlSentinelReplacement(filePath, contents, runtimeBasePath) {
+  if (path.extname(filePath).toLowerCase() !== ".html") {
+    return { contents, replacements: 0 };
+  }
+
+  let updatedContents = contents;
+  let replacements = 0;
+
+  for (const { pattern } of SPLIT_SENTINEL_PATTERNS) {
+    const patternMatches = countOccurrences(updatedContents, pattern);
+
+    if (patternMatches === 0) {
+      continue;
+    }
+
+    updatedContents = updatedContents.replaceAll(
+      pattern,
+      `${runtimeBasePath}${HTML_FLIGHT_BOUNDARY}`
+    );
+    replacements += patternMatches;
+  }
+
+  return { contents: updatedContents, replacements };
+}
+
+function applyReplacement(filePath, runtimeBasePath) {
+  const contents = fs.readFileSync(filePath, "utf8");
+  const {
+    contents: directPatchedContents,
+    replacements: directReplacements,
+  } = applyDirectSentinelReplacement(contents, runtimeBasePath);
+  const {
+    contents: fullyPatchedContents,
+    replacements: splitReplacements,
+  } = applySplitHtmlSentinelReplacement(
+    filePath,
+    directPatchedContents,
+    runtimeBasePath
+  );
+  const totalReplacements = directReplacements + splitReplacements;
+
+  if (totalReplacements === 0) {
+    return 0;
+  }
+
   fs.writeFileSync(
     filePath,
-    normalizeRoutesManifest(filePath, updatedContents, runtimeBasePath)
+    normalizeRoutesManifest(filePath, fullyPatchedContents, runtimeBasePath)
   );
 
-  return replacements;
+  return totalReplacements;
 }
 
 function readMarker(markerPath) {
@@ -137,16 +204,30 @@ function writeMarker(markerPath, runtimeBasePath) {
   );
 }
 
+function countSplitSentinelOccurrences(contents) {
+  let remainingCount = 0;
+
+  for (const { pattern } of SPLIT_SENTINEL_PATTERNS) {
+    remainingCount += countOccurrences(contents, pattern);
+  }
+
+  return remainingCount;
+}
+
 function findRemainingSentinelOccurrences(filePaths) {
   const matches = [];
 
   for (const filePath of filePaths) {
     const contents = fs.readFileSync(filePath, "utf8");
-    // Escaped variants still include the raw sentinel token, so one check catches all forms.
-    const remainingCount = countOccurrences(contents, BASE_PATH_SENTINEL);
+    // Escaped variants still include the raw sentinel token, so one check catches all
+    // contiguous forms. HTML flight payloads can also split the sentinel across adjacent
+    // script tags, which we validate separately.
+    const contiguousCount = countOccurrences(contents, BASE_PATH_SENTINEL);
+    const splitCount = countSplitSentinelOccurrences(contents);
+    const remainingCount = contiguousCount + splitCount;
 
     if (remainingCount > 0) {
-      matches.push({ filePath, remainingCount });
+      matches.push({ filePath, contiguousCount, splitCount, remainingCount });
     }
   }
 
@@ -161,8 +242,8 @@ function verifyRuntimeOutput(rootDir, markerPath) {
     const formattedMatches = remainingOccurrences
       .slice(0, 5)
       .map(
-        ({ filePath, remainingCount }) =>
-          `"${path.relative(rootDir, filePath)}" (${remainingCount})`
+        ({ filePath, contiguousCount, splitCount }) =>
+          `"${path.relative(rootDir, filePath)}" (contiguous: ${contiguousCount}, split: ${splitCount})`
       )
       .join(", ");
 
@@ -174,7 +255,7 @@ function verifyRuntimeOutput(rootDir, markerPath) {
   }
 
   console.log(
-    `Verified runtime output in "${rootDir}". No "${BASE_PATH_SENTINEL}" placeholders remain.`
+    `Verified runtime output in "${rootDir}". No "${BASE_PATH_SENTINEL}" placeholders remain, including split HTML flight chunks.`
   );
 }
 
