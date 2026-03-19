@@ -8,6 +8,11 @@ export async function proxy(request: NextRequest) {
   const token = request.cookies.get(COOKIE_NAME)?.value;
   const isValid = token ? await verifyToken(token) : false;
 
+  if (isValid && pathname === "/admin/login") {
+    const adminUrl = new URL(withBasePath("/admin/news"), request.url);
+    return NextResponse.redirect(adminUrl);
+  }
+
   if (!isValid) {
     // API routes return 401 JSON
     if (pathname.startsWith("/api/admin/")) {

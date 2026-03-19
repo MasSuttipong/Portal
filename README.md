@@ -89,7 +89,7 @@ Local commands now load `.env*` with the same precedence as Next.js itself, so `
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) to view the public portal and [http://localhost:3000/admin](http://localhost:3000/admin) to access the admin panel. To simulate the Kong deployment under `/portal`, start the app with `NEXT_PUBLIC_BASE_PATH=/portal` and browse to [http://localhost:3000/portal](http://localhost:3000/portal).
+Open [http://localhost:3000](http://localhost:3000) to view the public portal and [http://localhost:3000/admin](http://localhost:3000/admin) to access the admin panel. If you need to simulate a subpath deployment such as `/portal`, start the app with `NEXT_PUBLIC_BASE_PATH=/portal` and browse to [http://localhost:3000/portal](http://localhost:3000/portal).
 
 ## Available Scripts
 
@@ -183,7 +183,7 @@ services:
       NEXT_PUBLIC_BASE_PATH: /portal
 ```
 
-Leave `COOKIE_SECURE` unset or set it to `false` when you access the app over plain HTTP, such as the current NodePort deployment. Set it to `true` only after the app is fronted by HTTPS. For the current dev deployment, `NEXT_PUBLIC_BASE_PATH=/portal` means users should access `https://devnewcore.blueventuretpa.com/portal/...`.
+Leave `COOKIE_SECURE` unset or set it to `false` when you access the app over plain HTTP, such as the current NodePort deployment. Set it to `true` only after the app is fronted by HTTPS. The current dev deployment is expected to run at the domain root, so users should access `https://devnewcore.blueventuretpa.com/...` and keep `NEXT_PUBLIC_BASE_PATH` empty there.
 
 ### Persistent content
 

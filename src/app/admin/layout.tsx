@@ -1,20 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { usePathname } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import PreviewButton from "@/components/admin/PreviewButton";
 import LanguageToggle from "@/components/admin/LanguageToggle";
 import { LanguageProvider, useLanguage } from "@/lib/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
-import { stripBasePath, withBasePathApi } from "@/lib/base-path";
+import { stripBasePath, withBasePath, withBasePathApi } from "@/lib/base-path";
 import { LogOut, Menu, X } from "lucide-react";
 
 function AdminLayoutInner({ children }: { children: React.ReactNode }) {
-  const router = useRouter();
   const pathname = stripBasePath(usePathname());
   const { t } = useLanguage();
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const sectionMap: Record<string, string> = {
     "/admin/news": t("nav.news"),
@@ -28,12 +28,27 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
   const currentSection = sectionMap[pathname] ?? "";
 
   async function handleLogout() {
-    try {
-      await fetch(withBasePathApi("/api/auth/logout"), { method: "POST" });
-    } catch {
-      // ignore errors
+    if (isLoggingOut) {
+      return;
     }
-    router.push("/admin/login");
+
+    setIsLoggingOut(true);
+
+    try {
+      const response = await fetch(withBasePathApi("/api/auth/logout"), {
+        method: "POST",
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        window.location.reload();
+        return;
+      }
+
+      window.location.replace(withBasePath("/admin/login"));
+    } catch {
+      window.location.reload();
+    }
   }
 
   return (
@@ -65,10 +80,14 @@ function AdminLayoutInner({ children }: { children: React.ReactNode }) {
             variant="ghost"
             size="sm"
             onClick={handleLogout}
-            className="gap-1.5 text-gray-600 hover:text-red-600"
+            disabled={isLoggingOut}
+            aria-busy={isLoggingOut}
+            className="gap-1.5 text-gray-600 hover:text-red-600 disabled:pointer-events-none disabled:opacity-60 disabled:hover:text-gray-600"
           >
             <LogOut className="size-4" />
-            <span className="hidden sm:inline">{t("common.logout")}</span>
+            <span className="hidden sm:inline">
+              {isLoggingOut ? t("common.loggingOut") : t("common.logout")}
+            </span>
           </Button>
         </div>
       </header>

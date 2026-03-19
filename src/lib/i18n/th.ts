@@ -10,6 +10,7 @@ const th = {
     errorPrefix: "เกิดข้อผิดพลาด:",
     preview: "ดูตัวอย่าง",
     logout: "ออกจากระบบ",
+    loggingOut: "กำลังออกจากระบบ...",
     openMenu: "เปิดเมนู",
     closeMenu: "ปิดเมนู",
     type: "ประเภท",

@@ -12,6 +12,7 @@ const en: Translations = {
     errorPrefix: "Error:",
     preview: "Preview",
     logout: "Logout",
+    loggingOut: "Logging out...",
     openMenu: "Open menu",
     closeMenu: "Close menu",
     type: "Type",

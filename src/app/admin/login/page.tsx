@@ -35,7 +35,7 @@ export default function LoginPage() {
       });
 
       if (res.ok) {
-        router.push("/admin");
+        router.replace("/admin/news");
       } else {
         setError(t("login.invalidPassword"));
       }
