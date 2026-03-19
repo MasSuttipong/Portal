@@ -4,6 +4,8 @@
     {
       "id": "si-1",
       "displayName": "Baker Hughes Operations (Thailand) Ltd.",
+      "nameEn": "Baker Hughes Operations (Thailand) Ltd.",
+      "nameTh": "เบเกอ",
       "code": "BHOT",
       "iclaimId": "118",
       "isClickable": true,
@@ -11,21 +13,21 @@
       "claimType": "IPD_ONLY",
       "remark": null,
       "logoUrl": "/images/1773205706075-images.png",
-      "alertText": "OPD สำรองจ่าย",
-      "alertType": "error",
-      "alertSize": "xl",
-      "alertBorder": "rainbow"
+      "alertText": null
     },
     {
       "id": "si-2",
-      "displayName": "Coffee Concepts (Starbucks) [OPD Only]",
+      "displayName": "Coffee Concepts (Starbucks)",
+      "nameEn": "Coffee Concepts (Starbucks)",
+      "nameTh": "สตาบัค",
       "code": "STBT",
       "iclaimId": "88",
       "isClickable": true,
       "isNew": false,
       "claimType": "OPD_ONLY",
       "remark": null,
-      "logoUrl": "/logos/si-2.png"
+      "logoUrl": "/logos/si-2.png",
+      "alertText": null
     },
     {
       "id": "si-3",

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useAdminContent } from "@/lib/useAdminContent";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
 import type { CompanySection, Company, AlertBorder } from "@/types/portal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -34,7 +35,8 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Pencil, Trash2, Plus, Save, Upload, X } from "lucide-react";
+import { Pencil, Trash2, Plus, Save, Upload, X, Search, ChevronDown } from "lucide-react";
+import { toast } from "sonner";
 import DragDropList from "@/components/admin/DragDropList";
 import { withBasePath, withBasePathApi } from "@/lib/base-path";
 
@@ -45,6 +47,8 @@ interface CompanySectionPageProps {
 
 interface CompanyFormData {
   displayName: string;
+  nameEn: string;
+  nameTh: string;
   code: string;
   iclaimId: string;
   isClickable: boolean;
@@ -61,6 +65,8 @@ interface CompanyFormData {
 
 const emptyForm: CompanyFormData = {
   displayName: "",
+  nameEn: "",
+  nameTh: "",
   code: "",
   iclaimId: "",
   isClickable: true,
@@ -75,16 +81,11 @@ const emptyForm: CompanyFormData = {
   alertBorder: "none",
 };
 
-const CLAIM_TYPE_LABELS: Record<string, string> = {
-  OPD_IPD: "OPD + IPD",
-  OPD_ONLY: "OPD เท่านั้น",
-  IPD_ONLY: "IPD เท่านั้น",
-};
-
 export default function CompanySectionPage({
   filename,
   pageTitle,
 }: CompanySectionPageProps) {
+  const { t } = useLanguage();
   const { data, loading, error, save } = useAdminContent<CompanySection>(filename);
   const [headingValue, setHeadingValue] = useState("");
   const [sectionAlertText, setSectionAlertText] = useState("");
@@ -98,6 +99,14 @@ export default function CompanySectionPage({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [tableFilter, setTableFilter] = useState("");
+  const [showAdvanced, setShowAdvanced] = useState(false);
+
+  const CLAIM_TYPE_LABELS: Record<string, string> = {
+    OPD_IPD: t("company.opdIpd"),
+    OPD_ONLY: t("company.opdOnly"),
+    IPD_ONLY: t("company.ipdOnly"),
+  };
 
   if (data && !headingInitialized) {
     setHeadingValue(data.heading ?? "");
@@ -109,6 +118,13 @@ export default function CompanySectionPage({
   }
 
   const companies = data?.companies ?? [];
+  const filteredCompanies = tableFilter
+    ? companies.filter((c) =>
+        c.displayName.toLowerCase().includes(tableFilter.toLowerCase()) ||
+        c.nameEn?.toLowerCase().includes(tableFilter.toLowerCase()) ||
+        c.nameTh?.toLowerCase().includes(tableFilter.toLowerCase())
+      )
+    : companies;
 
   function sectionFields() {
     return {
@@ -130,6 +146,8 @@ export default function CompanySectionPage({
     setEditingId(company.id);
     setForm({
       displayName: company.displayName,
+      nameEn: company.nameEn ?? "",
+      nameTh: company.nameTh ?? "",
       code: company.code ?? "",
       iclaimId: company.iclaimId ?? "",
       isClickable: company.isClickable,
@@ -157,6 +175,8 @@ export default function CompanySectionPage({
     return {
       id,
       displayName: form.displayName,
+      nameEn: form.nameEn.trim() || null,
+      nameTh: form.nameTh.trim() || null,
       code: form.code.trim() || null,
       iclaimId: form.iclaimId.trim() || null,
       isClickable: form.isClickable,
@@ -221,7 +241,7 @@ export default function CompanySectionPage({
       const { url } = await res.json();
       handleFormChange("logoUrl", url);
     } catch {
-      alert("อัปโหลดไม่สำเร็จ");
+      alert(t("company.uploadFailed"));
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -231,7 +251,7 @@ export default function CompanySectionPage({
   if (loading) {
     return (
       <div className="flex items-center justify-center h-40 text-gray-500 text-sm">
-        กำลังโหลด...
+        {t("common.loading")}
       </div>
     );
   }
@@ -239,7 +259,7 @@ export default function CompanySectionPage({
   if (error) {
     return (
       <div className="flex items-center justify-center h-40 text-red-500 text-sm">
-        เกิดข้อผิดพลาด: {error}
+        {t("common.errorPrefix")} {error}
       </div>
     );
   }
@@ -251,22 +271,22 @@ export default function CompanySectionPage({
         <div className="flex gap-2">
           <Button onClick={openAddDialog} variant="outline" size="sm" className="gap-1.5">
             <Plus className="size-4" />
-            เพิ่มบริษัท
+            {t("company.addCompany")}
           </Button>
           <Button onClick={handleSave} disabled={saving} size="sm" className="gap-1.5">
             <Save className="size-4" />
-            {saving ? "กำลังบันทึก..." : "บันทึก"}
+            {saving ? t("common.saving") : t("common.save")}
           </Button>
         </div>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle className="text-base">ชื่อส่วน</CardTitle>
+          <CardTitle className="text-base">{t("company.sectionName")}</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            <Label htmlFor={`${filename}-heading`}>หัวข้อส่วน</Label>
+            <Label htmlFor={`${filename}-heading`}>{t("company.sectionHeading")}</Label>
             <Input
               id={`${filename}-heading`}
               value={headingValue}
@@ -275,38 +295,38 @@ export default function CompanySectionPage({
           </div>
           <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3 mt-3">
             <div className="space-y-2">
-              <Label htmlFor={`${filename}-alert`}>ข้อความแจ้งเตือนส่วน (ถ้ามี)</Label>
+              <Label htmlFor={`${filename}-alert`}>{t("company.sectionAlert")}</Label>
               <Input
                 id={`${filename}-alert`}
                 value={sectionAlertText}
                 onChange={(e) => setSectionAlertText(e.target.value)}
-                placeholder="เช่น OPD ให้สำรองจ่าย"
+                placeholder={t("company.sectionAlertPlaceholder")}
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`${filename}-alert-type`}>ประเภท</Label>
+              <Label htmlFor={`${filename}-alert-type`}>{t("common.type")}</Label>
               <select
                 id={`${filename}-alert-type`}
                 value={sectionAlertType}
                 onChange={(e) => setSectionAlertType(e.target.value as CompanyFormData["alertType"])}
-                title="ประเภทแจ้งเตือน"
+                title={t("common.type")}
                 className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               >
-                <option value="warning">⚠️ เตือน</option>
-                <option value="error">❌ สำคัญ</option>
-                <option value="info">ℹ️ แจ้งข้อมูล</option>
-                <option value="success">✅ สำเร็จ</option>
-                <option value="promo">🎉 โปรโมชั่น</option>
-                <option value="urgent">🚨 ด่วน</option>
+                <option value="warning">{t("alertOptions.warning")}</option>
+                <option value="error">{t("alertOptions.error")}</option>
+                <option value="info">{t("alertOptions.info")}</option>
+                <option value="success">{t("alertOptions.success")}</option>
+                <option value="promo">{t("alertOptions.promo")}</option>
+                <option value="urgent">{t("alertOptions.urgent")}</option>
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`${filename}-alert-size`}>ขนาด</Label>
+              <Label htmlFor={`${filename}-alert-size`}>{t("common.size")}</Label>
               <select
                 id={`${filename}-alert-size`}
                 value={sectionAlertSize}
                 onChange={(e) => setSectionAlertSize(e.target.value as CompanyFormData["alertSize"])}
-                title="ขนาดแจ้งเตือน"
+                title={t("common.size")}
                 className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               >
                 <option value="xs">XS</option>
@@ -317,22 +337,22 @@ export default function CompanySectionPage({
               </select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor={`${filename}-alert-border`}>ขอบ</Label>
+              <Label htmlFor={`${filename}-alert-border`}>{t("common.border")}</Label>
               <select
                 id={`${filename}-alert-border`}
                 value={sectionAlertBorder}
                 onChange={(e) => setSectionAlertBorder(e.target.value as CompanyFormData["alertBorder"])}
-                title="เอฟเฟกต์ขอบ"
+                title={t("common.border")}
                 className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               >
-                <option value="none">ไม่มี</option>
-                <option value="glow">เรืองแสง</option>
-                <option value="pulse">กระพริบ</option>
-                <option value="shimmer">วิ่ง</option>
-                <option value="bounce">เด้ง</option>
-                <option value="shake">สั่น</option>
-                <option value="rainbow">สายรุ้ง</option>
-                <option value="blink">กระพริบจ้า</option>
+                <option value="none">{t("alertOptions.none")}</option>
+                <option value="glow">{t("alertOptions.glow")}</option>
+                <option value="pulse">{t("alertOptions.pulse")}</option>
+                <option value="shimmer">{t("alertOptions.shimmer")}</option>
+                <option value="bounce">{t("alertOptions.bounce")}</option>
+                <option value="shake">{t("alertOptions.shake")}</option>
+                <option value="rainbow">{t("alertOptions.rainbow")}</option>
+                <option value="blink">{t("alertOptions.blink")}</option>
               </select>
             </div>
           </div>
@@ -341,25 +361,39 @@ export default function CompanySectionPage({
 
       {companies.length === 0 ? (
         <div className="text-center py-12 text-gray-400 text-sm border rounded-lg bg-white">
-          ยังไม่มีบริษัท กดปุ่ม "เพิ่มบริษัท" เพื่อเพิ่ม
+          {t("company.noCompanies")}
         </div>
       ) : (
         <div className="bg-white rounded-lg border overflow-hidden">
+          {companies.length > 5 && (
+            <div className="p-3 border-b">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-gray-400" />
+                <input
+                  type="text"
+                  value={tableFilter}
+                  onChange={(e) => setTableFilter(e.target.value)}
+                  placeholder={t("company.searchPlaceholder")}
+                  className="w-full pl-9 pr-3 py-1.5 text-sm rounded-md border border-input bg-transparent focus:outline-none focus:ring-1 focus:ring-ring"
+                />
+              </div>
+            </div>
+          )}
           <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="w-8"></TableHead>
-                <TableHead className="w-12">โลโก้</TableHead>
-                <TableHead>ชื่อบริษัท</TableHead>
-                <TableHead className="w-28">ประเภท</TableHead>
-                <TableHead className="w-24 text-center">คลิกได้</TableHead>
-                <TableHead className="w-20 text-center">ใหม่</TableHead>
-                <TableHead className="w-24 text-right">จัดการ</TableHead>
+                <TableHead className="w-12">{t("company.logo")}</TableHead>
+                <TableHead>{t("company.companyName")}</TableHead>
+                <TableHead className="w-28">{t("common.type")}</TableHead>
+                <TableHead className="w-24 text-center">{t("common.clickable")}</TableHead>
+                <TableHead className="w-20 text-center">{t("common.new")}</TableHead>
+                <TableHead className="w-24 text-right">{t("common.manage")}</TableHead>
               </TableRow>
             </TableHeader>
           </Table>
           <DragDropList
-            items={companies}
+            items={tableFilter ? filteredCompanies : companies}
             onReorder={handleReorder}
             renderItem={(company) => (
               <Table>
@@ -376,6 +410,11 @@ export default function CompanySectionPage({
                       <span className="text-sm font-medium text-gray-800">
                         {company.displayName}
                       </span>
+                      {(company.nameEn || company.nameTh) && (
+                        <span className="block text-xs text-gray-400">
+                          {[company.nameEn, company.nameTh].filter(Boolean).join(" / ")}
+                        </span>
+                      )}
                       {company.remark && (
                         <span className="block text-xs text-red-500 mt-0.5">
                           {company.remark}
@@ -396,6 +435,17 @@ export default function CompanySectionPage({
                             c.id === company.id ? { ...c, isClickable: val } : c
                           );
                           void save({ ...data, ...sectionFields(), companies: updated });
+                          toast(val ? t("company.clickableEnabled") : t("company.clickableDisabled"), {
+                            action: {
+                              label: t("company.undoToggle"),
+                              onClick: () => {
+                                const reverted = companies.map((c) =>
+                                  c.id === company.id ? { ...c, isClickable: !val } : c
+                                );
+                                void save({ ...data, ...sectionFields(), companies: reverted });
+                              },
+                            },
+                          });
                         }}
                       />
                     </TableCell>
@@ -408,6 +458,17 @@ export default function CompanySectionPage({
                             c.id === company.id ? { ...c, isNew: val } : c
                           );
                           void save({ ...data, ...sectionFields(), companies: updated });
+                          toast(val ? t("company.newBadgeEnabled") : t("company.newBadgeDisabled"), {
+                            action: {
+                              label: t("company.undoToggle"),
+                              onClick: () => {
+                                const reverted = companies.map((c) =>
+                                  c.id === company.id ? { ...c, isNew: !val } : c
+                                );
+                                void save({ ...data, ...sectionFields(), companies: reverted });
+                              },
+                            },
+                          });
                         }}
                       />
                     </TableCell>
@@ -444,27 +505,40 @@ export default function CompanySectionPage({
         <DialogContent className="sm:max-w-lg">
           <DialogHeader>
             <DialogTitle>
-              {editingId ? "แก้ไขบริษัท" : "เพิ่มบริษัท"}
+              {editingId ? t("company.editCompany") : t("company.addCompany")}
             </DialogTitle>
           </DialogHeader>
           <div className="space-y-4 py-2 max-h-[60vh] overflow-y-auto pr-1">
             <div className="space-y-2">
-              <Label htmlFor="co-name">ชื่อบริษัท</Label>
+              <Label htmlFor="co-name">{t("company.companyName")}</Label>
               <Input
                 id="co-name"
                 value={form.displayName}
                 onChange={(e) => handleFormChange("displayName", e.target.value)}
-                placeholder="กรอกชื่อบริษัท"
+                placeholder={t("company.companyNamePlaceholder")}
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="co-name-en">{t("company.nameEn")}</Label>
+              <Input
+                id="co-name-en"
+                value={form.nameEn}
+                onChange={(e) => handleFormChange("nameEn", e.target.value)}
+                placeholder={t("company.nameEnPlaceholder")}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="co-name-th">{t("company.nameTh")}</Label>
+              <Input id="co-name-th" value={form.nameTh} onChange={(e) => handleFormChange("nameTh", e.target.value)} placeholder={t("company.nameThPlaceholder")} />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="co-code">รหัสบริษัท (code)</Label>
+                <Label htmlFor="co-code">{t("company.companyCode")}</Label>
                 <Input
                   id="co-code"
                   value={form.code}
                   onChange={(e) => handleFormChange("code", e.target.value)}
-                  placeholder="เช่น AIA"
+                  placeholder={t("company.codePlaceholder")}
                 />
               </div>
               <div className="space-y-2">
@@ -473,12 +547,12 @@ export default function CompanySectionPage({
                   id="co-iclaimid"
                   value={form.iclaimId}
                   onChange={(e) => handleFormChange("iclaimId", e.target.value)}
-                  placeholder="เช่น 123"
+                  placeholder={t("company.iclaimIdPlaceholder")}
                 />
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="co-claimtype">ประเภทการเบิก</Label>
+              <Label htmlFor="co-claimtype">{t("company.claimType")}</Label>
               <select
                 id="co-claimtype"
                 value={form.claimType}
@@ -490,150 +564,162 @@ export default function CompanySectionPage({
                 }
                 className="w-full h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
               >
-                <option value="OPD_IPD">OPD + IPD</option>
-                <option value="OPD_ONLY">OPD เท่านั้น</option>
-                <option value="IPD_ONLY">IPD เท่านั้น</option>
+                <option value="OPD_IPD">{t("company.opdIpd")}</option>
+                <option value="OPD_ONLY">{t("company.opdOnly")}</option>
+                <option value="IPD_ONLY">{t("company.ipdOnly")}</option>
               </select>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="co-redirect">Redirect URL (ถ้ามี)</Label>
-              <Input
-                id="co-redirect"
-                value={form.redirectUrl}
-                onChange={(e) => handleFormChange("redirectUrl", e.target.value)}
-                placeholder="https://..."
-              />
-            </div>
-            <div className="space-y-2">
-              <Label>โลโก้บริษัท</Label>
-              {form.logoUrl ? (
-                <div className="flex items-center gap-3">
-                  <img src={withBasePath(form.logoUrl)} alt="logo" className="w-12 h-12 object-contain rounded border" />
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="text-red-500 hover:text-red-700 gap-1"
-                    onClick={() => handleFormChange("logoUrl", "")}
-                  >
-                    <X className="size-3.5" />
-                    ลบโลโก้
-                  </Button>
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors"
+            >
+              <ChevronDown className={`size-4 transition-transform ${showAdvanced ? "rotate-180" : ""}`} />
+              {t("company.advancedOptions")}
+            </button>
+            {showAdvanced && (
+              <div className="space-y-4 pt-1">
+                <div className="space-y-2">
+                  <Label htmlFor="co-redirect">{t("company.redirectUrl")}</Label>
+                  <Input
+                    id="co-redirect"
+                    value={form.redirectUrl}
+                    onChange={(e) => handleFormChange("redirectUrl", e.target.value)}
+                    placeholder="https://..."
+                  />
                 </div>
-              ) : (
-                <div>
-                  <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
-                    <Upload className="size-3.5" />
-                    {uploading ? "กำลังอัปโหลด..." : "อัปโหลดโลโก้"}
-                    <input
-                      type="file"
-                      accept="image/*"
-                      className="hidden"
-                      onChange={handleLogoUpload}
-                      disabled={uploading}
+                <div className="space-y-2">
+                  <Label>{t("company.companyLogo")}</Label>
+                  {form.logoUrl ? (
+                    <div className="flex items-center gap-3">
+                      <img src={withBasePath(form.logoUrl)} alt="logo" className="w-12 h-12 object-contain rounded border" />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="text-red-500 hover:text-red-700 gap-1"
+                        onClick={() => handleFormChange("logoUrl", "")}
+                      >
+                        <X className="size-3.5" />
+                        {t("company.removeLogo")}
+                      </Button>
+                    </div>
+                  ) : (
+                    <div>
+                      <label className="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm border rounded-md cursor-pointer hover:bg-gray-50 transition-colors">
+                        <Upload className="size-3.5" />
+                        {uploading ? t("company.uploading") : t("company.uploadLogo")}
+                        <input
+                          type="file"
+                          accept="image/*"
+                          className="hidden"
+                          onChange={handleLogoUpload}
+                          disabled={uploading}
+                        />
+                      </label>
+                    </div>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="co-remark">{t("company.remark")}</Label>
+                  <Input
+                    id="co-remark"
+                    value={form.remark}
+                    onChange={(e) => handleFormChange("remark", e.target.value)}
+                    placeholder={t("company.remarkPlaceholder")}
+                  />
+                </div>
+                <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3">
+                  <div className="space-y-2">
+                    <Label htmlFor="co-alert">{t("company.alertText")}</Label>
+                    <Input
+                      id="co-alert"
+                      value={form.alertText}
+                      onChange={(e) => handleFormChange("alertText", e.target.value)}
+                      placeholder={t("company.alertPlaceholder")}
                     />
-                  </label>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="co-alert-type">{t("common.type")}</Label>
+                    <select
+                      id="co-alert-type"
+                      value={form.alertType}
+                      onChange={(e) => handleFormChange("alertType", e.target.value as CompanyFormData["alertType"])}
+                      title={t("common.type")}
+                      className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="warning">{t("alertOptions.warning")}</option>
+                      <option value="error">{t("alertOptions.error")}</option>
+                      <option value="info">{t("alertOptions.info")}</option>
+                      <option value="success">{t("alertOptions.success")}</option>
+                      <option value="promo">{t("alertOptions.promo")}</option>
+                      <option value="urgent">{t("alertOptions.urgent")}</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="co-alert-size">{t("common.size")}</Label>
+                    <select
+                      id="co-alert-size"
+                      value={form.alertSize}
+                      onChange={(e) => handleFormChange("alertSize", e.target.value as CompanyFormData["alertSize"])}
+                      title={t("common.size")}
+                      className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="xs">XS</option>
+                      <option value="sm">S</option>
+                      <option value="md">M</option>
+                      <option value="lg">L</option>
+                      <option value="xl">XL</option>
+                    </select>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="co-alert-border">{t("common.border")}</Label>
+                    <select
+                      id="co-alert-border"
+                      value={form.alertBorder}
+                      onChange={(e) => handleFormChange("alertBorder", e.target.value as CompanyFormData["alertBorder"])}
+                      title={t("common.border")}
+                      className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                    >
+                      <option value="none">{t("alertOptions.none")}</option>
+                      <option value="glow">{t("alertOptions.glow")}</option>
+                      <option value="pulse">{t("alertOptions.pulse")}</option>
+                      <option value="shimmer">{t("alertOptions.shimmer")}</option>
+                      <option value="bounce">{t("alertOptions.bounce")}</option>
+                      <option value="shake">{t("alertOptions.shake")}</option>
+                      <option value="rainbow">{t("alertOptions.rainbow")}</option>
+                      <option value="blink">{t("alertOptions.blink")}</option>
+                    </select>
+                  </div>
                 </div>
-              )}
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="co-remark">หมายเหตุ (แสดงเมื่อระงับ)</Label>
-              <Input
-                id="co-remark"
-                value={form.remark}
-                onChange={(e) => handleFormChange("remark", e.target.value)}
-                placeholder="ข้อความหมายเหตุ"
-              />
-            </div>
-            <div className="grid grid-cols-[1fr_auto_auto_auto] gap-3">
-              <div className="space-y-2">
-                <Label htmlFor="co-alert">ข้อความแจ้งเตือน (ถ้ามี)</Label>
-                <Input
-                  id="co-alert"
-                  value={form.alertText}
-                  onChange={(e) => handleFormChange("alertText", e.target.value)}
-                  placeholder="เช่น OPD ให้สำรองจ่าย"
-                />
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="co-clickable">{t("company.isClickable")}</Label>
+                  <Switch
+                    id="co-clickable"
+                    checked={form.isClickable}
+                    onCheckedChange={(val) => handleFormChange("isClickable", val)}
+                  />
+                </div>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="co-isnew">{t("company.showNewBadge")}</Label>
+                  <Switch
+                    id="co-isnew"
+                    checked={form.isNew}
+                    onCheckedChange={(val) => handleFormChange("isNew", val)}
+                  />
+                </div>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="co-alert-type">ประเภท</Label>
-                <select
-                  id="co-alert-type"
-                  value={form.alertType}
-                  onChange={(e) => handleFormChange("alertType", e.target.value as CompanyFormData["alertType"])}
-                  title="ประเภทแจ้งเตือน"
-                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="warning">⚠️ เตือน</option>
-                  <option value="error">❌ สำคัญ</option>
-                  <option value="info">ℹ️ แจ้งข้อมูล</option>
-                  <option value="success">✅ สำเร็จ</option>
-                  <option value="promo">🎉 โปรโมชั่น</option>
-                  <option value="urgent">🚨 ด่วน</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="co-alert-size">ขนาด</Label>
-                <select
-                  id="co-alert-size"
-                  value={form.alertSize}
-                  onChange={(e) => handleFormChange("alertSize", e.target.value as CompanyFormData["alertSize"])}
-                  title="ขนาดแจ้งเตือน"
-                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="xs">XS</option>
-                  <option value="sm">S</option>
-                  <option value="md">M</option>
-                  <option value="lg">L</option>
-                  <option value="xl">XL</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="co-alert-border">ขอบ</Label>
-                <select
-                  id="co-alert-border"
-                  value={form.alertBorder}
-                  onChange={(e) => handleFormChange("alertBorder", e.target.value as CompanyFormData["alertBorder"])}
-                  title="เอฟเฟกต์ขอบ"
-                  className="h-9 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
-                >
-                  <option value="none">ไม่มี</option>
-                  <option value="glow">เรืองแสง</option>
-                  <option value="pulse">กระพริบ</option>
-                  <option value="shimmer">วิ่ง</option>
-                  <option value="bounce">เด้ง</option>
-                  <option value="shake">สั่น</option>
-                  <option value="rainbow">สายรุ้ง</option>
-                  <option value="blink">กระพริบจ้า</option>
-                </select>
-              </div>
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="co-clickable">คลิกได้ (ไม่ระงับ)</Label>
-              <Switch
-                id="co-clickable"
-                checked={form.isClickable}
-                onCheckedChange={(val) => handleFormChange("isClickable", val)}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label htmlFor="co-isnew">แสดงป้าย "ใหม่"</Label>
-              <Switch
-                id="co-isnew"
-                checked={form.isNew}
-                onCheckedChange={(val) => handleFormChange("isNew", val)}
-              />
-            </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              ยกเลิก
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={handleDialogSave}
               disabled={!form.displayName.trim()}
             >
-              {editingId ? "บันทึก" : "เพิ่ม"}
+              {editingId ? t("common.save") : t("common.add")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -646,18 +732,18 @@ export default function CompanySectionPage({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>ยืนยันการลบ?</AlertDialogTitle>
+            <AlertDialogTitle>{t("common.confirmDelete")}</AlertDialogTitle>
             <AlertDialogDescription>
-              การลบนี้ไม่สามารถกู้คืนได้
+              {t("common.cannotUndo")}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>ยกเลิก</AlertDialogCancel>
+            <AlertDialogCancel>{t("common.cancel")}</AlertDialogCancel>
             <AlertDialogAction
               className="bg-red-600 hover:bg-red-700"
               onClick={() => deleteId && handleDelete(deleteId)}
             >
-              ลบ
+              {t("common.delete")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

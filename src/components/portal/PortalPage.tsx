@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { Search, X, LayoutGrid, List } from "lucide-react";
+import { Search, X, LayoutGrid, List, Shield, Building2, Globe, Receipt } from "lucide-react";
 import type {
   Company,
   CompanySection,
   ManualData,
   NewsData,
   PortalSettings,
+  PortalTheme,
   TpaCareCheck,
 } from "@/types/portal";
 import type { ViewMode } from "./CompanyItem";
@@ -17,10 +18,19 @@ import NewsSection from "./NewsSection";
 import CompanySectionComponent from "./CompanySection";
 import TpaCareCheckCard from "./TpaCareCheckCard";
 import IClaimModal from "./IClaimModal";
+import { buildIClaimUrl } from "@/lib/iclaim";
 import CompanyItem from "./CompanyItem";
 import ViewModeToggle from "./ViewModeToggle";
 import ClassicView from "./ClassicView";
 import AnnouncementBanner from "./AnnouncementBanner";
+import ThemeDecorations from "./ThemeDecorations";
+
+const TAB_ICONS: Record<string, React.ReactNode> = {
+  insurance: <Shield className="size-4" />,
+  "self-insured": <Building2 className="size-4" />,
+  international: <Globe className="size-4" />,
+  deductible: <Receipt className="size-4" />,
+};
 import { withBasePath } from "@/lib/base-path";
 
 interface PortalPageProps {
@@ -32,6 +42,8 @@ interface PortalPageProps {
   selfInsured: CompanySection;
   internationalInsurance: CompanySection;
   deductible: CompanySection;
+  activeTheme?: PortalTheme;
+  providerCode?: string | null;
 }
 
 interface TabData {
@@ -55,6 +67,8 @@ export default function PortalPage({
   selfInsured,
   internationalInsurance,
   deductible,
+  activeTheme = "default",
+  providerCode,
 }: PortalPageProps) {
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedCompany, setSelectedCompany] = useState<Company | null>(null);
@@ -79,6 +93,17 @@ export default function PortalPage({
   }
 
   function handleCompanyClick(company: Company) {
+    // Skip modal entirely for single-claimType companies — redirect directly
+    if (company.code && company.iclaimId) {
+      if (company.claimType === "OPD_ONLY") {
+        window.location.href = buildIClaimUrl(settings.iclaim.baseUrl, company.code, company.iclaimId, "OPD");
+        return;
+      }
+      if (company.claimType === "IPD_ONLY") {
+        window.location.href = buildIClaimUrl(settings.iclaim.baseUrl, company.code, company.iclaimId, "IPD");
+        return;
+      }
+    }
     setSelectedCompany(company);
     setModalOpen(true);
   }
@@ -111,14 +136,14 @@ export default function PortalPage({
     for (const tab of tabs) {
       const label = tab.label;
       for (const co of tab.section.companies) {
-        if (co.displayName.toLowerCase().includes(q)) {
+        if (co.displayName.toLowerCase().includes(q) || co.nameEn?.toLowerCase().includes(q) || co.nameTh?.toLowerCase().includes(q)) {
           results.push({ company: co, sectionLabel: label });
         }
       }
       if (tab.section.groups) {
         for (const group of tab.section.groups) {
           for (const co of group.companies) {
-            if (co.displayName.toLowerCase().includes(q)) {
+            if (co.displayName.toLowerCase().includes(q) || co.nameEn?.toLowerCase().includes(q) || co.nameTh?.toLowerCase().includes(q)) {
               results.push({ company: co, sectionLabel: label });
             }
           }
@@ -134,6 +159,27 @@ export default function PortalPage({
 
   return (
     <>
+      <ThemeDecorations theme={activeTheme} />
+
+      {/* Provider badge */}
+      {providerCode && (
+        <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-lg px-4 py-2 mb-3 text-sm">
+          <span className="text-blue-800">
+            <strong>Provider:</strong> {providerCode}
+          </span>
+          <button
+            type="button"
+            onClick={async () => {
+              await fetch("/api/auth/provider-logout", { method: "POST" });
+              window.location.reload();
+            }}
+            className="text-blue-600 hover:text-blue-800 underline text-xs"
+          >
+            View All
+          </button>
+        </div>
+      )}
+
       {/* Announcement Banner — top, both views */}
       <AnnouncementBanner announcement={settings.announcement} />
 
@@ -223,7 +269,7 @@ export default function PortalPage({
                   ไม่พบผลลัพธ์สำหรับ &quot;{searchQuery}&quot;
                 </div>
               ) : viewMode === "card" ? (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                   {searchResults.map((r) => (
                     <CompanyItem
                       key={r.company.id}
@@ -258,12 +304,13 @@ export default function PortalPage({
                       key={tab.key}
                       type="button"
                       onClick={() => setActiveTab(tab.key)}
-                      className={`portal-tab whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shrink-0 ${
+                      className={`portal-tab flex items-center gap-1.5 whitespace-nowrap px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 shrink-0 ${
                         activeTab === tab.key
                           ? "portal-tab-active bg-primary text-primary-foreground shadow-sm"
                           : "text-muted-foreground hover:text-foreground hover:bg-secondary"
                       }`}
                     >
+                      {TAB_ICONS[tab.key]}
                       {tab.label}
                       <span className={`ml-1.5 text-xs ${activeTab === tab.key ? "text-primary-foreground/70" : "text-muted-foreground"}`}>
                         ({tab.count})

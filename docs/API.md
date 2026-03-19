@@ -54,7 +54,7 @@ All routes matching `/admin/*` and `/api/admin/*` are protected by middleware (`
 ```bash
 ADMIN_PASSWORD=your-secure-password-here
 JWT_SECRET=your-jwt-secret-key-change-in-production
-COOKIE_SECURE=false
+COOKIE_SECURE=false   # Set to "true" for HTTPS environments; default is "false" for Docker HTTP access
 ```
 
 `ADMIN_PASSWORD` and `JWT_SECRET` are required. The server will fail fast during startup if either variable is missing or blank.
@@ -83,9 +83,9 @@ Authenticate with the admin password and obtain a session token.
 }
 ```
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `password` | string | Yes | The admin password. Must match `ADMIN_PASSWORD` env variable. |
+| Field      | Type   | Required | Description                                                   |
+| ---------- | ------ | -------- | ------------------------------------------------------------- |
+| `password` | string | Yes      | The admin password. Must match `ADMIN_PASSWORD` env variable. |
 
 **Response (Success - 200)**:
 
@@ -117,6 +117,16 @@ Returned when the request body is not valid JSON.
 
 Returned when the password is incorrect or missing. The error message is in Thai: "Incorrect password".
 
+**Response (Error - 500)**:
+
+```json
+{
+  "error": "Server configuration error"
+}
+```
+
+Returned when the `ADMIN_PASSWORD` environment variable is not set on the server.
+
 **Example cURL**:
 
 ```bash
@@ -129,19 +139,19 @@ curl -X POST http://localhost:3000/api/auth/login \
 **Example JavaScript**:
 
 ```javascript
-const response = await fetch('/api/auth/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ password: 'admin123' }),
-  credentials: 'include', // Include cookies
+const response = await fetch("/api/auth/login", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ password: "admin123" }),
+  credentials: "include", // Include cookies
 });
 
 if (response.ok) {
   const data = await response.json();
-  console.log('Logged in successfully:', data);
+  console.log("Logged in successfully:", data);
 } else {
   const error = await response.json();
-  console.error('Login failed:', error.error);
+  console.error("Login failed:", error.error);
 }
 ```
 
@@ -176,13 +186,13 @@ curl -X POST http://localhost:3000/api/auth/logout -v
 **Example JavaScript**:
 
 ```javascript
-const response = await fetch('/api/auth/logout', {
-  method: 'POST',
-  credentials: 'include',
+const response = await fetch("/api/auth/logout", {
+  method: "POST",
+  credentials: "include",
 });
 
 const data = await response.json();
-console.log('Logged out:', data);
+console.log("Logged out:", data);
 ```
 
 ---
@@ -199,9 +209,9 @@ Retrieve the contents of a specific content JSON file.
 
 **URL Parameters**:
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `filename` | string | Yes | Name of the content file (without `.json`). Allowed values: `settings`, `manual`, `news`, `tpacare-check`, `insurance-companies`, `self-insured`, `international-insurance`, `deductible`. |
+| Parameter  | Type   | Required | Description                                                                                                                                                                                |
+| ---------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `filename` | string | Yes      | Name of the content file (without `.json`). Allowed values: `settings`, `manual`, `news`, `tpacare-check`, `insurance-companies`, `self-insured`, `international-insurance`, `deductible`. |
 
 **Response (Success - 200)**:
 
@@ -263,21 +273,21 @@ curl http://localhost:3000/api/admin/content/settings \
 **Example JavaScript**:
 
 ```javascript
-const response = await fetch('/api/admin/content/news', {
-  method: 'GET',
-  credentials: 'include', // Include auth cookie
+const response = await fetch("/api/admin/content/news", {
+  method: "GET",
+  credentials: "include", // Include auth cookie
 });
 
 if (response.ok) {
   const newsData = await response.json();
-  console.log('News items:', newsData.items);
+  console.log("News items:", newsData.items);
 } else if (response.status === 401) {
-  console.error('Not authenticated');
+  console.error("Not authenticated");
   // Redirect to login
-  window.location.href = '/admin/login';
+  window.location.href = "/admin/login";
 } else {
   const error = await response.json();
-  console.error('Error:', error.error);
+  console.error("Error:", error.error);
 }
 ```
 
@@ -293,9 +303,9 @@ Update the contents of a specific content JSON file. This endpoint replaces the 
 
 **URL Parameters**:
 
-| Parameter | Type | Required | Description |
-|-----------|------|----------|-------------|
-| `filename` | string | Yes | Name of the content file (without `.json`). Allowed values: `settings`, `manual`, `news`, `tpacare-check`, `insurance-companies`, `self-insured`, `international-insurance`, `deductible`. |
+| Parameter  | Type   | Required | Description                                                                                                                                                                                |
+| ---------- | ------ | -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `filename` | string | Yes      | Name of the content file (without `.json`). Allowed values: `settings`, `manual`, `news`, `tpacare-check`, `insurance-companies`, `self-insured`, `international-insurance`, `deductible`. |
 
 **Request Body**:
 
@@ -395,31 +405,31 @@ curl -X PUT http://localhost:3000/api/admin/content/news \
 const newsData = {
   items: [
     {
-      id: 'n1',
-      title: 'Breaking News',
-      url: 'https://example.com/news.pdf',
+      id: "n1",
+      title: "Breaking News",
+      url: "https://example.com/news.pdf",
       isNew: true,
       isPublished: true,
     },
   ],
 };
 
-const response = await fetch('/api/admin/content/news', {
-  method: 'PUT',
-  headers: { 'Content-Type': 'application/json' },
+const response = await fetch("/api/admin/content/news", {
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify(newsData),
-  credentials: 'include',
+  credentials: "include",
 });
 
 if (response.ok) {
   const result = await response.json();
-  console.log('Content updated:', result);
+  console.log("Content updated:", result);
 } else if (response.status === 401) {
-  console.error('Not authenticated');
-  window.location.href = '/admin/login';
+  console.error("Not authenticated");
+  window.location.href = "/admin/login";
 } else {
   const error = await response.json();
-  console.error('Update failed:', error.error);
+  console.error("Update failed:", error.error);
 }
 ```
 
@@ -437,9 +447,9 @@ Upload an image file to the server. The file is stored in `/public/images/` and 
 
 **Form Fields**:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `file` | File | Yes | The image file to upload. Accepted formats: PNG, JPG, JPEG, GIF, WebP, SVG. Max size: no hard limit (browser/server dependent). |
+| Field  | Type | Required | Description                                                                                |
+| ------ | ---- | -------- | ------------------------------------------------------------------------------------------ |
+| `file` | File | Yes      | The image file to upload. Accepted formats: PNG, JPG, JPEG, GIF, WebP. Max file size: 5MB. |
 
 **Response (Success - 200)**:
 
@@ -463,7 +473,7 @@ or
 
 ```json
 {
-  "error": "Invalid file type. Allowed types: png, jpg, jpeg, gif, webp, svg"
+  "error": "Invalid file type. Allowed types: png, jpg, jpeg, gif, webp"
 }
 ```
 
@@ -518,23 +528,23 @@ curl -X POST http://localhost:3000/api/admin/upload \
 
 ```javascript
 const formData = new FormData();
-formData.append('file', fileInputElement.files[0]);
+formData.append("file", fileInputElement.files[0]);
 
-const response = await fetch('/api/admin/upload', {
-  method: 'POST',
+const response = await fetch("/api/admin/upload", {
+  method: "POST",
   body: formData,
-  credentials: 'include',
+  credentials: "include",
 });
 
 if (response.ok) {
   const result = await response.json();
-  console.log('Image uploaded:', result.url);
+  console.log("Image uploaded:", result.url);
   // Use result.url in content
 } else if (response.status === 401) {
-  console.error('Not authenticated');
+  console.error("Not authenticated");
 } else {
   const error = await response.json();
-  console.error('Upload failed:', error.error);
+  console.error("Upload failed:", error.error);
 }
 ```
 
@@ -563,7 +573,15 @@ type AlertSize = "xs" | "sm" | "md" | "lg" | "xl";
 A string enum representing border animation styles for alerts.
 
 ```typescript
-type AlertBorder = "none" | "glow" | "pulse" | "shimmer" | "bounce" | "shake" | "rainbow" | "blink";
+type AlertBorder =
+  | "none"
+  | "glow"
+  | "pulse"
+  | "shimmer"
+  | "bounce"
+  | "shake"
+  | "rainbow"
+  | "blink";
 ```
 
 ### Company
@@ -572,21 +590,23 @@ Represents an insurance company or self-insured organization.
 
 ```typescript
 interface Company {
-  id: string;                                        // Unique identifier
-  displayName: string;                              // Company name displayed to users
-  code: string | null;                              // iClaim company code (for system integration)
-  iclaimId: string | null;                          // iClaim numeric ID (for claim redirection)
-  isClickable: boolean;                             // Whether the company is active/clickable
-  isNew: boolean;                                   // If true, displays "NEW" badge
-  claimType: "OPD_IPD" | "OPD_ONLY" | "IPD_ONLY";  // Types of claims supported
-  remark: string | null;                            // Remark shown in red when company is suspended
-  redirectUrl?: string;                             // Custom redirect URL (skips iClaim modal)
-  logoUrl?: string | null;                          // URL to company logo image
-  alertText?: string | null;                        // Alert message (e.g., "OPD self-pay")
-  alertType?: AlertType;                            // Alert style type
-  alertSize?: AlertSize;                            // Alert size
-  alertGlow?: boolean;                              // Add glow effect to alert
-  alertBorder?: AlertBorder;                        // Border animation style
+  id: string; // Unique identifier
+  displayName: string; // Company name displayed to users
+  code: string | null; // iClaim company code (for system integration)
+  iclaimId: string | null; // iClaim numeric ID (for claim redirection)
+  isClickable: boolean; // Whether the company is active/clickable
+  isNew: boolean; // If true, displays "NEW" badge
+  claimType: "OPD_IPD" | "OPD_ONLY" | "IPD_ONLY"; // Types of claims supported
+  remark: string | null; // Remark shown in red when company is suspended
+  redirectUrl?: string; // Custom redirect URL (skips iClaim modal)
+  nameEn?: string | null; // English company name (for bilingual search)
+  nameTh?: string | null; // Thai company name (for bilingual search)
+  logoUrl?: string | null; // URL to company logo image
+  alertText?: string | null; // Alert message (e.g., "OPD self-pay")
+  alertType?: AlertType; // Alert style type
+  alertSize?: AlertSize; // Alert size
+  alertGlow?: boolean; // Add glow effect to alert
+  alertBorder?: AlertBorder; // Border animation style
 }
 ```
 
@@ -612,15 +632,15 @@ Represents a grouped set of companies (used in self-insured section for parent c
 
 ```typescript
 interface CompanyGroup {
-  id: string;                    // Unique identifier
-  headerName: string;            // Parent company/group name
-  headerIconUrl: string | null;  // Logo URL for the group header
-  companies: Company[];          // Array of child companies
-  alertText?: string | null;     // Alert message for the group
-  alertType?: AlertType;         // Alert style type
-  alertSize?: AlertSize;         // Alert size
-  alertGlow?: boolean;           // Add glow effect
-  alertBorder?: AlertBorder;     // Border animation style
+  id: string; // Unique identifier
+  headerName: string; // Parent company/group name
+  headerIconUrl: string | null; // Logo URL for the group header
+  companies: Company[]; // Array of child companies
+  alertText?: string | null; // Alert message for the group
+  alertType?: AlertType; // Alert style type
+  alertSize?: AlertSize; // Alert size
+  alertGlow?: boolean; // Add glow effect
+  alertBorder?: AlertBorder; // Border animation style
 }
 ```
 
@@ -662,14 +682,14 @@ Represents a section of companies (e.g., "Insurance Companies" or "Self-Insured"
 
 ```typescript
 interface CompanySection {
-  heading: string;                // Section heading (e.g., "บริษัทประกันภัย")
-  companies: Company[];           // Flat array of companies
-  groups?: CompanyGroup[];        // Optional: grouped companies
-  alertText?: string | null;      // Alert message for the entire section
-  alertType?: AlertType;          // Alert style type
-  alertSize?: AlertSize;          // Alert size
-  alertGlow?: boolean;            // Add glow effect
-  alertBorder?: AlertBorder;      // Border animation style
+  heading: string; // Section heading (e.g., "บริษัทประกันภัย")
+  companies: Company[]; // Flat array of companies
+  groups?: CompanyGroup[]; // Optional: grouped companies
+  alertText?: string | null; // Alert message for the entire section
+  alertType?: AlertType; // Alert style type
+  alertSize?: AlertSize; // Alert size
+  alertGlow?: boolean; // Add glow effect
+  alertBorder?: AlertBorder; // Border animation style
 }
 ```
 
@@ -679,10 +699,10 @@ Represents a news or announcement entry.
 
 ```typescript
 interface NewsItem {
-  id: string;           // Unique identifier
-  title: string;        // News title
-  url: string;          // URL to news document (typically PDF)
-  isNew: boolean;       // If true, displays "NEW" badge
+  id: string; // Unique identifier
+  title: string; // News title
+  url: string; // URL to news document (typically PDF)
+  isNew: boolean; // If true, displays "NEW" badge
   isPublished: boolean; // If false, item is hidden from portal
 }
 ```
@@ -703,9 +723,9 @@ Represents a manual or guide entry.
 
 ```typescript
 interface ManualItem {
-  id: string;           // Unique identifier
-  title: string;        // Manual title
-  url: string;          // URL to manual document (typically PDF)
+  id: string; // Unique identifier
+  title: string; // Manual title
+  url: string; // URL to manual document (typically PDF)
   isPublished: boolean; // If false, item is hidden from portal
 }
 ```
@@ -716,7 +736,7 @@ Container for manual items with a subheading.
 
 ```typescript
 interface ManualData {
-  subHeading: string;  // Sub-heading displayed under "Manual" (e.g., "คู่มือ TPA")
+  subHeading: string; // Sub-heading displayed under "Manual" (e.g., "คู่มือ TPA")
   items: ManualItem[]; // Array of manual items
 }
 ```
@@ -727,14 +747,14 @@ Configuration for a site-wide announcement banner.
 
 ```typescript
 interface AnnouncementConfig {
-  enabled: boolean;      // Whether the announcement is shown
-  text: string;          // Announcement text
-  type: AlertType;       // Alert style type
-  size: AlertSize;       // Alert size
-  glow?: boolean;        // Add glow effect
-  border: AlertBorder;   // Border animation style
-  link: string | null;   // Optional URL for the announcement
-  dismissible: boolean;  // Whether users can dismiss the announcement
+  enabled: boolean; // Whether the announcement is shown
+  text: string; // Announcement text
+  type: AlertType; // Alert style type
+  size: AlertSize; // Alert size
+  glow?: boolean; // Add glow effect
+  border: AlertBorder; // Border animation style
+  link: string | null; // Optional URL for the announcement
+  dismissible: boolean; // Whether users can dismiss the announcement
 }
 ```
 
@@ -745,18 +765,51 @@ Top-level configuration for the portal.
 ```typescript
 interface PortalSettings {
   logo: {
-    url: string;       // Logo image URL
-    alt: string;       // Alt text for accessibility
+    url: string; // Logo image URL
+    alt: string; // Alt text for accessibility
   };
   iclaim: {
-    baseUrl: string;           // iClaim system base URL
-    confirmText: string;       // Confirmation dialog message
-    confirmOk: string;         // OK button text
-    confirmCancel: string;     // Cancel button text
-    claimTypePrompt: string;   // Prompt for claim type selection
+    baseUrl: string; // iClaim system base URL
+    confirmText: string; // Confirmation dialog message
+    confirmOk: string; // OK button text
+    confirmCancel: string; // Cancel button text
+    claimTypePrompt: string; // Prompt for claim type selection
   };
   announcement?: AnnouncementConfig; // Optional: site-wide announcement
+  theme?: ThemeConfig; // Optional: portal theme configuration
 }
+```
+
+### ThemeConfig
+
+Configuration for the portal visual theme.
+
+```typescript
+interface ThemeConfig {
+  preset: PortalTheme; // Selected theme preset
+}
+```
+
+### PortalTheme
+
+Available theme presets.
+
+```typescript
+type PortalTheme =
+  | "default"
+  | "ocean"
+  | "forest"
+  | "sunset"
+  | "cherry-blossom"
+  | "songkran"
+  | "loy-krathong"
+  | "christmas"
+  | "new-year"
+  | "halloween"
+  | "valentine"
+  | "spring"
+  | "summer"
+  | "winter";
 ```
 
 **Example**:
@@ -792,11 +845,11 @@ Configuration for the TPA Care Check section.
 
 ```typescript
 interface TpaCareCheck {
-  heading: string;      // Section heading
-  description: string;  // Description text
+  heading: string; // Section heading
+  description: string; // Description text
   imageUrl: string | null; // Optional image
   redirectCode: string; // iClaim code for redirect
-  redirectId: string;   // iClaim ID for redirect
+  redirectId: string; // iClaim ID for redirect
 }
 ```
 
@@ -808,16 +861,16 @@ All portal content is stored in JSON files in the `/content/` directory. These f
 
 ### List of Content Files
 
-| Filename | Content Type | Description |
-|----------|--------------|-------------|
-| `settings` | PortalSettings | Portal branding, iClaim config, and announcements |
-| `manual` | ManualData | User manuals and guides |
-| `news` | NewsData | News and announcements |
-| `tpacare-check` | TpaCareCheck | TPA Care Check section config |
-| `insurance-companies` | CompanySection | Insurance companies and life insurance companies |
-| `self-insured` | CompanySection | Self-insured employee benefit organizations |
-| `international-insurance` | CompanySection | International insurance companies |
-| `deductible` | CompanySection | Deductible-based insurance options |
+| Filename                  | Content Type   | Description                                       |
+| ------------------------- | -------------- | ------------------------------------------------- |
+| `settings`                | PortalSettings | Portal branding, iClaim config, and announcements |
+| `manual`                  | ManualData     | User manuals and guides                           |
+| `news`                    | NewsData       | News and announcements                            |
+| `tpacare-check`           | TpaCareCheck   | TPA Care Check section config                     |
+| `insurance-companies`     | CompanySection | Insurance companies and life insurance companies  |
+| `self-insured`            | CompanySection | Self-insured employee benefit organizations       |
+| `international-insurance` | CompanySection | International insurance companies                 |
+| `deductible`              | CompanySection | Deductible-based insurance options                |
 
 ### File Structure Reference
 
@@ -1027,11 +1080,13 @@ or
 ```
 
 **When it occurs**:
+
 - Invalid filename in URL
 - Malformed JSON in request body
 - Missing required fields
 
 **How to fix**:
+
 - Verify the filename is in the allowed list
 - Validate JSON syntax
 - Check required fields are present
@@ -1055,11 +1110,13 @@ or (on login endpoint)
 ```
 
 **When it occurs**:
+
 - No valid JWT token in cookie
 - Expired JWT token
 - Invalid password on login
 
 **How to fix**:
+
 - Log in again at `/admin/login`
 - Ensure cookies are enabled in your browser
 - Check the password is correct
@@ -1092,12 +1149,14 @@ or
 ```
 
 **When it occurs**:
+
 - File system permission errors
 - Disk space issues
 - Corrupted JSON files
 - Directory creation failures
 
 **How to fix**:
+
 - Check server logs for details
 - Verify file permissions on `/content/` directory
 - Ensure adequate disk space
@@ -1106,12 +1165,12 @@ or
 
 ### HTTP Status Code Reference
 
-| Status Code | Meaning | Typical Response |
-|------------|---------|------------------|
-| 200 OK | Request succeeded | JSON response with data or `{ "success": true }` |
-| 400 Bad Request | Invalid request format | `{ "error": "..." }` |
-| 401 Unauthorized | Authentication failed | `{ "error": "Unauthorized" }` or `{ "error": "รหัสผ่านไม่ถูกต้อง" }` |
-| 500 Internal Server Error | Server error | `{ "error": "..." }` |
+| Status Code               | Meaning                | Typical Response                                                     |
+| ------------------------- | ---------------------- | -------------------------------------------------------------------- |
+| 200 OK                    | Request succeeded      | JSON response with data or `{ "success": true }`                     |
+| 400 Bad Request           | Invalid request format | `{ "error": "..." }`                                                 |
+| 401 Unauthorized          | Authentication failed  | `{ "error": "Unauthorized" }` or `{ "error": "รหัสผ่านไม่ถูกต้อง" }` |
+| 500 Internal Server Error | Server error           | `{ "error": "..." }`                                                 |
 
 ---
 
@@ -1134,7 +1193,7 @@ or
 ### Image Uploads
 
 - **Optimize images**: Compress images before uploading to save storage.
-- **Use appropriate formats**: PNG for logos, JPEG for photos, SVG for icons.
+- **Use appropriate formats**: PNG for logos, JPEG for photos, WebP for optimized images.
 - **Store URLs**: After uploading, store the returned URL in content files (e.g., as `logoUrl`).
 - **Cleanup old images**: The server keeps all uploaded images; periodically remove unused files from `/public/images/`.
 
@@ -1150,58 +1209,58 @@ Currently, there is no built-in rate limiting. If deploying at scale, consider a
 
 ```javascript
 // 1. Log in
-const loginResponse = await fetch('/api/auth/login', {
-  method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
-  body: JSON.stringify({ password: 'admin123' }),
-  credentials: 'include',
+const loginResponse = await fetch("/api/auth/login", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ password: "admin123" }),
+  credentials: "include",
 });
 
 if (!loginResponse.ok) {
-  console.error('Login failed');
+  console.error("Login failed");
   process.exit(1);
 }
 
 // 2. Fetch content
-const contentResponse = await fetch('/api/admin/content/news', {
-  credentials: 'include',
+const contentResponse = await fetch("/api/admin/content/news", {
+  credentials: "include",
 });
 
 const news = await contentResponse.json();
-console.log('Current news:', news.items);
+console.log("Current news:", news.items);
 
 // 3. Update content
 const updatedNews = {
   items: [
     ...news.items,
     {
-      id: 'n-new',
-      title: 'New Announcement',
-      url: 'https://example.com/new.pdf',
+      id: "n-new",
+      title: "New Announcement",
+      url: "https://example.com/new.pdf",
       isNew: true,
       isPublished: true,
     },
   ],
 };
 
-const updateResponse = await fetch('/api/admin/content/news', {
-  method: 'PUT',
-  headers: { 'Content-Type': 'application/json' },
+const updateResponse = await fetch("/api/admin/content/news", {
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify(updatedNews),
-  credentials: 'include',
+  credentials: "include",
 });
 
 if (updateResponse.ok) {
-  console.log('News updated successfully');
+  console.log("News updated successfully");
 }
 
 // 4. Log out
-const logoutResponse = await fetch('/api/auth/logout', {
-  method: 'POST',
-  credentials: 'include',
+const logoutResponse = await fetch("/api/auth/logout", {
+  method: "POST",
+  credentials: "include",
 });
 
-console.log('Logged out');
+console.log("Logged out");
 ```
 
 ### Upload an Image and Use It
@@ -1209,47 +1268,50 @@ console.log('Logged out');
 ```javascript
 // 1. Upload image
 const formData = new FormData();
-formData.append('file', imageFile);
+formData.append("file", imageFile);
 
-const uploadResponse = await fetch('/api/admin/upload', {
-  method: 'POST',
+const uploadResponse = await fetch("/api/admin/upload", {
+  method: "POST",
   body: formData,
-  credentials: 'include',
+  credentials: "include",
 });
 
 const { url } = await uploadResponse.json();
-console.log('Image URL:', url); // e.g., "/images/1234567890-logo.png"
+console.log("Image URL:", url); // e.g., "/images/1234567890-logo.png"
 
 // 2. Use the URL in content
-const companiesResponse = await fetch('/api/admin/content/insurance-companies', {
-  credentials: 'include',
-});
+const companiesResponse = await fetch(
+  "/api/admin/content/insurance-companies",
+  {
+    credentials: "include",
+  },
+);
 
 const companies = await companiesResponse.json();
 
 // Add a new company with the uploaded logo
 companies.companies.push({
-  id: 'ins-new',
-  displayName: 'New Insurance Co.',
-  code: 'NEWINC',
-  iclaimId: '999',
+  id: "ins-new",
+  displayName: "New Insurance Co.",
+  code: "NEWINC",
+  iclaimId: "999",
   isClickable: true,
   isNew: true,
-  claimType: 'OPD_IPD',
+  claimType: "OPD_IPD",
   remark: null,
   logoUrl: url, // Use the uploaded image
 });
 
 // 3. Save updated companies
-const saveResponse = await fetch('/api/admin/content/insurance-companies', {
-  method: 'PUT',
-  headers: { 'Content-Type': 'application/json' },
+const saveResponse = await fetch("/api/admin/content/insurance-companies", {
+  method: "PUT",
+  headers: { "Content-Type": "application/json" },
   body: JSON.stringify(companies),
-  credentials: 'include',
+  credentials: "include",
 });
 
 if (saveResponse.ok) {
-  console.log('Company added with logo');
+  console.log("Company added with logo");
 }
 ```
 
@@ -1257,16 +1319,16 @@ if (saveResponse.ok) {
 
 ```javascript
 // Attempt to fetch protected content
-const response = await fetch('/api/admin/content/settings', {
-  credentials: 'include',
+const response = await fetch("/api/admin/content/settings", {
+  credentials: "include",
 });
 
 if (response.status === 401) {
-  console.log('Not authenticated - redirecting to login');
-  window.location.href = '/admin/login';
+  console.log("Not authenticated - redirecting to login");
+  window.location.href = "/admin/login";
 } else if (response.ok) {
   const settings = await response.json();
-  console.log('Authenticated, settings:', settings);
+  console.log("Authenticated, settings:", settings);
 }
 ```
 
@@ -1279,6 +1341,7 @@ if (response.status === 401) {
 **Issue**: API returns 401 even after logging in.
 
 **Solutions**:
+
 - Ensure cookies are enabled in your browser
 - Check that the login response set a cookie (inspect browser DevTools > Application > Cookies)
 - For plain HTTP access, keep `COOKIE_SECURE` unset or set to `false`
@@ -1291,6 +1354,7 @@ if (response.status === 401) {
 **Issue**: PUT/GET request returns "Invalid filename".
 
 **Solution**: Verify the filename matches one of the allowed files:
+
 - `settings`
 - `manual`
 - `news`
@@ -1305,10 +1369,11 @@ if (response.status === 401) {
 **Issue**: File upload fails with "could not save file".
 
 **Solutions**:
+
 - Check disk space on the server
 - Verify `/public/images/` directory exists and is writable
 - Ensure file size is reasonable
-- Check file type is allowed (PNG, JPG, JPEG, GIF, WebP, SVG)
+- Check file type is allowed (PNG, JPG, JPEG, GIF, WebP)
 - Check server logs for detailed error messages
 
 ### Content Not Updating
@@ -1316,6 +1381,7 @@ if (response.status === 401) {
 **Issue**: PUT request succeeds but content doesn't change.
 
 **Solutions**:
+
 - Hard refresh your browser (Ctrl+F5 or Cmd+Shift+R) to clear cache
 - Verify the PUT request body is valid JSON
 - Check the response from the PUT request confirms `"success": true`
@@ -1346,6 +1412,19 @@ The current API has no explicit versioning. All endpoints are stable. If breakin
 
 ---
 
+## Security Headers
+
+The application sets the following security headers on responses:
+
+| Header                   | Value                                      | Purpose                                                                    |
+| ------------------------ | ------------------------------------------ | -------------------------------------------------------------------------- |
+| `X-Frame-Options`        | `DENY`                                     | Prevents the page from being embedded in iframes (clickjacking protection) |
+| `X-Content-Type-Options` | `nosniff`                                  | Prevents browsers from MIME-type sniffing                                  |
+| `Referrer-Policy`        | `strict-origin-when-cross-origin`          | Controls how much referrer information is sent with requests               |
+| `Permissions-Policy`     | `camera=(), microphone=(), geolocation=()` | Restricts access to browser features not used by the application           |
+
+---
+
 ## Support
 
 For issues or questions about the API:
@@ -1354,4 +1433,3 @@ For issues or questions about the API:
 2. Review the [Troubleshooting](#troubleshooting) section
 3. Examine server logs for additional context
 4. Contact the system administrator with the request details and error message
-

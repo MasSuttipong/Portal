@@ -13,7 +13,7 @@ node_modules
 !README.md
 
 # Local environment overrides (secrets must come from docker-compose env or runtime)
-.env.local
+.env*
 
 
 # Editor and tool config

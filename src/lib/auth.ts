@@ -5,8 +5,11 @@ import { getRuntimeEnv } from "@/lib/runtime-env";
 export const COOKIE_NAME = "admin_token";
 export const SESSION_MAX_AGE = 8 * 60 * 60;
 
-const getSecret = () =>
-  new TextEncoder().encode(getRuntimeEnv().jwtSecret);
+const getSecret = () => {
+  const secret = getRuntimeEnv().jwtSecret || process.env.JWT_SECRET;
+  if (!secret) throw new Error("JWT_SECRET environment variable is required");
+  return new TextEncoder().encode(secret);
+};
 
 export async function signToken(): Promise<string> {
   return new SignJWT({ role: "admin" })
@@ -18,19 +21,17 @@ export async function signToken(): Promise<string> {
 
 export async function verifyToken(token: string): Promise<boolean> {
   try {
-    await jwtVerify(token, getSecret());
-    return true;
+    const { payload } = await jwtVerify(token, getSecret());
+    return payload.role === "admin";
   } catch {
     return false;
   }
 }
 
-export function getCookieOptions() {
-  return {
-    httpOnly: true,
-    secure: getRuntimeEnv().cookieSecure,
-    sameSite: "lax" as const,
-    path: BASE_PATH || "/",
-    maxAge: SESSION_MAX_AGE,
-  };
-}
+export const cookieOptions = {
+  httpOnly: true,
+  secure: process.env.COOKIE_SECURE === "true",
+  sameSite: "lax" as const,
+  path: "/",
+  maxAge: 8 * 60 * 60, // 8 hours
+};

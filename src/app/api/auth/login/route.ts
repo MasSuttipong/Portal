@@ -13,6 +13,20 @@ export async function POST(request: NextRequest) {
 
   const { password } = body;
 
+  if (!process.env.ADMIN_PASSWORD) {
+    return NextResponse.json(
+      { error: "Server misconfigured: ADMIN_PASSWORD not set" },
+      { status: 500 }
+    );
+  }
+
+  if (!process.env.ADMIN_PASSWORD) {
+    return NextResponse.json(
+      { error: "Server misconfigured: ADMIN_PASSWORD not set" },
+      { status: 500 }
+    );
+  }
+
   if (!password || password !== getRuntimeEnv().adminPassword) {
     return NextResponse.json(
       { error: "รหัสผ่านไม่ถูกต้อง" },

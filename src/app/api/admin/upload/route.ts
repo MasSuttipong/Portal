@@ -2,13 +2,13 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFileSync, mkdirSync } from "fs";
 import { join, extname } from "path";
 
-const ALLOWED_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp", ".svg"]);
+const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+const ALLOWED_EXTENSIONS = new Set([".png", ".jpg", ".jpeg", ".gif", ".webp"]);
 const ALLOWED_MIME_TYPES = new Set([
   "image/png",
   "image/jpeg",
   "image/gif",
   "image/webp",
-  "image/svg+xml",
 ]);
 
 export async function POST(request: NextRequest) {
@@ -36,7 +36,14 @@ export async function POST(request: NextRequest) {
 
   if (!ALLOWED_EXTENSIONS.has(ext) || !ALLOWED_MIME_TYPES.has(file.type)) {
     return NextResponse.json(
-      { error: "Invalid file type. Allowed types: png, jpg, jpeg, gif, webp, svg" },
+      { error: "Invalid file type. Allowed types: png, jpg, jpeg, gif, webp" },
+      { status: 400 }
+    );
+  }
+
+  if (file.size > MAX_FILE_SIZE) {
+    return NextResponse.json(
+      { error: "File too large. Maximum size is 5MB." },
       { status: 400 }
     );
   }

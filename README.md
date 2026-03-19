@@ -14,6 +14,8 @@ A modern Next.js web application that serves as the insurance company portal for
 - **Announcements** -- configurable site-wide announcement banner with multiple alert styles, glow effects, and border animations.
 - **Classic View Toggle** -- users can switch between default and classic list layouts.
 - **Thai Language UI** -- portal content is primarily in Thai with Thai-optimized fonts (Prompt and Sarabun).
+- **Bilingual Search** -- search companies by both Thai and English names.
+- **Holiday Themes** -- 14 theme presets with seasonal decorations (e.g., Songkran, Christmas, Loy Krathong).
 
 ### Admin Panel (`/admin/*`)
 
@@ -23,20 +25,22 @@ A modern Next.js web application that serves as the insurance company portal for
 - **Portal Settings** -- configure the site logo, iClaim base URL, confirmation text, and announcement banners.
 - **Live Preview** -- preview changes before publishing.
 - **Password-Protected** -- secured with a single shared password and JWT-based session tokens.
+- **Admin i18n** -- admin panel supports Thai and English interface languages.
+- **Security Hardened** -- secure cookie controls, security headers, and environment-based configuration.
 
 ## Tech Stack
 
-| Layer           | Technology                                         |
-| --------------- | -------------------------------------------------- |
-| Framework       | [Next.js 16](https://nextjs.org/) (App Router)     |
-| Language        | TypeScript 5                                       |
-| UI              | React 19, Tailwind CSS 4, shadcn/ui                |
-| Icons           | lucide-react                                       |
-| Drag & Drop     | @dnd-kit                                           |
-| Auth            | jose (JWT), HTTP-only cookies                      |
-| Notifications   | Sonner                                             |
-| Data Storage    | JSON files on disk (`/content/*.json`)              |
-| Deployment      | Docker (standalone output) or Vercel               |
+| Layer         | Technology                                     |
+| ------------- | ---------------------------------------------- |
+| Framework     | [Next.js 16](https://nextjs.org/) (App Router) |
+| Language      | TypeScript 5                                   |
+| UI            | React 19, Tailwind CSS 4, shadcn/ui            |
+| Icons         | lucide-react                                   |
+| Drag & Drop   | @dnd-kit                                       |
+| Auth          | jose (JWT), HTTP-only cookies                  |
+| Notifications | Sonner                                         |
+| Data Storage  | JSON files on disk (`/content/*.json`)         |
+| Deployment    | Docker (standalone output) or Vercel           |
 
 ## Prerequisites
 
@@ -67,14 +71,15 @@ Copy the example file and fill in the values:
 cp .env.example .env.local
 ```
 
-| Variable         | Description                                    | Example                            |
-| ---------------- | ---------------------------------------------- | ---------------------------------- |
-| `ADMIN_PASSWORD` | Password used to log into the admin panel      | `my-secure-password`               |
-| `JWT_SECRET`     | Secret key for signing JWT session tokens      | `a-long-random-string-min-32-chars`|
-| `COOKIE_SECURE`  | Set to `true` only when the site is served over HTTPS | `false`                     |
-| `NEXT_PUBLIC_BASE_PATH` | Runtime-only in production. Leave empty for root deployment, or set a subpath like `/portal` when the public URL is mounted under that prefix | `/portal` |
+| Variable                | Description                                                                                                                                   | Example                             |
+| ----------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------- |
+| `ADMIN_PASSWORD`        | Password used to log into the admin panel                                                                                                     | `my-secure-password`                |
+| `JWT_SECRET`            | Secret key for signing JWT session tokens                                                                                                     | `a-long-random-string-min-32-chars` |
+| `COOKIE_SECURE`         | Set to `true` only when the site is served over HTTPS                                                                                         | `false`                             |
+| `NEXT_PUBLIC_BASE_PATH` | Runtime-only in production. Leave empty for root deployment, or set a subpath like `/portal` when the public URL is mounted under that prefix | `/portal`                           |
 
 `ADMIN_PASSWORD` and `JWT_SECRET` are required at runtime. The app now fails fast during server startup if either one is missing or blank.
+| `COOKIE_SECURE` | Set cookie `secure` flag (`true` for HTTPS) | `false` |
 
 ### 4. Start the development server
 
@@ -86,12 +91,12 @@ Open [http://localhost:3000](http://localhost:3000) to view the public portal an
 
 ## Available Scripts
 
-| Command           | Description                              |
-| ----------------- | ---------------------------------------- |
-| `npm run dev`     | Start the development server             |
-| `npm run build`   | Create a generic production build with a base-path placeholder |
-| `npm run start`   | Stage a local standalone runtime, patch it from the OS environment, and start the production server |
-| `npm run lint`    | Run ESLint                               |
+| Command         | Description                                                                                         |
+| --------------- | --------------------------------------------------------------------------------------------------- |
+| `npm run dev`   | Start the development server                                                                        |
+| `npm run build` | Create a generic production build with a base-path placeholder                                      |
+| `npm run start` | Stage a local standalone runtime, patch it from the OS environment, and start the production server |
+| `npm run lint`  | Run ESLint                                                                                          |
 
 `npm run start` prepares a fresh runtime directory under `.next/runtime-standalone` on each launch, so the same build output can be reused with different `NEXT_PUBLIC_BASE_PATH` values between restarts. The Docker image uses the same startup script so container runtime patching matches local production behavior.
 
@@ -129,12 +134,15 @@ Portal/
 │   │           └── upload/     #   File upload endpoint
 │   ├── components/
 │   │   ├── portal/             # Public-facing components
+│   │   │   └── ThemeDecorations.tsx  # Seasonal theme visual effects
 │   │   ├── admin/              # Admin panel components
+│   │   │   └── LanguageToggle.tsx   # TH/EN language switcher
 │   │   └── ui/                 # shadcn/ui primitives
 │   ├── lib/
 │   │   ├── content.ts          # JSON read/write helpers
 │   │   ├── auth.ts             # JWT sign/verify, cookie config
-│   │   └── useAdminContent.ts  # React hook for admin CRUD operations
+│   │   ├── useAdminContent.ts  # React hook for admin CRUD operations
+│   │   └── i18n/               # Internationalization (translations, context, hook)
 │   ├── types/
 │   │   └── portal.ts           # TypeScript interfaces
 │   └── middleware.ts           # Auth guard for /admin/* routes
@@ -161,7 +169,7 @@ The portal will be available at [http://localhost:3000](http://localhost:3000).
 
 ### Environment variables
 
-Set `ADMIN_PASSWORD`, `JWT_SECRET`, and optionally `COOKIE_SECURE` / `NEXT_PUBLIC_BASE_PATH` in `docker-compose.yml` or pass them at container runtime. `NEXT_PUBLIC_BASE_PATH` is not read during image build, and the public URL must include the same prefix:
+Set `ADMIN_PASSWORD` and `JWT_SECRET` in `docker-compose.yml` or pass them at runtime:
 
 ```yaml
 services:
@@ -202,16 +210,16 @@ All portal data is stored as JSON files in the `/content/` directory. There is n
 
 ### Content files
 
-| File                          | Purpose                                          |
-| ----------------------------- | ------------------------------------------------ |
-| `settings.json`              | Site logo, iClaim configuration, announcements    |
-| `insurance-companies.json`   | Insurance company listings                        |
-| `self-insured.json`          | Self-insured company listings and groups          |
-| `international-insurance.json`| International insurance company listings         |
-| `deductible.json`            | Deductible company listings                       |
-| `manual.json`                | Downloadable manual links                         |
-| `news.json`                  | News items                                        |
-| `tpacare-check.json`         | TPA care check card configuration                 |
+| File                           | Purpose                                        |
+| ------------------------------ | ---------------------------------------------- |
+| `settings.json`                | Site logo, iClaim configuration, announcements |
+| `insurance-companies.json`     | Insurance company listings                     |
+| `self-insured.json`            | Self-insured company listings and groups       |
+| `international-insurance.json` | International insurance company listings       |
+| `deductible.json`              | Deductible company listings                    |
+| `manual.json`                  | Downloadable manual links                      |
+| `news.json`                    | News items                                     |
+| `tpacare-check.json`           | TPA care check card configuration              |
 
 ## Authentication
 
@@ -238,19 +246,21 @@ Represents an insurance company in any of the four listing sections.
 interface Company {
   id: string;
   displayName: string;
-  code: string | null;        // iClaim company code
-  iclaimId: string | null;    // iClaim numeric ID
-  isClickable: boolean;       // false = suspended (shows remark instead)
-  isNew: boolean;             // displays an animated "NEW" badge
+  code: string | null; // iClaim company code
+  iclaimId: string | null; // iClaim numeric ID
+  isClickable: boolean; // false = suspended (shows remark instead)
+  isNew: boolean; // displays an animated "NEW" badge
   claimType: "OPD_IPD" | "OPD_ONLY" | "IPD_ONLY";
-  remark: string | null;      // shown in red when suspended
-  redirectUrl?: string;       // custom redirect URL (skips iClaim modal)
+  remark: string | null; // shown in red when suspended
+  redirectUrl?: string; // custom redirect URL (skips iClaim modal)
+  nameEn?: string | null; // English name (for bilingual search)
+  nameTh?: string | null; // Thai name (for bilingual search)
   logoUrl?: string | null;
-  alertText?: string | null;  // inline alert badge text
-  alertType?: AlertType;      // "warning" | "error" | "info" | "success" | "promo" | "urgent"
+  alertText?: string | null; // inline alert badge text
+  alertType?: AlertType; // "warning" | "error" | "info" | "success" | "promo" | "urgent"
   alertSize?: AlertSize;
   alertGlow?: boolean;
-  alertBorder?: AlertBorder;  // "none" | "glow" | "pulse" | "shimmer" | ...
+  alertBorder?: AlertBorder; // "none" | "glow" | "pulse" | "shimmer" | ...
 }
 ```
 
@@ -281,6 +291,29 @@ When a user clicks a clickable company:
 3. The browser redirects to `{iClaim.baseUrl}?code={company.code}&id={company.iclaimId}&type={OPD|IPD}`.
 
 Companies with a `redirectUrl` skip the modal entirely and navigate directly to that URL.
+
+## Theme System
+
+The portal supports 14 visual theme presets that can be selected from the admin settings page. Themes are stored in `settings.json` and applied via CSS variable overrides using the `[data-theme]` attribute. The `ThemeDecorations` component renders seasonal visual effects (falling snowflakes, cherry blossoms, etc.).
+
+### Available Themes
+
+| Theme            | Description               |
+| ---------------- | ------------------------- |
+| `default`        | Standard BVTPA branding   |
+| `ocean`          | Blue ocean tones          |
+| `forest`         | Green nature palette      |
+| `sunset`         | Warm orange/red gradient  |
+| `cherry-blossom` | Pink sakura theme         |
+| `songkran`       | Thai New Year celebration |
+| `loy-krathong`   | Festival of lights        |
+| `christmas`      | Holiday red and green     |
+| `new-year`       | New Year celebration      |
+| `halloween`      | Orange and black          |
+| `valentine`      | Romantic pink and red     |
+| `spring`         | Fresh pastel greens       |
+| `summer`         | Bright warm colors        |
+| `winter`         | Cool blue and white       |
 
 ## License
 

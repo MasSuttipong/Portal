@@ -8,6 +8,15 @@ import NewBadge from "./NewBadge";
 import AlertBadge from "./AlertBadge";
 import RemarkText from "./RemarkText";
 
+function safeUrl(url: string | undefined): string | undefined {
+  if (!url) return undefined;
+  try {
+    const parsed = new URL(url);
+    if (parsed.protocol === "https:" || parsed.protocol === "http:") return url;
+  } catch { /* invalid URL */ }
+  return undefined;
+}
+
 export type ViewMode = "card" | "list";
 
 interface CompanyItemProps {
@@ -28,7 +37,8 @@ export default function CompanyItem({
   sectionLabel,
   viewMode = "card",
 }: CompanyItemProps) {
-  const { displayName, isClickable, isNew, remark, redirectUrl, claimType, code, iclaimId, logoUrl } = company;
+  const { displayName, isClickable, isNew, remark, redirectUrl: rawRedirectUrl, claimType, code, iclaimId, logoUrl } = company;
+  const redirectUrl = safeUrl(rawRedirectUrl);
 
   const suspended = !isClickable || (!redirectUrl && (!code || !iclaimId));
 
@@ -77,7 +87,7 @@ export default function CompanyItem({
       <div className={`${cardBase} opacity-60 grayscale`}>
         {logo}
         <div className="min-w-0 flex-1">
-          <span className="text-sm text-portal-suspended block truncate">{displayName}</span>
+          <span className="text-base text-portal-suspended block truncate">{displayName}</span>
           {badges}
           {remark && <RemarkText remark={remark} />}
         </div>
@@ -95,7 +105,7 @@ export default function CompanyItem({
       >
         {logo}
         <div className="min-w-0 flex-1">
-          <span className="text-sm font-medium text-portal-link block truncate">{displayName}</span>
+          <span className="text-base font-medium text-portal-link block truncate">{displayName}</span>
           {badges}
           {remark && <RemarkText remark={remark} />}
         </div>
@@ -111,7 +121,7 @@ export default function CompanyItem({
     >
       {logo}
       <div className="min-w-0 flex-1">
-        <span className="text-sm font-medium text-portal-link block truncate">{displayName}</span>
+        <span className="text-base font-medium text-portal-link block truncate">{displayName}</span>
         {badges}
         {remark && <RemarkText remark={remark} />}
       </div>
@@ -132,7 +142,8 @@ function ListItem({
   onCompanyClick: (company: Company) => void;
   sectionLabel?: string;
 }) {
-  const { displayName, isClickable, isNew, remark, redirectUrl, claimType, code, iclaimId, logoUrl } = company;
+  const { displayName, isClickable, isNew, remark, redirectUrl: rawRedirectUrl2, claimType, code, iclaimId, logoUrl } = company;
+  const redirectUrl = safeUrl(rawRedirectUrl2);
 
   const logo = logoUrl ? (
     <img src={withBasePath(logoUrl)} alt="" className="w-6 h-6 object-contain rounded shrink-0" />
@@ -165,7 +176,7 @@ function ListItem({
     return (
       <div className={`${rowBase} opacity-60`}>
         {logo}
-        <span className="text-sm text-portal-suspended truncate">{displayName}</span>
+        <span className="text-base text-portal-suspended truncate">{displayName}</span>
         {inlineBadges}
         {remark && <RemarkText remark={remark} />}
       </div>

@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useLanguage } from "@/lib/i18n/LanguageContext";
+import LanguageToggle from "@/components/admin/LanguageToggle";
 import {
   Card,
   CardContent,
@@ -15,6 +17,7 @@ import { withBasePathApi } from "@/lib/base-path";
 
 export default function LoginPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -34,32 +37,34 @@ export default function LoginPage() {
       if (res.ok) {
         router.push("/admin");
       } else {
-        const data = await res.json();
-        setError(data.error ?? "รหัสผ่านไม่ถูกต้อง");
+        setError(t("login.invalidPassword"));
       }
     } catch {
-      setError("เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง");
+      setError(t("login.error"));
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 relative">
+      <div className="absolute top-4 right-4">
+        <LanguageToggle />
+      </div>
       <Card className="w-full max-w-sm shadow-md">
         <CardHeader>
-          <CardTitle className="text-center text-xl">เข้าสู่ระบบผู้ดูแล</CardTitle>
+          <CardTitle className="text-center text-xl">{t("login.title")}</CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="password">รหัสผ่าน</Label>
+              <Label htmlFor="password">{t("login.password")}</Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder="กรอกรหัสผ่าน"
+                placeholder={t("login.passwordPlaceholder")}
                 required
                 autoFocus
                 autoComplete="current-password"
@@ -74,7 +79,7 @@ export default function LoginPage() {
             )}
 
             <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? "กำลังเข้าสู่ระบบ..." : "เข้าสู่ระบบ"}
+              {loading ? t("login.submitting") : t("login.submit")}
             </Button>
           </form>
         </CardContent>

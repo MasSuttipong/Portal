@@ -5,6 +5,8 @@ export type AlertBorder = "none" | "glow" | "pulse" | "shimmer" | "bounce" | "sh
 export interface Company {
   id: string;
   displayName: string;
+  nameEn?: string | null;
+  nameTh?: string | null;
   code: string | null;
   iclaimId: string | null;
   isClickable: boolean;
@@ -78,6 +80,12 @@ export interface AnnouncementConfig {
   dismissible: boolean;
 }
 
+export type PortalTheme = "default" | "christmas" | "newyear" | "songkran" | "valentine" | "chinese-newyear" | "halloween" | "mothers-day" | "fathers-day" | "spring" | "summer" | "autumn" | "winter" | "party" | "pride";
+
+export interface ThemeConfig {
+  activeTheme: PortalTheme;
+}
+
 export interface PortalSettings {
   logo: { url: string; alt: string };
   iclaim: {
@@ -88,6 +96,18 @@ export interface PortalSettings {
     claimTypePrompt: string;
   };
   announcement?: AnnouncementConfig;
+  theme?: ThemeConfig;
+}
+
+export interface ProviderPermission {
+  providerCode: string;
+  name: string;
+  apiKey: string;
+  allowedCompanyIds: string[];
+}
+
+export interface ProviderPermissions {
+  providers: ProviderPermission[];
 }
 
 export interface TpaCareCheck {
